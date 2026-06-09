@@ -84,31 +84,14 @@ bool SenderApp::run_connection(SrtSocket &socket,
                       << profile.fps << "fps/"
                       << profile.width << "x" << profile.height
                       << std::endl;
-            send_ok = false;
-            break;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            continue;
         }
 
         const auto now = std::chrono::steady_clock::now();
         if (now >= next_stats) {
             const auto network = socket.network_snapshot(true);
             auto next_profile = adaptation_.update(network);
-            if (network.loss_percent > 7.0 && profile.level < 6) {
-                NetworkSnapshot emergency;
-                emergency.loss_percent = 100.0;
-                emergency.rtt_ms = network.rtt_ms;
-                emergency.valid = true;
-                next_profile = adaptation_.update(emergency);
-                profile = next_profile;
-                keyframe_requested_.store(true);
-                std::cerr << "transport_reset_for_loss="
-                          << network.loss_percent << "% profile="
-                          << profile.bitrate_kbps << "kbps/"
-                          << profile.fps << "fps/"
-                          << profile.width << "x" << profile.height
-                          << std::endl;
-                send_ok = false;
-                break;
-            }
             if (next_profile != profile) {
                 profile = next_profile;
                 keyframe_requested_.store(true);

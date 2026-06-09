@@ -26,8 +26,18 @@ string(REPLACE "${initial_ack_original}" "${initial_ack_replacement}" core_sourc
 string(REPLACE "        SendApiLock ack_lock" "        NonblockingApiLockGuard ack_lock" core_source "${core_source}")
 
 set(drop_original "    const int iPktsTLDropped SRT_ATR_UNUSED = sndDropTooLate();")
-set(drop_replacement "    const int iPktsTLDropped SRT_ATR_UNUSED =\n        m_config.bSynSending ? sndDropTooLate() : 0;")
+set(drop_old_patch "    const int iPktsTLDropped SRT_ATR_UNUSED =\n        m_config.bSynSending ? sndDropTooLate() : 0;")
+set(drop_replacement "    const int iPktsTLDropped SRT_ATR_UNUSED = sndDropTooLate();")
+string(REPLACE "${drop_old_patch}" "${drop_replacement}" core_source "${core_source}")
 string(REPLACE "${drop_original}" "${drop_replacement}" core_source "${core_source}")
+
+set(drop_ack_original "    ScopedLock rcvlck(m_RecvAckLock);\n    int dbytes;")
+set(drop_ack_replacement "    NonblockingApiLockGuard rcvlck(m_RecvAckLock, m_config.bSynSending);\n    if (!rcvlck.locked())\n        return 0;\n    int dbytes;")
+string(REPLACE "${drop_ack_original}" "${drop_ack_replacement}" core_source "${core_source}")
+
+set(expired_rexmit_original "            m_pSndLossList->removeUpTo(buffer_drop.seqno[DropRange::END]);\n            m_iSndCurrSeqNo = CSeqNo::maxseq(m_iSndCurrSeqNo, buffer_drop.seqno[DropRange::END]);\n            continue;")
+set(expired_rexmit_replacement "            m_pSndLossList->removeUpTo(buffer_drop.seqno[DropRange::END]);\n            m_iSndCurrSeqNo = CSeqNo::maxseq(m_iSndCurrSeqNo, buffer_drop.seqno[DropRange::END]);\n            // Bound DROPREQ generation to one expired message per paced send cycle.\n            return 0;")
+string(REPLACE "${expired_rexmit_original}" "${expired_rexmit_replacement}" core_source "${core_source}")
 
 set(insert_ack_original "        ScopedLock recvAckLock(m_RecvAckLock);\n        // insert the user buffer into the sending list")
 set(insert_ack_replacement "        NonblockingApiLockGuard recvAckLock(m_RecvAckLock, m_config.bSynSending);\n        if (!recvAckLock.locked())\n            throw CUDTException(MJ_AGAIN, MN_WRAVAIL, 0);\n        // insert the user buffer into the sending list")
@@ -35,8 +45,16 @@ string(REPLACE "${insert_ack_original}" "${insert_ack_replacement}" core_source 
 string(REPLACE "        SendApiLock recvAckLock" "        NonblockingApiLockGuard recvAckLock" core_source "${core_source}")
 
 set(close_locks_original "    ScopedLock sendguard(m_SendLock);\n    ScopedLock recvguard(m_RecvLock);")
-set(close_locks_replacement "    NonblockingApiLockGuard sendguard(\n        m_SendLock, m_config.bSynSending || m_config.bSynRecving);\n    NonblockingApiLockGuard recvguard(\n        m_RecvLock, m_config.bSynSending || m_config.bSynRecving);")
+set(close_locks_old_patch "    NonblockingApiLockGuard sendguard(\n        m_SendLock, m_config.bSynSending || m_config.bSynRecving);\n    NonblockingApiLockGuard recvguard(\n        m_RecvLock, m_config.bSynSending || m_config.bSynRecving);")
+set(close_locks_check "    if (!sendguard.locked() || !recvguard.locked())\n        return false;\n")
+set(close_locks_replacement "${close_locks_old_patch}\n${close_locks_check}")
+string(REPLACE "${close_locks_check}" "" core_source "${core_source}")
+string(REPLACE "${close_locks_old_patch}" "${close_locks_replacement}" core_source "${core_source}")
 string(REPLACE "${close_locks_original}" "${close_locks_replacement}" core_source "${core_source}")
+
+set(close_connection_original "    HLOGC(smlog.Debug, log << CONID() << \"CLOSING STATE (closing=true). Acquiring connection lock\");\n\n    ScopedLock connectguard(m_ConnectionLock);")
+set(close_connection_replacement "    HLOGC(smlog.Debug, log << CONID() << \"CLOSING STATE (closing=true). Acquiring connection lock\");\n\n    NonblockingApiLockGuard connectguard(\n        m_ConnectionLock, m_config.bSynSending || m_config.bSynRecving);\n    if (!connectguard.locked())\n        return false;")
+string(REPLACE "${close_connection_original}" "${close_connection_replacement}" core_source "${core_source}")
 
 file(WRITE "${core_file}" "${core_source}")
 message(STATUS "Applied SRT nonblocking API-lock patch")

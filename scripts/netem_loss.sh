@@ -31,8 +31,12 @@ Examples:
   sudo ./scripts/netem_loss.sh ns-down
 
 Run commands inside namespaces:
-  sudo ip netns exec webrtc_tx <sender command>
-  sudo ip netns exec webrtc_rx <receiver command>
+  sudo ip netns exec webrtc_rx ./build/srt_weak_video \
+    --role receiver --listen 10.88.0.2:9000 \
+    --output-file /tmp/srt-received.h264 --no-display
+  sudo ip netns exec webrtc_tx ./build/srt_weak_video \
+    --role sender --connect 10.88.0.2:9000 \
+    --video-file /path/to/input.mp4 --max-video-kbps 2000
 
 Default topology:
   webrtc_tx/veth_tx 10.88.0.1/24  <---->  webrtc_rx/veth_rx 10.88.0.2/24
@@ -40,9 +44,8 @@ Default topology:
 Notes:
   - ns-loss defaults to tx, so loss is applied only from webrtc_tx to webrtc_rx.
   - This avoids loopback's possible two-direction loss amplification.
-  - The current single-process local WebRTC demo does not cross veth. To test
-    this topology, run sender and receiver as separate processes in different
-    namespaces.
+  - Processes started on the host, including listeners on 0.0.0.0, do not
+    cross this veth. Run sender and receiver in the namespaces shown above.
 EOF
 }
 
