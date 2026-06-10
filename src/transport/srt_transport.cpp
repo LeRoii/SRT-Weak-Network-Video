@@ -86,7 +86,7 @@ SRTSOCKET SrtSocket::create_configured_socket() {
         const bool disabled = false;
         const int latency_ms = 350;
         const int timeout_ms = 200;
-        const int idle_timeout_ms = 5000;
+        const int idle_timeout_ms = 15'000;
         const int payload_size = 1200;
         const int send_drop_delay_ms = 0;
         const int flow_control_packets = 512;
@@ -280,6 +280,33 @@ NetworkSnapshot SrtSocket::receiver_network_snapshot(bool clear_interval) {
         std::max(0, stats.pktRcvRetrans));
     result.valid = resolved_original > 0;
     return result;
+}
+
+std::string SrtSocket::state_name() const {
+    if (!valid()) {
+        return "NONEXIST";
+    }
+    switch (srt_getsockstate(socket_)) {
+    case SRTS_INIT:
+        return "INIT";
+    case SRTS_OPENED:
+        return "OPENED";
+    case SRTS_LISTENING:
+        return "LISTENING";
+    case SRTS_CONNECTING:
+        return "CONNECTING";
+    case SRTS_CONNECTED:
+        return "CONNECTED";
+    case SRTS_BROKEN:
+        return "BROKEN";
+    case SRTS_CLOSING:
+        return "CLOSING";
+    case SRTS_CLOSED:
+        return "CLOSED";
+    case SRTS_NONEXIST:
+        return "NONEXIST";
+    }
+    return "UNKNOWN";
 }
 
 bool SrtSocket::valid() const {

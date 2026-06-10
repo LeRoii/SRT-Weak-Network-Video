@@ -1,0 +1,175 @@
+metadata:
+  purpose: "Record parameters tuned during weak-network video development."
+  runtime_loaded: false
+  updated_at: "2026-06-10"
+  units_note: "Bitrates are kbps unless a different unit is stated."
+
+current:
+  srt:
+    transport_type: live
+    message_api: true
+    timestamp_based_delivery: true
+    too_late_packet_drop: true
+    nak_report: false
+    latency_ms: 350
+    receive_timeout_ms: 200
+    send_timeout_ms: 200
+    peer_idle_timeout_ms: 15000
+    payload_size_bytes: 1200
+    send_drop_delay_ms: 0
+    flow_control_packets: 512
+    send_buffer_bytes: 524288
+    max_bandwidth_bytes_per_second: 375000
+    synchronous_send: false
+    synchronous_receive: false
+    reuse_address: true
+    media_message_ttl_ms: 320
+    network_report_ttl_ms: 1500
+
+  sender:
+    reconnect:
+      initial_delay_ms: 100
+      maximum_delay_ms: 1000
+      backoff_multiplier: 2
+      preserve_last_receiver_loss: true
+    statistics_interval_ms: 1000
+    receiver_loss_freshness_ms: 12000
+    send_retry:
+      attempts_per_shard: 20
+      retry_delay_ms: 2
+    would_block:
+      synthetic_loss_percent: 100
+      synthetic_rtt_ms: 500
+      retry_delay_ms: 100
+
+  receiver:
+    timeout_poll_delay_ms: 2
+    frame_assembly_timeout_ms: 450
+    completed_frame_history_ms: 2000
+    statistics_interval_ms: 1000
+    receive_stall_threshold_ms: 3000
+    receive_stall_loss_percent: 100
+    loss_estimator:
+      minimum_resolved_packets: 400
+      source_received_packets: pktRecvUniqueTotal
+      source_dropped_packets: pktRcvDropTotal
+      source_missing_packets: pktRcvLossTotal
+      reset_batch_after_stall: true
+
+  adaptation:
+    max_video_kbps:
+      minimum: 8
+      maximum: 2000
+      default: 2000
+    healthy_window:
+      loss_below_percent: 3
+      rtt_below_ms: 130
+      consecutive_windows: 5
+    degradation: "Immediately jump to the required lower-quality level."
+    normal_recovery: "Recover one level after five healthy windows."
+    emergency_recovery: "Recover one level every five stable windows until the current network-required level."
+    loss_thresholds:
+      - {greater_than_percent: 3, level: 1}
+      - {greater_than_percent: 7, level: 2}
+      - {greater_than_percent: 15, level: 3}
+      - {greater_than_percent: 30, level: 4}
+      - {greater_than_percent: 50, level: 5}
+      - {greater_than_percent: 70, level: 6}
+      - {greater_than_percent: 80, level: 7}
+      - {greater_than_percent: 90, level: 8}
+    rtt_minimum_levels:
+      - {greater_than_ms: 150, minimum_level: 3}
+      - {greater_than_ms: 220, minimum_level: 5}
+      - {greater_than_ms: 300, minimum_level: 6}
+      - {greater_than_ms: 400, minimum_level: 7}
+    profiles:
+      - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, fec_ratio: 0.15, all_intra: false}
+      - {level: 1, bitrate_kbps: 1400, fps: 20, width: 1280, height: 720, fec_ratio: 0.25, all_intra: false}
+      - {level: 2, bitrate_kbps: 900, fps: 10, width: 960, height: 540, fec_ratio: 0.50, all_intra: false}
+      - {level: 3, bitrate_kbps: 500, fps: 5, width: 640, height: 360, fec_ratio: 0.75, all_intra: false}
+      - {level: 4, bitrate_kbps: 250, fps: 3, width: 426, height: 240, fec_ratio: 1.00, all_intra: false}
+      - {level: 5, bitrate_kbps: 120, fps: 2, width: 426, height: 240, fec_ratio: 2.00, all_intra: true}
+      - {level: 6, bitrate_kbps: 50, fps: 1, width: 320, height: 180, fec_ratio: 3.00, all_intra: true}
+      - {level: 7, bitrate_kbps: 20, fps: 1, width: 160, height: 90, fec_ratio: 5.00, all_intra: true}
+      - {level: 8, bitrate_kbps: 8, fps: 1, width: 128, height: 72, fec_ratio: 11.00, all_intra: true}
+
+  fec:
+    target_shard_bytes: 1000
+    maximum_total_shards: 255
+
+  netem_script:
+    left_namespace: webrtc_tx
+    right_namespace: webrtc_rx
+    left_interface: veth_tx
+    right_interface: veth_rx
+    left_address: "10.88.0.1/24"
+    right_address: "10.88.0.2/24"
+    default_loss_direction: tx
+    bandwidth_units_examples: [500kbit, 2mbit, 1gbit]
+
+development_history:
+  - parameter: SRTO_PEERIDLETIMEO
+    previous: 5000
+    current: 15000
+    unit: ms
+    reason: "Five seconds was too sensitive to temporary silence under 50 percent bidirectional loss."
+
+  - parameter: receiver_receive_stall_threshold
+    previous: 2000
+    current: 3000
+    unit: ms
+    reason: "Reduce false 100 percent loss reports during short packet gaps."
+
+  - parameter: reconnect_loss_initialization
+    previous: "Clear receiver loss and use the new SRT short-window sender statistic."
+    current: "Preserve the last reliable receiver-side loss until a new report arrives."
+    reason: "Avoid several seconds of near-100 percent loss immediately after reconnect."
+
+  - parameter: loss_estimation
+    previous_stages:
+      - "Sender pktSndLoss divided by sent plus lost packets."
+      - "Receiver one-second samples, which were unstable at low bitrate."
+      - "Five-second rolling window with at least 100 packets."
+      - "Ten-second rolling window with at least 200 packets."
+    current: "Receiver cumulative batches of at least 400 resolved original packets."
+    reason: "Track injected link loss without retransmission-window skew or small-sample spikes."
+
+  - parameter: loss_estimator_stall_handling
+    previous: "Keep the stalled interval in the next loss batch."
+    current: "Report 100 percent while stalled, then reset the batch when packet progress resumes."
+    reason: "Prevent the first post-stall report from remaining close to 100 percent."
+
+  - parameter: emergency_profile_recovery
+    previous: "All recovery required loss below 3 percent and RTT below 130 ms."
+    current: "An emergency Level 8 can recover every five stable windows to the level required by the current network."
+    reason: "Prevent a temporary stall or WouldBlock event from permanently trapping video at the emergency level."
+
+  - parameter: adaptation_ladder
+    previous_profiles:
+      - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, fec_ratio: 0.15, all_intra: false}
+      - {level: 1, bitrate_kbps: 1200, fps: 24, width: 960, height: 540, fec_ratio: 0.25, all_intra: false}
+      - {level: 2, bitrate_kbps: 600, fps: 15, width: 640, height: 360, fec_ratio: 0.50, all_intra: false}
+      - {level: 3, bitrate_kbps: 300, fps: 10, width: 426, height: 240, fec_ratio: 1.00, all_intra: false}
+      - {level: 4, bitrate_kbps: 150, fps: 5, width: 320, height: 180, fec_ratio: 1.50, all_intra: false}
+      - {level: 5, bitrate_kbps: 50, fps: 2, width: 160, height: 90, fec_ratio: 3.00, all_intra: true}
+      - {level: 6, bitrate_kbps: 8, fps: 1, width: 128, height: 72, fec_ratio: 11.00, all_intra: true}
+    current_profile_count: 9
+    reason: "Prefer bitrate and frame-rate reductions before large resolution changes, while retaining three emergency levels."
+
+  - parameter: rtt_level_mapping
+    previous:
+      - {greater_than_ms: 150, minimum_level: 2}
+      - {greater_than_ms: 220, minimum_level: 4}
+      - {greater_than_ms: 350, minimum_level: 5}
+    current:
+      - {greater_than_ms: 150, minimum_level: 3}
+      - {greater_than_ms: 220, minimum_level: 5}
+      - {greater_than_ms: 300, minimum_level: 6}
+      - {greater_than_ms: 400, minimum_level: 7}
+
+validation_scenarios:
+  - {loss_percent: 30, delay_ms: 50, direction: both, expected_profile: "426x240/2fps/120kbps"}
+  - {loss_percent: 50, delay_ms: 50, direction: both, expected_profile_range: "426x240 at 120-250kbps"}
+  - {loss_percent: 71, delay_ms: 50, direction: tx, expected_resolution: "320x180"}
+  - {loss_percent: 81, delay_ms: 50, direction: tx, expected_resolution: "160x90"}
+  - {loss_percent: 91, delay_ms: 50, direction: tx, expected_resolution: "128x72 or 160x90 near the strict 90 percent boundary"}

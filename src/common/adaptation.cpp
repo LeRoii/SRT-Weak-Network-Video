@@ -66,15 +66,23 @@ VideoProfile AdaptationController::update(const NetworkSnapshot &network) {
     if (required > level_) {
         level_ = required;
         healthy_windows_ = 0;
+        emergency_recovery_active_ = required == 8;
     } else if (required < level_ &&
-               network.loss_percent < 3.0 &&
-               network.rtt_ms < 130.0) {
+               ((network.loss_percent < 3.0 &&
+                 network.rtt_ms < 130.0) ||
+                emergency_recovery_active_)) {
         if (++healthy_windows_ >= 5) {
             --level_;
             healthy_windows_ = 0;
+            if (level_ <= required) {
+                emergency_recovery_active_ = false;
+            }
         }
     } else {
         healthy_windows_ = 0;
+        if (required == level_ && required < 8) {
+            emergency_recovery_active_ = false;
+        }
     }
 
     current_ = profile_for_level(level_);

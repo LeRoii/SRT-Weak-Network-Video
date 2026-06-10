@@ -43,12 +43,24 @@ void test_counter_reset_starts_a_new_baseline() {
     expect_near(*loss, 30.0);
 }
 
+void test_explicit_reset_discards_stalled_interval() {
+    NetworkLossEstimator estimator(100);
+    assert(!estimator.update(1000, 500));
+    estimator.reset(1100, 900);
+    assert(!estimator.update(1199, 949));
+
+    const auto loss = estimator.update(1200, 950);
+    assert(loss);
+    expect_near(*loss, 50.0);
+}
+
 } // namespace
 
 int main() {
     test_minimum_sample_and_loss_ratios();
     test_caps_at_one_hundred_percent();
     test_counter_reset_starts_a_new_baseline();
+    test_explicit_reset_discards_stalled_interval();
     std::cout << "network_quality_tests=passed" << std::endl;
     return 0;
 }

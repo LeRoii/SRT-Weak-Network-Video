@@ -49,6 +49,7 @@ public:
     ReceiveResult receive(std::vector<uint8_t> &message);
     NetworkSnapshot network_snapshot(bool clear_interval);
     NetworkSnapshot receiver_network_snapshot(bool clear_interval);
+    std::string state_name() const;
     bool valid() const;
     void close();
 

@@ -53,13 +53,16 @@ void ReceiverApp::run_connection(SrtSocket &socket) {
                       std::chrono::seconds(1);
     uint64_t network_report_sequence = 0;
     NetworkLossEstimator loss_estimator;
-    std::optional<uint32_t> reported_loss_basis_points;
+    std::optional<uint32_t> reliable_loss_basis_points;
     uint64_t last_resolved_packets = 0;
     auto last_receive_progress = std::chrono::steady_clock::now();
+    bool receive_stalled = false;
     while (!g_stop_requested.load()) {
         std::vector<uint8_t> message;
         const auto result = socket.receive(message);
         if (result == ReceiveResult::Closed) {
+            std::cerr << "srt_receive_failed=" << srt_last_error()
+                      << " state=" << socket.state_name() << std::endl;
             break;
         }
         if (result == ReceiveResult::Timeout) {
@@ -85,25 +88,31 @@ void ReceiverApp::run_connection(SrtSocket &socket) {
             const auto network = socket.receiver_network_snapshot(false);
             if (network.valid) {
                 if (network.sent_packets > last_resolved_packets) {
+                    if (receive_stalled) {
+                        loss_estimator.reset(network.sent_packets,
+                                             network.lost_packets);
+                    }
                     last_resolved_packets = network.sent_packets;
                     last_receive_progress = now;
+                    receive_stalled = false;
                 } else if (now - last_receive_progress >=
-                           std::chrono::seconds(2)) {
-                    reported_loss_basis_points = 10'000;
+                           std::chrono::seconds(3)) {
+                    receive_stalled = true;
                 }
 
                 if (const auto loss_percent = loss_estimator.update(
                         network.sent_packets, network.lost_packets)) {
-                    reported_loss_basis_points = static_cast<uint32_t>(
+                    reliable_loss_basis_points = static_cast<uint32_t>(
                         std::clamp(std::lround(*loss_percent * 100.0),
                                    0L, 10'000L));
                 }
 
-                if (reported_loss_basis_points) {
+                if (receive_stalled || reliable_loss_basis_points) {
                     NetworkReport report;
                     report.sequence = ++network_report_sequence;
-                    report.loss_basis_points =
-                        *reported_loss_basis_points;
+                    report.loss_basis_points = receive_stalled
+                        ? 10'000
+                        : *reliable_loss_basis_points;
                     socket.send(encode_network_report(report), 1500);
                 }
             }

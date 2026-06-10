@@ -53,8 +53,10 @@ bool SenderApp::run_connection(SrtSocket &socket,
     auto next_stats = std::chrono::steady_clock::now() +
                       std::chrono::seconds(1);
     bool send_ok = true;
-    receiver_loss_percent_.reset();
     network_report_sequence_ = 0;
+    if (receiver_loss_percent_) {
+        network_report_received_at_ = std::chrono::steady_clock::now();
+    }
 
     while (!g_stop_requested.load()) {
         if (!receive_network_reports(socket)) {
@@ -137,6 +139,8 @@ bool SenderApp::receive_network_reports(SrtSocket &socket) {
             return true;
         }
         if (result == ReceiveResult::Closed) {
+            std::cerr << "srt_receive_failed=" << srt_last_error()
+                      << " state=" << socket.state_name() << std::endl;
             return false;
         }
 
@@ -199,7 +203,8 @@ SendResult SenderApp::send_frame(SrtSocket &socket,
             }
         }
         if (result == SendResult::Closed) {
-            std::cerr << "srt_send_failed=" << srt_last_error() << std::endl;
+            std::cerr << "srt_send_failed=" << srt_last_error()
+                      << " state=" << socket.state_name() << std::endl;
             return result;
         }
         if (result == SendResult::WouldBlock) {
