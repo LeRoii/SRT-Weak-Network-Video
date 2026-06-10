@@ -89,3 +89,16 @@ target_compile_options(protocol_tests PRIVATE
     -Wpedantic
 )
 add_test(NAME protocol_tests COMMAND protocol_tests)
+
+add_executable(adaptation_tests
+    src/common/adaptation.cpp
+    tests/adaptation_tests.cpp
+)
+target_include_directories(adaptation_tests PRIVATE src)
+target_compile_options(adaptation_tests PRIVATE
+    -UNDEBUG
+    -Wall
+    -Wextra
+    -Wpedantic
+)
+add_test(NAME adaptation_tests COMMAND adaptation_tests)

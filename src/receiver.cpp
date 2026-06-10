@@ -88,6 +88,11 @@ void ReceiverApp::run_connection(SrtSocket &socket) {
 }
 
 void ReceiverApp::handle_frame(RecoveredFrame frame) {
+    if (stream_epoch_ != 0 && frame.stream_epoch < stream_epoch_) {
+        ++dropped_frames_;
+        return;
+    }
+
     if (frame.stream_epoch != stream_epoch_) {
         stream_epoch_ = frame.stream_epoch;
         synchronized_ = false;
