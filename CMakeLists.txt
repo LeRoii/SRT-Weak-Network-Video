@@ -38,6 +38,7 @@ pkg_check_modules(ISAL REQUIRED IMPORTED_TARGET libisal)
 
 set(COMMON_SOURCES
     src/common/adaptation.cpp
+    src/common/network_quality.cpp
     src/common/utils.cpp
     src/fec/reed_solomon.cpp
     src/protocol/frame_assembler.cpp
@@ -102,3 +103,16 @@ target_compile_options(adaptation_tests PRIVATE
     -Wpedantic
 )
 add_test(NAME adaptation_tests COMMAND adaptation_tests)
+
+add_executable(network_quality_tests
+    src/common/network_quality.cpp
+    tests/network_quality_tests.cpp
+)
+target_include_directories(network_quality_tests PRIVATE src)
+target_compile_options(network_quality_tests PRIVATE
+    -UNDEBUG
+    -Wall
+    -Wextra
+    -Wpedantic
+)
+add_test(NAME network_quality_tests COMMAND network_quality_tests)

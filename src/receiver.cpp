@@ -1,10 +1,14 @@
 #include "receiver.hpp"
 
+#include "common/network_quality.hpp"
 #include "common/utils.hpp"
 #include "protocol/messages.hpp"
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <iostream>
+#include <optional>
 #include <thread>
 
 ReceiverApp::ReceiverApp(Endpoint local,
@@ -47,6 +51,11 @@ void ReceiverApp::run() {
 void ReceiverApp::run_connection(SrtSocket &socket) {
     auto next_stats = std::chrono::steady_clock::now() +
                       std::chrono::seconds(1);
+    uint64_t network_report_sequence = 0;
+    NetworkLossEstimator loss_estimator;
+    std::optional<uint32_t> reported_loss_basis_points;
+    uint64_t last_resolved_packets = 0;
+    auto last_receive_progress = std::chrono::steady_clock::now();
     while (!g_stop_requested.load()) {
         std::vector<uint8_t> message;
         const auto result = socket.receive(message);
@@ -73,7 +82,31 @@ void ReceiverApp::run_connection(SrtSocket &socket) {
 
         const auto now = std::chrono::steady_clock::now();
         if (now >= next_stats) {
-            const auto network = socket.network_snapshot(true);
+            const auto network = socket.receiver_network_snapshot(false);
+            if (network.valid) {
+                if (network.sent_packets > last_resolved_packets) {
+                    last_resolved_packets = network.sent_packets;
+                    last_receive_progress = now;
+                } else if (now - last_receive_progress >=
+                           std::chrono::seconds(2)) {
+                    reported_loss_basis_points = 10'000;
+                }
+
+                if (const auto loss_percent = loss_estimator.update(
+                        network.sent_packets, network.lost_packets)) {
+                    reported_loss_basis_points = static_cast<uint32_t>(
+                        std::clamp(std::lround(*loss_percent * 100.0),
+                                   0L, 10'000L));
+                }
+
+                if (reported_loss_basis_points) {
+                    NetworkReport report;
+                    report.sequence = ++network_report_sequence;
+                    report.loss_basis_points =
+                        *reported_loss_basis_points;
+                    socket.send(encode_network_report(report), 1500);
+                }
+            }
             std::cout << "bandwidth=" << network.bandwidth_kbps << "kbps "
                       << "rtt=" << network.rtt_ms << "ms "
                       << "frames=" << completed_frames_ << " "

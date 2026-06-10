@@ -121,6 +121,16 @@ std::vector<uint8_t> encode_control_packet(const ControlPacket &packet) {
     return output;
 }
 
+std::vector<uint8_t> encode_network_report(const NetworkReport &report) {
+    std::vector<uint8_t> output;
+    output.reserve(kControlSize);
+    append_prefix(output, MessageType::NetworkReport);
+    append_u32(output, report.loss_basis_points);
+    append_u64(output, report.sequence);
+    append_u32(output, 0);
+    return output;
+}
+
 std::optional<ParsedMessage> parse_message(const uint8_t *data,
                                            std::size_t size) {
     MessageType type{};
@@ -170,6 +180,20 @@ std::optional<ParsedMessage> parse_message(const uint8_t *data,
             return std::nullopt;
         }
         parsed.control = packet;
+        return parsed;
+    }
+
+    if (type == MessageType::NetworkReport) {
+        NetworkReport report;
+        uint32_t reserved = 0;
+        if (!read_u32(data, size, offset, report.loss_basis_points) ||
+            !read_u64(data, size, offset, report.sequence) ||
+            !read_u32(data, size, offset, reserved) ||
+            offset != size ||
+            report.loss_basis_points > 10'000) {
+            return std::nullopt;
+        }
+        parsed.network_report = report;
         return parsed;
     }
     return std::nullopt;

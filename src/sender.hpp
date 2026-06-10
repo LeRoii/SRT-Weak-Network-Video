@@ -7,7 +7,9 @@
 #include "video/video_file_reader.hpp"
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
+#include <optional>
 #include <string>
 
 class SenderApp {
@@ -22,10 +24,14 @@ private:
                           const VideoProfile &profile,
                           uint32_t stream_epoch,
                           uint64_t frame_id);
+    bool receive_network_reports(SrtSocket &socket);
 
     Endpoint peer_;
     VideoFileReader reader_;
     AdaptationController adaptation_;
     ReedSolomon fec_;
     std::atomic<bool> keyframe_requested_{true};
+    std::optional<double> receiver_loss_percent_;
+    uint64_t network_report_sequence_ = 0;
+    std::chrono::steady_clock::time_point network_report_received_at_{};
 };

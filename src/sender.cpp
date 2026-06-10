@@ -53,8 +53,15 @@ bool SenderApp::run_connection(SrtSocket &socket,
     auto next_stats = std::chrono::steady_clock::now() +
                       std::chrono::seconds(1);
     bool send_ok = true;
+    receiver_loss_percent_.reset();
+    network_report_sequence_ = 0;
 
     while (!g_stop_requested.load()) {
+        if (!receive_network_reports(socket)) {
+            send_ok = false;
+            break;
+        }
+
         const bool force_keyframe =
             keyframe_requested_.exchange(false) || profile.all_intra;
         EncodedVideoFrame frame;
@@ -90,7 +97,12 @@ bool SenderApp::run_connection(SrtSocket &socket,
 
         const auto now = std::chrono::steady_clock::now();
         if (now >= next_stats) {
-            const auto network = socket.network_snapshot(true);
+            auto network = socket.network_snapshot(true);
+            if (receiver_loss_percent_ &&
+                now - network_report_received_at_ <
+                    std::chrono::seconds(12)) {
+                network.loss_percent = *receiver_loss_percent_;
+            }
             auto next_profile = adaptation_.update(network);
             if (next_profile != profile) {
                 profile = next_profile;
@@ -115,6 +127,30 @@ bool SenderApp::run_connection(SrtSocket &socket,
 
     std::cerr << "srt_connected=0" << std::endl;
     return send_ok;
+}
+
+bool SenderApp::receive_network_reports(SrtSocket &socket) {
+    for (;;) {
+        std::vector<uint8_t> message;
+        const auto result = socket.receive(message);
+        if (result == ReceiveResult::Timeout) {
+            return true;
+        }
+        if (result == ReceiveResult::Closed) {
+            return false;
+        }
+
+        const auto parsed = parse_message(message.data(), message.size());
+        if (!parsed || !parsed->network_report ||
+            parsed->network_report->sequence <= network_report_sequence_) {
+            continue;
+        }
+
+        network_report_sequence_ = parsed->network_report->sequence;
+        receiver_loss_percent_ =
+            parsed->network_report->loss_basis_points / 100.0;
+        network_report_received_at_ = std::chrono::steady_clock::now();
+    }
 }
 
 SendResult SenderApp::send_frame(SrtSocket &socket,

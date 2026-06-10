@@ -50,6 +50,7 @@ struct NetworkSnapshot {
     double rtt_ms = 0.0;
     double bandwidth_kbps = 0.0;
     uint64_t sent_packets = 0;
+    uint64_t lost_packets = 0;
     uint64_t retransmitted_packets = 0;
     bool valid = false;
 };

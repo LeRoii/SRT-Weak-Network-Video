@@ -55,6 +55,17 @@ int main() {
     assert(parsed->shard->payload == shard.payload);
     assert(parsed->shard->keyframe);
 
+    NetworkReport report;
+    report.sequence = 17;
+    report.loss_basis_points = 9123;
+    const auto report_wire = encode_network_report(report);
+    const auto parsed_report =
+        parse_message(report_wire.data(), report_wire.size());
+    assert(parsed_report && parsed_report->network_report);
+    assert(parsed_report->network_report->sequence == report.sequence);
+    assert(parsed_report->network_report->loss_basis_points ==
+           report.loss_basis_points);
+
     FrameAssembler assembler;
     std::optional<RecoveredFrame> recovered;
     for (std::size_t i = 0; i < encoded.shards.size(); ++i) {
