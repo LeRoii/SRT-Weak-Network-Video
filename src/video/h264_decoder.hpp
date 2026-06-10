@@ -17,7 +17,11 @@ public:
     H264Decoder(const H264Decoder &) = delete;
     H264Decoder &operator=(const H264Decoder &) = delete;
 
-    bool decode(const uint8_t *data, std::size_t size);
+    bool decode(const uint8_t *data,
+                std::size_t size,
+                uint64_t display_latency_start_us,
+                uint64_t latency_generation,
+                uint64_t *decoded_at_unix_us);
     void reset();
 
 private:

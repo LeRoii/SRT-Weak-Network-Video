@@ -38,12 +38,20 @@ pkg_check_modules(ISAL REQUIRED IMPORTED_TARGET libisal)
 
 set(COMMON_SOURCES
     src/common/adaptation.cpp
+    src/common/latency_stats.cpp
     src/common/network_quality.cpp
+    src/common/runtime_config.cpp
     src/common/utils.cpp
     src/fec/reed_solomon.cpp
     src/protocol/frame_assembler.cpp
     src/protocol/messages.cpp
     src/transport/srt_transport.cpp
+)
+
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/runtime-config.yaml
+    ${CMAKE_CURRENT_BINARY_DIR}/runtime-config.yaml
+    COPYONLY
 )
 
 add_executable(srt_weak_video
@@ -116,3 +124,29 @@ target_compile_options(network_quality_tests PRIVATE
     -Wpedantic
 )
 add_test(NAME network_quality_tests COMMAND network_quality_tests)
+
+add_executable(runtime_config_tests
+    src/common/runtime_config.cpp
+    tests/runtime_config_tests.cpp
+)
+target_include_directories(runtime_config_tests PRIVATE src)
+target_compile_options(runtime_config_tests PRIVATE
+    -UNDEBUG
+    -Wall
+    -Wextra
+    -Wpedantic
+)
+add_test(NAME runtime_config_tests COMMAND runtime_config_tests)
+
+add_executable(latency_stats_tests
+    src/common/latency_stats.cpp
+    tests/latency_stats_tests.cpp
+)
+target_include_directories(latency_stats_tests PRIVATE src)
+target_compile_options(latency_stats_tests PRIVATE
+    -UNDEBUG
+    -Wall
+    -Wextra
+    -Wpedantic
+)
+add_test(NAME latency_stats_tests COMMAND latency_stats_tests)

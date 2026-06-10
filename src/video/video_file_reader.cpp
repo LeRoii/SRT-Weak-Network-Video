@@ -1,10 +1,13 @@
 #include "video/video_file_reader.hpp"
 
+#include "common/utils.hpp"
+
 #include <algorithm>
 #include <cerrno>
 #include <cmath>
 #include <cstddef>
 #include <cstring>
+#include <limits>
 #include <stdexcept>
 #include <utility>
 
@@ -54,6 +57,7 @@ bool VideoFileReader::next_frame(EncodedVideoFrame &frame,
             av_frame_unref(decoded_frame_);
             continue;
         }
+        const int64_t source_ready_monotonic_us = monotonic_us();
 
         sws_context_ = sws_getCachedContext(
             sws_context_,
@@ -113,6 +117,17 @@ bool VideoFileReader::next_frame(EncodedVideoFrame &frame,
             static_cast<uint32_t>(std::max(1, 90000 / profile.fps));
         frame.encoder_epoch = epoch_;
         frame.keyframe = (packet->flags & AV_PKT_FLAG_KEY) != 0;
+        frame.encoded_at_unix_us = unix_time_us();
+        const int64_t encoded_monotonic_us = monotonic_us();
+        const uint64_t source_to_encoded_us =
+            encoded_monotonic_us >= source_ready_monotonic_us
+                ? static_cast<uint64_t>(
+                      encoded_monotonic_us - source_ready_monotonic_us)
+                : 0;
+        frame.source_to_encoded_us = static_cast<uint32_t>(
+            std::min<uint64_t>(
+                source_to_encoded_us,
+                std::numeric_limits<uint32_t>::max()));
         av_packet_free(&packet);
         return true;
     }

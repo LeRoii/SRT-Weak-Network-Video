@@ -1,0 +1,3 @@
+latency:
+  metric: encode_to_decode
+  window_seconds: 10

@@ -1,3 +1,4 @@
+#include "common/runtime_config.hpp"
 #include "common/types.hpp"
 #include "common/utils.hpp"
 #include "receiver.hpp"
@@ -5,6 +6,7 @@
 #include "transport/srt_transport.hpp"
 
 #include <csignal>
+#include <filesystem>
 #include <iostream>
 #include <optional>
 #include <stdexcept>
@@ -17,10 +19,10 @@ void print_usage(const char *program) {
         << "Usage:\n"
         << "  " << program
         << " --role sender --connect <host:port> --video-file <path>"
-           " [--max-video-kbps <8-2000>]\n"
+           " [--max-video-kbps <8-2000>] [--config <path>]\n"
         << "  " << program
         << " --role receiver --listen <host:port>"
-           " [--output-file <path>] [--no-display]\n";
+           " [--output-file <path>] [--no-display] [--config <path>]\n";
 }
 
 } // namespace
@@ -36,6 +38,7 @@ int main(int argc, char **argv) {
         std::string output_file = "received.h264";
         int max_video_kbps = 2000;
         bool display_enabled = true;
+        std::optional<std::filesystem::path> config_path;
 
         for (int i = 1; i < argc; ++i) {
             const std::string argument = argv[i];
@@ -65,6 +68,8 @@ int main(int argc, char **argv) {
                 }
             } else if (argument == "--no-display") {
                 display_enabled = false;
+            } else if (argument == "--config" && i + 1 < argc) {
+                config_path = argv[++i];
             } else if (argument == "--help" || argument == "-h") {
                 print_usage(argv[0]);
                 return 0;
@@ -84,10 +89,15 @@ int main(int argc, char **argv) {
         }
 
         SrtRuntime runtime;
+        const auto effective_config_path =
+            config_path.value_or(default_runtime_config_path());
+        const auto config = load_runtime_config(
+            effective_config_path, !config_path.has_value());
         if (*role == Role::Sender) {
             SenderApp(*endpoint, video_file, max_video_kbps).run();
         } else {
-            ReceiverApp(*endpoint, output_file, display_enabled).run();
+            ReceiverApp(*endpoint, output_file, display_enabled,
+                        config.latency).run();
         }
     } catch (const std::exception &error) {
         std::cerr << "fatal: " << error.what() << std::endl;

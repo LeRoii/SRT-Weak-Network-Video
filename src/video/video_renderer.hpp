@@ -1,5 +1,7 @@
 #pragma once
 
+#include "common/latency_stats.hpp"
+
 #include <atomic>
 #include <condition_variable>
 #include <cstddef>
@@ -12,7 +14,7 @@ struct AVFrame;
 
 class VideoRenderer {
 public:
-    VideoRenderer();
+    explicit VideoRenderer(LatencyStats *latency_stats = nullptr);
     ~VideoRenderer();
 
     VideoRenderer(const VideoRenderer &) = delete;
@@ -20,10 +22,19 @@ public:
 
     void start(bool enabled);
     void stop();
-    void submit(const AVFrame *frame);
+    void submit(const AVFrame *frame,
+                uint64_t latency_start_unix_us,
+                uint64_t latency_generation);
     uint64_t rendered_frames() const;
+    void discard_pending();
 
 private:
+    struct QueuedFrame {
+        AVFrame *frame = nullptr;
+        uint64_t latency_start_unix_us = 0;
+        uint64_t latency_generation = 0;
+    };
+
     void render_loop();
     void clear_queue();
 
@@ -32,6 +43,7 @@ private:
     std::atomic<uint64_t> rendered_frames_{0};
     std::mutex mutex_;
     std::condition_variable cv_;
-    std::deque<AVFrame *> frames_;
+    LatencyStats *latency_stats_ = nullptr;
+    std::deque<QueuedFrame> frames_;
     std::thread thread_;
 };

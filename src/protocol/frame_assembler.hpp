@@ -10,7 +10,8 @@
 struct RecoveredFrame {
     uint32_t stream_epoch = 0;
     uint64_t frame_id = 0;
-    uint64_t pts_us = 0;
+    uint64_t encoded_at_unix_us = 0;
+    uint32_t source_to_encoded_us = 0;
     uint32_t bitrate_kbps = 0;
     uint16_t width = 0;
     uint16_t height = 0;

@@ -56,6 +56,30 @@ Start the sender:
 
 Use `--no-display` on the receiver for headless tests.
 
+## Latency Metrics
+
+The executable automatically loads `runtime-config.yaml` from the directory
+that contains the executable. Use `--config <path>` to select another file.
+If the automatic file is missing, these defaults are used:
+
+```yaml
+latency:
+  metric: encode_to_decode
+  window_seconds: 10
+```
+
+Only one latency metric is sampled and printed at a time:
+
+- `encode_to_assemble`: encoder output to complete-frame FEC recovery
+- `encode_to_decode`: encoder output to a valid decoded frame
+- `source_to_display`: selected source frame to `SDL_RenderPresent`
+
+The receiver prints the average and P95 over the configured rolling window.
+`source_to_display` reports `n/a` with `--no-display`. Sender and receiver
+system clocks must be synchronized with NTP or PTP because these are one-way
+latency measurements. The display metric stops at the SDL software-present
+call and does not include monitor scanout or panel response.
+
 ## Weak-Network Test
 
 The copied `scripts/netem_loss.sh` creates the same sender/receiver namespace

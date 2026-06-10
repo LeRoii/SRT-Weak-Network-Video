@@ -7,15 +7,47 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <iomanip>
 #include <iostream>
 #include <optional>
+#include <sstream>
 #include <thread>
+
+namespace {
+
+std::string format_latency(const std::optional<double> &milliseconds) {
+    if (!milliseconds) {
+        return "n/a";
+    }
+    std::ostringstream output;
+    output << std::fixed << std::setprecision(1) << *milliseconds << "ms";
+    return output.str();
+}
+
+uint64_t source_timestamp(const RecoveredFrame &frame) {
+    if (frame.encoded_at_unix_us < frame.source_to_encoded_us) {
+        return 0;
+    }
+    return frame.encoded_at_unix_us - frame.source_to_encoded_us;
+}
+
+} // namespace
 
 ReceiverApp::ReceiverApp(Endpoint local,
                          std::string output_file,
                          bool display_enabled)
+    : ReceiverApp(std::move(local), std::move(output_file), display_enabled,
+                  {}) {}
+
+ReceiverApp::ReceiverApp(Endpoint local,
+                         std::string output_file,
+                         bool display_enabled,
+                         LatencyConfig latency_config)
     : local_(std::move(local)),
       output_(std::move(output_file), std::ios::binary | std::ios::trunc),
+      latency_config_(latency_config),
+      latency_stats_(latency_config.window_seconds),
+      renderer_(&latency_stats_),
       decoder_(renderer_),
       display_enabled_(display_enabled) {
     if (!output_) {
@@ -38,6 +70,8 @@ void ReceiverApp::run() {
             auto socket = listener.accept();
             std::cerr << "srt_connected=1" << std::endl;
             assembler_.reset();
+            renderer_.discard_pending();
+            latency_generation_ = latency_stats_.reset();
             run_connection(socket);
             std::cerr << "srt_connected=0" << std::endl;
         } catch (const std::exception &error) {
@@ -72,6 +106,14 @@ void ReceiverApp::run_connection(SrtSocket &socket) {
             const auto parsed = parse_message(message.data(), message.size());
             if (parsed && parsed->shard) {
                 if (auto frame = assembler_.push(std::move(*parsed->shard))) {
+                    if (latency_config_.metric ==
+                        LatencyMetric::EncodeToAssemble) {
+                        latency_stats_.record(
+                            latency_generation_,
+                            frame->encoded_at_unix_us,
+                            unix_time_us(),
+                            monotonic_us());
+                    }
                     handle_frame(std::move(*frame));
                 }
             }
@@ -116,8 +158,18 @@ void ReceiverApp::run_connection(SrtSocket &socket) {
                     socket.send(encode_network_report(report), 1500);
                 }
             }
+            const auto latency =
+                latency_stats_.snapshot(monotonic_us());
             std::cout << "bandwidth=" << network.bandwidth_kbps << "kbps "
                       << "rtt=" << network.rtt_ms << "ms "
+                      << "latency_type="
+                      << latency_metric_name(latency_config_.metric) << " "
+                      << "latency_avg="
+                      << format_latency(latency.average_ms) << " "
+                      << "latency_p95="
+                      << format_latency(latency.p95_ms) << " "
+                      << "latency_invalid="
+                      << latency.invalid_samples << " "
                       << "frames=" << completed_frames_ << " "
                       << "dropped=" << dropped_frames_ << " "
                       << "decoder_errors=" << decoder_errors_ << " "
@@ -138,7 +190,18 @@ void ReceiverApp::handle_frame(RecoveredFrame frame) {
     if (frame.stream_epoch != stream_epoch_) {
         stream_epoch_ = frame.stream_epoch;
         synchronized_ = false;
+        have_decoded_frame_id_ = false;
         decoder_.reset();
+    }
+
+    if (have_decoded_frame_id_ &&
+        frame.frame_id <= last_decoded_frame_id_) {
+        ++dropped_frames_;
+        return;
+    }
+    if (synchronized_ && have_decoded_frame_id_ &&
+        frame.frame_id != last_decoded_frame_id_ + 1) {
+        synchronized_ = false;
     }
 
     if (!synchronized_ && !frame.keyframe) {
@@ -149,13 +212,29 @@ void ReceiverApp::handle_frame(RecoveredFrame frame) {
     if (!synchronized_ && frame.keyframe) {
         decoder_.reset();
     }
-    if (!decoder_.decode(frame.data.data(), frame.data.size())) {
+    const uint64_t display_start =
+        latency_config_.metric == LatencyMetric::SourceToDisplay
+            ? source_timestamp(frame)
+            : 0;
+    uint64_t decoded_at_unix_us = 0;
+    if (!decoder_.decode(frame.data.data(), frame.data.size(),
+                         display_start, latency_generation_,
+                         &decoded_at_unix_us)) {
         ++decoder_errors_;
         synchronized_ = false;
         return;
     }
+    if (latency_config_.metric == LatencyMetric::EncodeToDecode) {
+        latency_stats_.record(
+            latency_generation_,
+            frame.encoded_at_unix_us,
+            decoded_at_unix_us,
+            monotonic_us());
+    }
 
     synchronized_ = true;
+    have_decoded_frame_id_ = true;
+    last_decoded_frame_id_ = frame.frame_id;
     ++completed_frames_;
     if (!output_started_ && frame.keyframe) {
         output_started_ = true;
