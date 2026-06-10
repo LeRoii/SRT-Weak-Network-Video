@@ -19,6 +19,8 @@ Usage:
   Network namespace + veth mode:
     sudo ./scripts/netem_loss.sh ns-up
     sudo ./scripts/netem_loss.sh ns-loss <loss_percent> [delay_ms] [tx|rx|both]
+    sudo ./scripts/netem_loss.sh ns-bandwidth <tx_rate> <rx_rate>
+    sudo ./scripts/netem_loss.sh ns-link <loss_percent> <delay_ms> <tx_rate> <rx_rate>
     sudo ./scripts/netem_loss.sh ns-clear [tx|rx|both]
     sudo ./scripts/netem_loss.sh ns-show
     sudo ./scripts/netem_loss.sh ns-down
@@ -26,8 +28,10 @@ Usage:
 Examples:
   sudo ./scripts/netem_loss.sh ns-up
   sudo ./scripts/netem_loss.sh ns-loss 15
+  sudo ./scripts/netem_loss.sh ns-bandwidth 500kbit 200kbit
+  sudo ./scripts/netem_loss.sh ns-link 15 50 500kbit 200kbit
   sudo ./scripts/netem_loss.sh ns-show
-  sudo ./scripts/netem_loss.sh ns-clear
+  sudo ./scripts/netem_loss.sh ns-clear both
   sudo ./scripts/netem_loss.sh ns-down
 
 Run commands inside namespaces:
@@ -43,6 +47,10 @@ Default topology:
 
 Notes:
   - ns-loss defaults to tx, so loss is applied only from webrtc_tx to webrtc_rx.
+  - ns-bandwidth and ns-link configure both directions independently.
+  - Rates use tc units such as 500kbit, 2mbit, or 1gbit.
+  - Running ns-loss or ns-bandwidth replaces the previous qdisc settings.
+    Use ns-link when bandwidth, loss, and delay must be active together.
   - This avoids loopback's possible two-direction loss amplification.
   - Processes started on the host, including listeners on 0.0.0.0, do not
     cross this veth. Run sender and receiver in the namespaces shown above.
@@ -94,12 +102,20 @@ qdisc_set_ns() {
     local dev="$2"
     local loss="$3"
     local delay_ms="$4"
+    local rate="${5:-}"
+    local args=(netem)
 
-    if [[ "${delay_ms}" == "0" ]]; then
-        ip netns exec "${ns}" tc qdisc replace dev "${dev}" root netem loss "${loss}%"
-    else
-        ip netns exec "${ns}" tc qdisc replace dev "${dev}" root netem loss "${loss}%" delay "${delay_ms}ms"
+    if [[ "${loss}" != "0" ]]; then
+        args+=(loss "${loss}%")
     fi
+    if [[ "${delay_ms}" != "0" ]]; then
+        args+=(delay "${delay_ms}ms")
+    fi
+    if [[ -n "${rate}" ]]; then
+        args+=(rate "${rate}")
+    fi
+
+    ip netns exec "${ns}" tc qdisc replace dev "${dev}" root "${args[@]}"
 }
 
 setup_namespaces() {
@@ -180,6 +196,51 @@ set_namespace_loss() {
     esac
 
     echo "configured namespace netem: loss=${loss}% delay=${delay_ms}ms direction=${direction}"
+    show_namespace_qdisc
+}
+
+set_namespace_bandwidth() {
+    require_root
+    require_ns "${DEFAULT_LEFT_NS}"
+    require_ns "${DEFAULT_RIGHT_NS}"
+
+    local tx_rate="${1:-}"
+    local rx_rate="${2:-}"
+
+    if [[ -z "${tx_rate}" || -z "${rx_rate}" ]]; then
+        usage
+        exit 1
+    fi
+
+    qdisc_set_ns "${DEFAULT_LEFT_NS}" "${DEFAULT_LEFT_VETH}" 0 0 "${tx_rate}"
+    qdisc_set_ns "${DEFAULT_RIGHT_NS}" "${DEFAULT_RIGHT_VETH}" 0 0 "${rx_rate}"
+
+    echo "configured namespace bandwidth: tx=${tx_rate} rx=${rx_rate}"
+    show_namespace_qdisc
+}
+
+set_namespace_link() {
+    require_root
+    require_ns "${DEFAULT_LEFT_NS}"
+    require_ns "${DEFAULT_RIGHT_NS}"
+
+    local loss="${1:-}"
+    local delay_ms="${2:-}"
+    local tx_rate="${3:-}"
+    local rx_rate="${4:-}"
+
+    if [[ -z "${loss}" || -z "${delay_ms}" ||
+          -z "${tx_rate}" || -z "${rx_rate}" ]]; then
+        usage
+        exit 1
+    fi
+
+    qdisc_set_ns "${DEFAULT_LEFT_NS}" "${DEFAULT_LEFT_VETH}" \
+        "${loss}" "${delay_ms}" "${tx_rate}"
+    qdisc_set_ns "${DEFAULT_RIGHT_NS}" "${DEFAULT_RIGHT_VETH}" \
+        "${loss}" "${delay_ms}" "${rx_rate}"
+
+    echo "configured namespace link: loss=${loss}% delay=${delay_ms}ms tx=${tx_rate} rx=${rx_rate}"
     show_namespace_qdisc
 }
 
@@ -285,6 +346,14 @@ case "${cmd}" in
 
     ns-loss)
         set_namespace_loss "${2:-}" "${3:-0}" "${4:-tx}"
+        ;;
+
+    ns-bandwidth)
+        set_namespace_bandwidth "${2:-}" "${3:-}"
+        ;;
+
+    ns-link)
+        set_namespace_link "${2:-}" "${3:-}" "${4:-}" "${5:-}"
         ;;
 
     ns-clear)

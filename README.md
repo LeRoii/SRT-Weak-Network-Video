@@ -92,6 +92,23 @@ sudo ./scripts/netem_loss.sh ns-loss 50 50 both
 sudo ./scripts/netem_loss.sh ns-show
 ```
 
+Limit the sender and receiver egress bandwidth independently:
+
+```bash
+sudo ./scripts/netem_loss.sh ns-bandwidth 500kbit 200kbit
+```
+
+To combine bandwidth limits with loss and delay, configure the complete link
+in one command:
+
+```bash
+sudo ./scripts/netem_loss.sh ns-link 30 50 500kbit 200kbit
+```
+
+Here `tx_rate` limits traffic leaving `webrtc_tx`, while `rx_rate` limits
+traffic leaving `webrtc_rx`. Rate values use `tc` units such as `kbit`,
+`mbit`, or `gbit`.
+
 Use `sudo ./scripts/netem_loss.sh ns-clear both` to remove the impairment and
 `sudo ./scripts/netem_loss.sh ns-down` after both processes have stopped.
 
