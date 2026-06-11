@@ -6,8 +6,13 @@
 #include <stdexcept>
 
 extern "C" {
+#if __has_include(<isa-l/crc.h>)
 #include <isa-l/crc.h>
 #include <isa-l/erasure_code.h>
+#else
+#include <isal/crc.h>
+#include <isal/erasure_code.h>
+#endif
 }
 
 namespace {

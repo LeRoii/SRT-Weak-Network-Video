@@ -62,6 +62,7 @@ void VideoRenderer::submit(const AVFrame *frame) {
 }
 
 void VideoRenderer::render_loop() {
+    SDL_SetMainReady();
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         std::cerr << "sdl_init_failed=" << SDL_GetError() << std::endl;
         return;

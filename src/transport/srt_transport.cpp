@@ -1,14 +1,26 @@
 #include "transport/srt_transport.hpp"
 
 #include <algorithm>
-#include <arpa/inet.h>
 #include <cstring>
-#include <netdb.h>
 #include <stdexcept>
-#include <syslog.h>
 #include <utility>
 
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#else
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <syslog.h>
+#endif
+
 namespace {
+
+#ifdef _WIN32
+constexpr int kSrtLogError = 3;
+#else
+constexpr int kSrtLogError = LOG_ERR;
+#endif
 
 template <typename T>
 void set_option(SRTSOCKET socket, SRT_SOCKOPT option,
@@ -32,9 +44,14 @@ sockaddr_storage resolve(const Endpoint &endpoint, int flags) {
         endpoint.host.empty() ? nullptr : endpoint.host.c_str(),
         port.c_str(), &hints, &result);
     if (error != 0 || !result) {
+#ifdef _WIN32
+        const std::string error_text = std::to_string(error);
+#else
+        const std::string error_text = gai_strerror(error);
+#endif
         throw std::runtime_error(
             "cannot resolve endpoint " + endpoint.host + ":" + port +
-            ": " + gai_strerror(error));
+            ": " + error_text);
     }
 
     sockaddr_storage address{};
@@ -49,7 +66,7 @@ SrtRuntime::SrtRuntime() {
     if (srt_startup() != 0) {
         throw std::runtime_error("srt_startup failed");
     }
-    srt_setloglevel(LOG_ERR);
+    srt_setloglevel(kSrtLogError);
 }
 
 SrtRuntime::~SrtRuntime() {
@@ -179,7 +196,8 @@ SendResult SrtSocket::send(const std::vector<uint8_t> &message, int ttl_ms) {
     if (!valid() || message.empty()) {
         return SendResult::Closed;
     }
-    SRT_MSGCTRL control = srt_msgctrl_default;
+    SRT_MSGCTRL control{};
+    srt_msgctrl_init(&control);
     control.msgttl = ttl_ms;
     control.inorder = 0;
     const int sent = srt_sendmsg2(
@@ -197,7 +215,8 @@ SendResult SrtSocket::send(const std::vector<uint8_t> &message, int ttl_ms) {
 
 ReceiveResult SrtSocket::receive(std::vector<uint8_t> &message) {
     message.resize(2048);
-    SRT_MSGCTRL control = srt_msgctrl_default;
+    SRT_MSGCTRL control{};
+    srt_msgctrl_init(&control);
     const int received = srt_recvmsg2(
         socket_, reinterpret_cast<char *>(message.data()),
         static_cast<int>(message.size()), &control);

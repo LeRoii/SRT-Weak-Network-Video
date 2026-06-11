@@ -1,7 +1,7 @@
 # SRT Weak-Network Video
 
-Native Linux sender/receiver for complete-frame video delivery over severe
-packet loss. The transport combines:
+Native sender/receiver for complete-frame video delivery over severe packet
+loss. The transport combines:
 
 - SRT live message transport with a 350 ms latency budget and deadline-aware ARQ
 - per-frame Reed-Solomon erasure coding through Intel ISA-L
@@ -25,6 +25,16 @@ the system SRT package. The build applies a local nonblocking-lock patch to
 SRT's send and close paths. Without it, extreme bidirectional loss can leave
 the public nonblocking API waiting indefinitely on an internal mutex.
 
+Windows with vcpkg:
+
+```powershell
+vcpkg install ffmpeg[x264]:x64-windows sdl2:x64-windows isal:x64-windows
+```
+
+If your FFmpeg port does not provide x264, install an FFmpeg development build
+that includes `libx264` and pass its install prefix to CMake through
+`CMAKE_PREFIX_PATH`. The sender requires the `libx264` encoder at runtime.
+
 ## Build
 
 ```bash
@@ -32,6 +42,18 @@ cmake -S . -B build
 cmake --build build -j2
 ctest --test-dir build --output-on-failure
 ```
+
+Windows with Visual Studio and vcpkg:
+
+```powershell
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
+    -DCMAKE_TOOLCHAIN_FILE=D:\SoftWare\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake --build build --config Release
+```
+
+The executable is generated under `build\Release\srt_weak_video.exe` for the
+Visual Studio generator. Make sure the FFmpeg, SDL2, ISA-L, OpenSSL, and SRT
+DLL directories are on `PATH`, or copy the required DLLs beside the executable.
 
 ## Run
 
@@ -42,6 +64,23 @@ Start the receiver:
   --role receiver \
   --listen 0.0.0.0:9000 \
   --output-file /tmp/srt-received.h264
+```
+
+On Windows, use the `.exe` path and Windows-style output paths, for example:
+
+```powershell
+.\build\Release\srt_weak_video.exe `
+  --role receiver `
+  --listen 0.0.0.0:9000 `
+  --output-file .\srt-received.h264
+```
+
+```powershell
+.\build\Release\srt_weak_video.exe `
+  --role sender `
+  --connect 127.0.0.1:9000 `
+  --video-file C:\path\to\input.mp4 `
+  --max-video-kbps 2000
 ```
 
 Start the sender:
