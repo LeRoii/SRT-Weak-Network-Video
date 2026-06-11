@@ -14,10 +14,10 @@
 
 class ReceiverApp {
 public:
-    ReceiverApp(Endpoint local, std::string output_file, bool display_enabled);
     ReceiverApp(Endpoint local,
                 std::string output_file,
                 bool display_enabled,
+                bool write_h264,
                 LatencyConfig latency_config);
     ~ReceiverApp();
 
@@ -35,6 +35,7 @@ private:
     H264Decoder decoder_;
     FrameAssembler assembler_;
     bool display_enabled_ = true;
+    bool write_h264_ = true;
     bool synchronized_ = false;
     bool output_started_ = false;
     bool have_decoded_frame_id_ = false;

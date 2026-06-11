@@ -1,10 +1,25 @@
 metadata:
   purpose: "Record parameters tuned during weak-network video development."
   runtime_loaded: false
-  updated_at: "2026-06-10"
+  updated_at: "2026-06-11"
   units_note: "Bitrates are kbps unless a different unit is stated."
 
 current:
+  runtime:
+    config_file: runtime-config.yaml
+    config_location: "Directory containing the executable."
+    command_line_parameters: [role]
+    missing_config_behavior: "Use compiled defaults."
+    sender:
+      connect: "127.0.0.1:9000"
+      video_file: "/home/u20/code/jetson-2k.mp4"
+      max_video_kbps: 2000
+    receiver:
+      listen: "0.0.0.0:9000"
+      display: true
+      write_h264: true
+      output_file: received.h264
+
   srt:
     transport_type: live
     message_api: true
@@ -134,6 +149,18 @@ current:
     bandwidth_units_examples: [500kbit, 2mbit, 1gbit]
 
 development_history:
+  - parameter: runtime_configuration_source
+    previous: "Endpoint, media path, bitrate limit, output path, and display mode were command-line parameters."
+    current: "All startup settings are loaded from runtime-config.yaml; command line accepts only role."
+    reason: "Keep startup behavior reproducible and centralize runtime parameters."
+
+  - parameter: receiver_h264_output
+    previous: "The receiver always created and wrote the configured H.264 file."
+    current:
+      write_h264: true
+      output_file: received.h264
+    reason: "Allow disabling disk output while preserving decode, display, and statistics; retain writing as the default."
+
   - parameter: SRTO_PEERIDLETIMEO
     previous: 5000
     current: 15000

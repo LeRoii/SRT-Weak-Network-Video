@@ -35,23 +35,21 @@ uint64_t source_timestamp(const RecoveredFrame &frame) {
 
 ReceiverApp::ReceiverApp(Endpoint local,
                          std::string output_file,
-                         bool display_enabled)
-    : ReceiverApp(std::move(local), std::move(output_file), display_enabled,
-                  {}) {}
-
-ReceiverApp::ReceiverApp(Endpoint local,
-                         std::string output_file,
                          bool display_enabled,
+                         bool write_h264,
                          LatencyConfig latency_config)
     : local_(std::move(local)),
-      output_(std::move(output_file), std::ios::binary | std::ios::trunc),
       latency_config_(latency_config),
       latency_stats_(latency_config.window_seconds),
       renderer_(&latency_stats_),
       decoder_(renderer_),
-      display_enabled_(display_enabled) {
-    if (!output_) {
-        throw std::runtime_error("cannot open receiver output file");
+      display_enabled_(display_enabled),
+      write_h264_(write_h264) {
+    if (write_h264_) {
+        output_.open(output_file, std::ios::binary | std::ios::trunc);
+        if (!output_) {
+            throw std::runtime_error("cannot open receiver output file");
+        }
     }
     renderer_.start(display_enabled_);
 }
@@ -236,10 +234,10 @@ void ReceiverApp::handle_frame(RecoveredFrame frame) {
     have_decoded_frame_id_ = true;
     last_decoded_frame_id_ = frame.frame_id;
     ++completed_frames_;
-    if (!output_started_ && frame.keyframe) {
+    if (write_h264_ && !output_started_ && frame.keyframe) {
         output_started_ = true;
     }
-    if (output_started_) {
+    if (write_h264_ && output_started_) {
         output_.write(reinterpret_cast<const char *>(frame.data.data()),
                       static_cast<std::streamsize>(frame.data.size()));
         output_.flush();

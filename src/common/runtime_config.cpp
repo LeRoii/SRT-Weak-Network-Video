@@ -3,6 +3,7 @@
 #include <cctype>
 #include <fstream>
 #include <limits.h>
+#include <set>
 #include <stdexcept>
 #include <string_view>
 #include <unistd.h>
@@ -38,20 +39,54 @@ LatencyMetric parse_metric(const std::string &value) {
         "or source_to_display");
 }
 
-int parse_window_seconds(const std::string &value) {
+int parse_integer(const std::string &value,
+                  const std::string &name,
+                  int minimum,
+                  int maximum) {
     std::size_t consumed = 0;
-    int seconds = 0;
+    int result = 0;
     try {
-        seconds = std::stoi(value, &consumed);
+        result = std::stoi(value, &consumed);
     } catch (const std::exception &) {
-        throw std::runtime_error(
-            "latency.window_seconds must be an integer");
+        throw std::runtime_error(name + " must be an integer");
     }
-    if (consumed != value.size() || seconds < 1 || seconds > 3600) {
+    if (consumed != value.size() || result < minimum || result > maximum) {
         throw std::runtime_error(
-            "latency.window_seconds must be between 1 and 3600");
+            name + " must be between " + std::to_string(minimum) +
+            " and " + std::to_string(maximum));
     }
-    return seconds;
+    return result;
+}
+
+bool parse_boolean(const std::string &value, const std::string &name) {
+    if (value == "true") {
+        return true;
+    }
+    if (value == "false") {
+        return false;
+    }
+    throw std::runtime_error(name + " must be true or false");
+}
+
+enum class Section {
+    None,
+    Sender,
+    Receiver,
+    Latency,
+};
+
+Section parse_section(const std::string &content) {
+    if (content == "sender:") {
+        return Section::Sender;
+    }
+    if (content == "receiver:") {
+        return Section::Receiver;
+    }
+    if (content == "latency:") {
+        return Section::Latency;
+    }
+    throw std::runtime_error(
+        "runtime config section must be sender, receiver, or latency");
 }
 
 } // namespace
@@ -81,10 +116,11 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
     }
 
     RuntimeConfig config;
-    bool in_latency = false;
+    Section section = Section::None;
+    bool saw_sender = false;
+    bool saw_receiver = false;
     bool saw_latency = false;
-    bool saw_metric = false;
-    bool saw_window = false;
+    std::set<std::string> seen_keys;
     std::string line;
     int line_number = 0;
     while (std::getline(input, line)) {
@@ -108,19 +144,27 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
         }
         const std::string content = trim(line);
         if (indent == 0) {
-            if (content != "latency:" || saw_latency) {
+            section = parse_section(content);
+            bool *seen = nullptr;
+            if (section == Section::Sender) {
+                seen = &saw_sender;
+            } else if (section == Section::Receiver) {
+                seen = &saw_receiver;
+            } else {
+                seen = &saw_latency;
+            }
+            if (*seen) {
                 throw std::runtime_error(
                     "runtime config line " + std::to_string(line_number) +
-                    " must be the unique 'latency:' section");
+                    " repeats a section");
             }
-            saw_latency = true;
-            in_latency = true;
+            *seen = true;
             continue;
         }
-        if (!in_latency || indent != 2) {
+        if (section == Section::None || indent != 2) {
             throw std::runtime_error(
                 "runtime config line " + std::to_string(line_number) +
-                " must use two-space indentation under latency");
+                " must use two-space indentation under a section");
         }
 
         const auto separator = content.find(':');
@@ -136,28 +180,55 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
                 "runtime config line " + std::to_string(line_number) +
                 " has an empty value");
         }
-        if (key == "metric") {
-            if (saw_metric) {
-                throw std::runtime_error("duplicate latency.metric");
-            }
-            config.latency.metric = parse_metric(value);
-            saw_metric = true;
-        } else if (key == "window_seconds") {
-            if (saw_window) {
-                throw std::runtime_error(
-                    "duplicate latency.window_seconds");
-            }
-            config.latency.window_seconds = parse_window_seconds(value);
-            saw_window = true;
-        } else {
+        const std::string qualified_key =
+            std::to_string(static_cast<int>(section)) + ":" + key;
+        if (!seen_keys.insert(qualified_key).second) {
             throw std::runtime_error(
-                "unknown latency config key '" + key + "'");
+                "duplicate runtime config key '" + key + "'");
+        }
+        if (section == Section::Sender) {
+            if (key == "connect") {
+                config.sender.connect = value;
+            } else if (key == "video_file") {
+                config.sender.video_file = value;
+            } else if (key == "max_video_kbps") {
+                config.sender.max_video_kbps = parse_integer(
+                    value, "sender.max_video_kbps", 8, 2000);
+            } else {
+                throw std::runtime_error(
+                    "unknown sender config key '" + key + "'");
+            }
+        } else if (section == Section::Receiver) {
+            if (key == "listen") {
+                config.receiver.listen = value;
+            } else if (key == "display") {
+                config.receiver.display =
+                    parse_boolean(value, "receiver.display");
+            } else if (key == "write_h264") {
+                config.receiver.write_h264 =
+                    parse_boolean(value, "receiver.write_h264");
+            } else if (key == "output_file") {
+                config.receiver.output_file = value;
+            } else {
+                throw std::runtime_error(
+                    "unknown receiver config key '" + key + "'");
+            }
+        } else {
+            if (key == "metric") {
+                config.latency.metric = parse_metric(value);
+            } else if (key == "window_seconds") {
+                config.latency.window_seconds = parse_integer(
+                    value, "latency.window_seconds", 1, 3600);
+            } else {
+                throw std::runtime_error(
+                    "unknown latency config key '" + key + "'");
+            }
         }
     }
 
-    if (!saw_latency) {
+    if (!saw_sender || !saw_receiver || !saw_latency) {
         throw std::runtime_error(
-            "runtime config is missing the latency section");
+            "runtime config must contain sender, receiver, and latency sections");
     }
     return config;
 }
