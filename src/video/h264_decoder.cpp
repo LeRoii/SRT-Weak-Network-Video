@@ -1,5 +1,7 @@
 #include "video/h264_decoder.hpp"
 
+#include "common/utils.hpp"
+
 #include <cstring>
 #include <stdexcept>
 
@@ -49,7 +51,11 @@ void H264Decoder::reset() {
     open();
 }
 
-bool H264Decoder::decode(const uint8_t *data, std::size_t size) {
+bool H264Decoder::decode(const uint8_t *data,
+                         std::size_t size,
+                         uint64_t display_latency_start_us,
+                         uint64_t latency_generation,
+                         uint64_t *decoded_at_unix_us) {
     AVPacket *packet = av_packet_alloc();
     if (!packet) {
         return false;
@@ -73,7 +79,12 @@ bool H264Decoder::decode(const uint8_t *data, std::size_t size) {
             (frame_->flags & AV_FRAME_FLAG_CORRUPT) != 0 ||
             frame_->decode_error_flags != 0;
         if (!corrupt) {
-            renderer_.submit(frame_);
+            const uint64_t decoded_at = unix_time_us();
+            if (decoded_at_unix_us && !rendered) {
+                *decoded_at_unix_us = decoded_at;
+            }
+            renderer_.submit(frame_, display_latency_start_us,
+                             latency_generation);
             rendered = true;
         }
         av_frame_unref(frame_);

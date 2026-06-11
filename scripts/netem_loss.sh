@@ -36,11 +36,14 @@ Examples:
 
 Run commands inside namespaces:
   sudo ip netns exec webrtc_rx ./build/srt_weak_video \
-    --role receiver --listen 10.88.0.2:9000 \
-    --output-file /tmp/srt-received.h264 --no-display
+    --role receiver
   sudo ip netns exec webrtc_tx ./build/srt_weak_video \
-    --role sender --connect 10.88.0.2:9000 \
-    --video-file /path/to/input.mp4 --max-video-kbps 2000
+    --role sender
+
+Before starting, configure build/runtime-config.yaml with:
+  sender.connect: 10.88.0.2:9000
+  receiver.listen: 10.88.0.2:9000
+  receiver.display: false
 
 Default topology:
   webrtc_tx/veth_tx 10.88.0.1/24  <---->  webrtc_rx/veth_rx 10.88.0.2/24

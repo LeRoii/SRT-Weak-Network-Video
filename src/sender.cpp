@@ -53,8 +53,10 @@ bool SenderApp::run_connection(SrtSocket &socket,
     auto next_stats = std::chrono::steady_clock::now() +
                       std::chrono::seconds(1);
     bool send_ok = true;
-    receiver_loss_percent_.reset();
     network_report_sequence_ = 0;
+    if (receiver_loss_percent_) {
+        network_report_received_at_ = std::chrono::steady_clock::now();
+    }
 
     while (!g_stop_requested.load()) {
         if (!receive_network_reports(socket)) {
@@ -137,6 +139,8 @@ bool SenderApp::receive_network_reports(SrtSocket &socket) {
             return true;
         }
         if (result == ReceiveResult::Closed) {
+            std::cerr << "srt_receive_failed=" << srt_last_error()
+                      << " state=" << socket.state_name() << std::endl;
             return false;
         }
 
@@ -169,12 +173,12 @@ SendResult SenderApp::send_frame(SrtSocket &socket,
     }
 
     const uint32_t crc = frame_crc32(frame.data.data(), frame.data.size());
-    const uint64_t pts_us = static_cast<uint64_t>(monotonic_us());
     for (std::size_t index = 0; index < block.shards.size(); ++index) {
         ShardPacket packet;
         packet.stream_epoch = stream_epoch;
         packet.frame_id = frame_id;
-        packet.pts_us = pts_us;
+        packet.encoded_at_unix_us = frame.encoded_at_unix_us;
+        packet.source_to_encoded_us = frame.source_to_encoded_us;
         packet.original_size = static_cast<uint32_t>(frame.data.size());
         packet.frame_crc = crc;
         packet.bitrate_kbps = static_cast<uint32_t>(profile.bitrate_kbps);
@@ -199,7 +203,8 @@ SendResult SenderApp::send_frame(SrtSocket &socket,
             }
         }
         if (result == SendResult::Closed) {
-            std::cerr << "srt_send_failed=" << srt_last_error() << std::endl;
+            std::cerr << "srt_send_failed=" << srt_last_error()
+                      << " state=" << socket.state_name() << std::endl;
             return result;
         }
         if (result == SendResult::WouldBlock) {

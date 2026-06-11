@@ -119,6 +119,24 @@ void test_recovery_requires_five_healthy_windows() {
     assert(controller.update(network(0.0, 50.0)).level == 3);
 }
 
+void test_emergency_recovers_to_current_network_level() {
+    AdaptationController controller(2000);
+    assert(controller.update(network(100.0, 500.0)).level == 8);
+
+    for (int target_level = 7; target_level >= 4; --target_level) {
+        for (int sample = 0; sample < 4; ++sample) {
+            assert(controller.update(network(50.0, 50.0)).level ==
+                   target_level + 1);
+        }
+        assert(controller.update(network(50.0, 50.0)).level ==
+               target_level);
+    }
+
+    for (int sample = 0; sample < 10; ++sample) {
+        assert(controller.update(network(50.0, 50.0)).level == 4);
+    }
+}
+
 void test_max_video_bitrate_selects_supported_profile() {
     AdaptationController capped(1000);
     expect_profile(capped.current(), 2, 900, 10, 960, 540, 0.50, false);
@@ -141,6 +159,7 @@ int main() {
     test_profile_ladder_and_loss_boundaries();
     test_rtt_floor_and_fast_degradation();
     test_recovery_requires_five_healthy_windows();
+    test_emergency_recovers_to_current_network_level();
     test_max_video_bitrate_selects_supported_profile();
     test_invalid_snapshot_keeps_current_profile();
     std::cout << "adaptation_tests=passed" << std::endl;

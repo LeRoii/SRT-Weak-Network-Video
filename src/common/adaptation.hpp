@@ -15,5 +15,6 @@ private:
     int max_video_kbps_ = 2000;
     int level_ = 0;
     int healthy_windows_ = 0;
+    bool emergency_recovery_active_ = false;
     VideoProfile current_;
 };

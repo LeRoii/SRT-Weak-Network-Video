@@ -1,5 +1,7 @@
 #include "video/video_renderer.hpp"
 
+#include "common/utils.hpp"
+
 #include <SDL2/SDL.h>
 
 #include <chrono>
@@ -16,7 +18,8 @@ namespace {
 constexpr std::size_t kMaxQueuedFrames = 3;
 }
 
-VideoRenderer::VideoRenderer() = default;
+VideoRenderer::VideoRenderer(LatencyStats *latency_stats)
+    : latency_stats_(latency_stats) {}
 
 VideoRenderer::~VideoRenderer() {
     stop();
@@ -39,7 +42,9 @@ void VideoRenderer::stop() {
     clear_queue();
 }
 
-void VideoRenderer::submit(const AVFrame *frame) {
+void VideoRenderer::submit(const AVFrame *frame,
+                           uint64_t latency_start_unix_us,
+                           uint64_t latency_generation) {
     rendered_frames_.fetch_add(1, std::memory_order_relaxed);
     if (!enabled_.load()) {
         return;
@@ -52,11 +57,12 @@ void VideoRenderer::submit(const AVFrame *frame) {
     {
         std::lock_guard<std::mutex> lock(mutex_);
         while (frames_.size() >= kMaxQueuedFrames) {
-            AVFrame *old = frames_.front();
+            AVFrame *old = frames_.front().frame;
             frames_.pop_front();
             av_frame_free(&old);
         }
-        frames_.push_back(copy);
+        frames_.push_back(
+            {copy, latency_start_unix_us, latency_generation});
     }
     cv_.notify_one();
 }
@@ -77,13 +83,13 @@ void VideoRenderer::render_loop() {
     AVPixelFormat source_format = AV_PIX_FMT_NONE;
 
     while (!stopping_.load()) {
-        AVFrame *frame = nullptr;
+        QueuedFrame queued;
         {
             std::unique_lock<std::mutex> lock(mutex_);
             cv_.wait_for(lock, std::chrono::milliseconds(50),
                          [this] { return stopping_.load() || !frames_.empty(); });
             if (!frames_.empty()) {
-                frame = frames_.front();
+                queued = frames_.front();
                 frames_.pop_front();
             }
         }
@@ -95,6 +101,7 @@ void VideoRenderer::render_loop() {
             }
         }
 
+        AVFrame *frame = queued.frame;
         if (!frame) {
             continue;
         }
@@ -157,6 +164,13 @@ void VideoRenderer::render_loop() {
         SDL_RenderClear(renderer);
         SDL_RenderCopy(renderer, texture, nullptr, nullptr);
         SDL_RenderPresent(renderer);
+        if (latency_stats_ && queued.latency_start_unix_us != 0) {
+            latency_stats_->record(
+                queued.latency_generation,
+                queued.latency_start_unix_us,
+                unix_time_us(),
+                monotonic_us());
+        }
         av_frame_free(&frame);
     }
 
@@ -178,10 +192,14 @@ uint64_t VideoRenderer::rendered_frames() const {
     return rendered_frames_.load(std::memory_order_relaxed);
 }
 
+void VideoRenderer::discard_pending() {
+    clear_queue();
+}
+
 void VideoRenderer::clear_queue() {
     std::lock_guard<std::mutex> lock(mutex_);
     while (!frames_.empty()) {
-        AVFrame *frame = frames_.front();
+        AVFrame *frame = frames_.front().frame;
         frames_.pop_front();
         av_frame_free(&frame);
     }

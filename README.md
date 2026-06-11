@@ -35,26 +35,54 @@ ctest --test-dir build --output-on-failure
 
 ## Run
 
-Start the receiver:
+Edit `build/runtime-config.yaml` after configuring the build, or edit
+`runtime-config.yaml` and rerun CMake. The default configuration is:
 
-```bash
-./build/srt_weak_video \
-  --role receiver \
-  --listen 0.0.0.0:9000 \
-  --output-file /tmp/srt-received.h264
+```yaml
+sender:
+  connect: 127.0.0.1:9000
+  video_file: /home/u20/code/jetson-2k.mp4
+  max_video_kbps: 2000
+
+receiver:
+  listen: 0.0.0.0:9000
+  display: true
+  write_h264: true
+  output_file: received.h264
+
+latency:
+  metric: encode_to_decode
+  window_seconds: 10
 ```
 
-Start the sender:
+Start the receiver and sender:
 
 ```bash
-./build/srt_weak_video \
-  --role sender \
-  --connect 127.0.0.1:9000 \
-  --video-file /path/to/input.mp4 \
-  --max-video-kbps 2000
+./build/srt_weak_video --role receiver
+./build/srt_weak_video --role sender
 ```
 
-Use `--no-display` on the receiver for headless tests.
+The command line accepts only `--role`. Set `receiver.display: false` for
+headless operation. Set `receiver.write_h264: false` to disable creation and
+writing of the H.264 output file; writing is enabled by default.
+
+## Latency Metrics
+
+The executable automatically loads `runtime-config.yaml` from the directory
+that contains the executable. If it is missing, the compiled defaults shown
+above are used.
+
+Only one latency metric is sampled and printed at a time:
+
+- `encode_to_assemble`: encoder output to complete-frame FEC recovery
+- `encode_to_decode`: encoder output to a valid decoded frame
+- `source_to_display`: selected source frame to `SDL_RenderPresent`
+
+The receiver prints the average and P95 over the configured rolling window.
+`source_to_display` reports `n/a` when `receiver.display` is false. Sender and receiver
+system clocks must be synchronized with NTP or PTP because these are one-way
+latency measurements. The display metric stops at the SDL software-present
+call and does not include monitor scanout or panel response.
 
 ## Weak-Network Test
 
@@ -63,25 +91,34 @@ topology as the WebRTC demo. A process started on the host does not use this
 link: binding the receiver to `0.0.0.0` only covers interfaces in the
 receiver's current network namespace.
 
+For namespace testing, set these values in `build/runtime-config.yaml`:
+
+```yaml
+sender:
+  connect: 10.88.0.2:9000
+  video_file: /home/u20/code/jetson-2k.mp4
+  max_video_kbps: 2000
+
+receiver:
+  listen: 10.88.0.2:9000
+  display: false
+  write_h264: true
+  output_file: /tmp/srt-received.h264
+```
+
 Create the topology, then start the receiver in `webrtc_rx`:
 
 ```bash
 sudo ./scripts/netem_loss.sh ns-up
 sudo ip netns exec webrtc_rx ./build/srt_weak_video \
-  --role receiver \
-  --listen 10.88.0.2:9000 \
-  --output-file /tmp/srt-received.h264 \
-  --no-display
+  --role receiver
 ```
 
 Start the sender in another terminal in `webrtc_tx`:
 
 ```bash
 sudo ip netns exec webrtc_tx ./build/srt_weak_video \
-  --role sender \
-  --connect 10.88.0.2:9000 \
-  --video-file /path/to/input.mp4 \
-  --max-video-kbps 2000
+  --role sender
 ```
 
 After the connection and media flow are established, apply loss in a third

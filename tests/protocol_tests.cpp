@@ -35,7 +35,8 @@ int main() {
     ShardPacket shard;
     shard.stream_epoch = 42;
     shard.frame_id = 99;
-    shard.pts_us = 1234567;
+    shard.encoded_at_unix_us = 1'765'432'100'123'456;
+    shard.source_to_encoded_us = 12'345;
     shard.original_size = static_cast<uint32_t>(data.size());
     shard.frame_crc = frame_crc32(data.data(), data.size());
     shard.bitrate_kbps = 600;
@@ -52,8 +53,17 @@ int main() {
     const auto parsed = parse_message(wire.data(), wire.size());
     assert(parsed && parsed->shard);
     assert(parsed->shard->frame_id == shard.frame_id);
+    assert(parsed->shard->encoded_at_unix_us ==
+           shard.encoded_at_unix_us);
+    assert(parsed->shard->source_to_encoded_us ==
+           shard.source_to_encoded_us);
     assert(parsed->shard->payload == shard.payload);
     assert(parsed->shard->keyframe);
+    auto old_version_wire = wire;
+    old_version_wire[4] = 1;
+    assert(!parse_message(old_version_wire.data(),
+                          old_version_wire.size()));
+    assert(!parse_message(wire.data(), wire.size() - 1));
 
     NetworkReport report;
     report.sequence = 17;
@@ -77,6 +87,10 @@ int main() {
     }
     assert(recovered);
     assert(recovered->data == data);
+    assert(recovered->encoded_at_unix_us ==
+           shard.encoded_at_unix_us);
+    assert(recovered->source_to_encoded_us ==
+           shard.source_to_encoded_us);
     assert(assembler.expire(monotonic_us() + 1'000'000, 450'000)
                .expired_frames == 0);
 
