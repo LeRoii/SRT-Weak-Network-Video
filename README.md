@@ -35,8 +35,14 @@ ctest --test-dir build --output-on-failure
 
 ## Run
 
-Edit `build/runtime-config.yaml` after configuring the build, or edit
-`runtime-config.yaml` and rerun CMake. The default configuration is:
+At runtime, the program loads `runtime-config.yaml` from the directory that
+contains the executable. For `./build/srt_weak_video`, the effective file is
+therefore `build/runtime-config.yaml`.
+
+The repository-root `runtime-config.yaml` is the source template copied into
+the build directory when CMake configures the project. Edit the build copy for
+an immediate runtime change, or edit the root template and rerun CMake to keep
+future build directories consistent. The default configuration is:
 
 ```yaml
 sender:
@@ -91,20 +97,24 @@ topology as the WebRTC demo. A process started on the host does not use this
 link: binding the receiver to `0.0.0.0` only covers interfaces in the
 receiver's current network namespace.
 
-For namespace testing, set these values in `build/runtime-config.yaml`:
+The values below are **namespace-test overrides**, not the default runtime
+configuration. Before starting a namespace test, temporarily change these
+fields in `build/runtime-config.yaml`:
 
 ```yaml
 sender:
   connect: 10.88.0.2:9000
-  video_file: /home/u20/code/jetson-2k.mp4
-  max_video_kbps: 2000
 
 receiver:
   listen: 10.88.0.2:9000
   display: false
-  write_h264: true
   output_file: /tmp/srt-received.h264
 ```
+
+All fields not shown above retain their default values from the earlier
+configuration block. Restore `sender.connect`, `receiver.listen`,
+`receiver.display`, and `receiver.output_file` after the namespace test if the
+next run will use the local host topology.
 
 Create the topology, then start the receiver in `webrtc_rx`:
 
