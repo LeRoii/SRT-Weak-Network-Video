@@ -103,7 +103,7 @@ SRTSOCKET SrtSocket::create_configured_socket() {
         const bool disabled = false;
         const int latency_ms = 350;
         const int timeout_ms = 200;
-        const int idle_timeout_ms = 5000;
+        const int idle_timeout_ms = 15'000;
         const int payload_size = 1200;
         const int send_drop_delay_ms = 0;
         const int flow_control_packets = 512;
@@ -244,18 +244,88 @@ NetworkSnapshot SrtSocket::network_snapshot(bool clear_interval) {
         SRT_ERROR) {
         return result;
     }
-    const double expected =
-        static_cast<double>(stats.pktSent + stats.pktSndLoss);
+    const double sent =
+        static_cast<double>(std::max<int64_t>(0, stats.pktSent));
     result.loss_percent =
-        expected > 0.0 ? stats.pktSndLoss * 100.0 / expected : 0.0;
+        sent > 0.0
+            ? std::min(
+                  static_cast<double>(std::max(0, stats.pktSndLoss)) *
+                      100.0 / sent,
+                  100.0)
+            : 0.0;
     result.rtt_ms = stats.msRTT;
     result.bandwidth_kbps = stats.mbpsBandwidth * 1000.0;
     result.sent_packets = static_cast<uint64_t>(
         std::max<int64_t>(0, stats.pktSent));
+    result.lost_packets = static_cast<uint64_t>(
+        std::max(0, stats.pktSndLoss));
     result.retransmitted_packets = static_cast<uint64_t>(
         std::max(0, stats.pktRetrans));
     result.valid = true;
     return result;
+}
+
+NetworkSnapshot SrtSocket::receiver_network_snapshot(bool clear_interval) {
+    NetworkSnapshot result;
+    if (!valid()) {
+        return result;
+    }
+
+    SRT_TRACEBSTATS stats{};
+    if (srt_bstats(socket_, &stats, clear_interval ? 1 : 0) ==
+        SRT_ERROR) {
+        return result;
+    }
+
+    const uint64_t received_unique = static_cast<uint64_t>(
+        std::max<int64_t>(0, stats.pktRecvUniqueTotal));
+    const uint64_t dropped_original = static_cast<uint64_t>(
+        std::max(0, stats.pktRcvDropTotal));
+    const uint64_t missing_original = static_cast<uint64_t>(
+        std::max(0, stats.pktRcvLossTotal));
+    const uint64_t resolved_original =
+        received_unique + dropped_original;
+
+    result.loss_percent =
+        resolved_original > 0
+            ? static_cast<double>(missing_original) * 100.0 /
+                  static_cast<double>(resolved_original)
+            : 0.0;
+    result.rtt_ms = stats.msRTT;
+    result.bandwidth_kbps = stats.mbpsBandwidth * 1000.0;
+    result.sent_packets = resolved_original;
+    result.lost_packets = missing_original;
+    result.retransmitted_packets = static_cast<uint64_t>(
+        std::max(0, stats.pktRcvRetrans));
+    result.valid = resolved_original > 0;
+    return result;
+}
+
+std::string SrtSocket::state_name() const {
+    if (!valid()) {
+        return "NONEXIST";
+    }
+    switch (srt_getsockstate(socket_)) {
+    case SRTS_INIT:
+        return "INIT";
+    case SRTS_OPENED:
+        return "OPENED";
+    case SRTS_LISTENING:
+        return "LISTENING";
+    case SRTS_CONNECTING:
+        return "CONNECTING";
+    case SRTS_CONNECTED:
+        return "CONNECTED";
+    case SRTS_BROKEN:
+        return "BROKEN";
+    case SRTS_CLOSING:
+        return "CLOSING";
+    case SRTS_CLOSED:
+        return "CLOSED";
+    case SRTS_NONEXIST:
+        return "NONEXIST";
+    }
+    return "UNKNOWN";
 }
 
 bool SrtSocket::valid() const {

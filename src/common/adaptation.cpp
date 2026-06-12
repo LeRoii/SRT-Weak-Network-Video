@@ -5,14 +5,16 @@
 
 namespace {
 
-constexpr std::array<VideoProfile, 7> kProfiles{{
+constexpr std::array<VideoProfile, 9> kProfiles{{
     {0, 2000, 30, 1280, 720, 0.15, false},
-    {1, 1200, 24, 960, 540, 0.25, false},
-    {2, 600, 15, 640, 360, 0.50, false},
-    {3, 300, 10, 426, 240, 1.00, false},
-    {4, 150, 5, 320, 180, 1.50, false},
-    {5, 50, 2, 160, 90, 3.00, true},
-    {6, 8, 1, 128, 72, 11.00, true},
+    {1, 1400, 20, 1280, 720, 0.25, false},
+    {2, 900, 10, 960, 540, 0.50, false},
+    {3, 500, 5, 640, 360, 0.75, false},
+    {4, 250, 3, 426, 240, 1.00, false},
+    {5, 120, 2, 426, 240, 2.00, true},
+    {6, 50, 1, 320, 180, 3.00, true},
+    {7, 20, 1, 160, 90, 5.00, true},
+    {8, 8, 1, 128, 72, 11.00, true},
 }};
 
 } // namespace
@@ -33,7 +35,11 @@ VideoProfile AdaptationController::update(const NetworkSnapshot &network) {
     }
 
     int required = 0;
-    if (network.loss_percent > 70.0) {
+    if (network.loss_percent > 90.0) {
+        required = 8;
+    } else if (network.loss_percent > 80.0) {
+        required = 7;
+    } else if (network.loss_percent > 70.0) {
         required = 6;
     } else if (network.loss_percent > 50.0) {
         required = 5;
@@ -47,26 +53,36 @@ VideoProfile AdaptationController::update(const NetworkSnapshot &network) {
         required = 1;
     }
 
-    if (network.rtt_ms > 350.0) {
-        required = std::max(required, 5);
+    if (network.rtt_ms > 400.0) {
+        required = std::max(required, 7);
+    } else if (network.rtt_ms > 300.0) {
+        required = std::max(required, 6);
     } else if (network.rtt_ms > 220.0) {
-        required = std::max(required, 4);
+        required = std::max(required, 5);
     } else if (network.rtt_ms > 150.0) {
-        required = std::max(required, 2);
+        required = std::max(required, 3);
     }
 
     if (required > level_) {
         level_ = required;
         healthy_windows_ = 0;
+        emergency_recovery_active_ = required == 8;
     } else if (required < level_ &&
-               network.loss_percent < 3.0 &&
-               network.rtt_ms < 130.0) {
+               ((network.loss_percent < 3.0 &&
+                 network.rtt_ms < 130.0) ||
+                emergency_recovery_active_)) {
         if (++healthy_windows_ >= 5) {
             --level_;
             healthy_windows_ = 0;
+            if (level_ <= required) {
+                emergency_recovery_active_ = false;
+            }
         }
     } else {
         healthy_windows_ = 0;
+        if (required == level_ && required < 8) {
+            emergency_recovery_active_ = false;
+        }
     }
 
     current_ = profile_for_level(level_);

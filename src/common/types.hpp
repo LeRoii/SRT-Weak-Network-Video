@@ -40,6 +40,8 @@ struct VideoProfile {
 
 struct EncodedVideoFrame {
     std::vector<uint8_t> data;
+    uint64_t encoded_at_unix_us = 0;
+    uint32_t source_to_encoded_us = 0;
     uint32_t duration_90khz = 3000;
     uint16_t encoder_epoch = 1;
     bool keyframe = false;
@@ -50,6 +52,7 @@ struct NetworkSnapshot {
     double rtt_ms = 0.0;
     double bandwidth_kbps = 0.0;
     uint64_t sent_packets = 0;
+    uint64_t lost_packets = 0;
     uint64_t retransmitted_packets = 0;
     bool valid = false;
 };

@@ -1,0 +1,19 @@
+sender:
+  input: camera
+  connect: 127.0.0.1:9000
+  video_file: /home/u20/code/jetson-2k.mp4
+  camera_device: /dev/video0
+  camera_width: 640
+  camera_height: 480
+  camera_fps: 30
+  max_video_kbps: 2000
+
+receiver:
+  listen: 0.0.0.0:9000
+  display: true
+  write_h264: true
+  output_file: received.h264
+
+latency:
+  metric: encode_to_decode
+  window_seconds: 10

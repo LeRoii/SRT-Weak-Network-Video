@@ -56,7 +56,8 @@ std::optional<RecoveredFrame> FrameAssembler::push(ShardPacket packet) {
     RecoveredFrame result;
     result.stream_epoch = frame.metadata.stream_epoch;
     result.frame_id = frame.metadata.frame_id;
-    result.pts_us = frame.metadata.pts_us;
+    result.encoded_at_unix_us = frame.metadata.encoded_at_unix_us;
+    result.source_to_encoded_us = frame.metadata.source_to_encoded_us;
     result.bitrate_kbps = frame.metadata.bitrate_kbps;
     result.width = frame.metadata.width;
     result.height = frame.metadata.height;

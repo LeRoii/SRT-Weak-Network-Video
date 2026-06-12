@@ -9,12 +9,10 @@
 #include <iostream>
 #include <thread>
 
-SenderApp::SenderApp(Endpoint peer,
-                     std::string video_file,
-                     int max_video_kbps)
+SenderApp::SenderApp(Endpoint peer, SenderConfig config)
     : peer_(std::move(peer)),
-      reader_(std::move(video_file)),
-      adaptation_(max_video_kbps) {}
+      reader_(config),
+      adaptation_(config.max_video_kbps) {}
 
 void SenderApp::run() {
     int reconnect_delay_ms = 100;
@@ -53,8 +51,17 @@ bool SenderApp::run_connection(SrtSocket &socket,
     auto next_stats = std::chrono::steady_clock::now() +
                       std::chrono::seconds(1);
     bool send_ok = true;
+    network_report_sequence_ = 0;
+    if (receiver_loss_percent_) {
+        network_report_received_at_ = std::chrono::steady_clock::now();
+    }
 
     while (!g_stop_requested.load()) {
+        if (!receive_network_reports(socket)) {
+            send_ok = false;
+            break;
+        }
+
         const bool force_keyframe =
             keyframe_requested_.exchange(false) || profile.all_intra;
         EncodedVideoFrame frame;
@@ -90,7 +97,12 @@ bool SenderApp::run_connection(SrtSocket &socket,
 
         const auto now = std::chrono::steady_clock::now();
         if (now >= next_stats) {
-            const auto network = socket.network_snapshot(true);
+            auto network = socket.network_snapshot(true);
+            if (receiver_loss_percent_ &&
+                now - network_report_received_at_ <
+                    std::chrono::seconds(12)) {
+                network.loss_percent = *receiver_loss_percent_;
+            }
             auto next_profile = adaptation_.update(network);
             if (next_profile != profile) {
                 profile = next_profile;
@@ -107,14 +119,42 @@ bool SenderApp::run_connection(SrtSocket &socket,
             next_stats = now + std::chrono::seconds(1);
         }
 
-        const auto frame_interval =
-            std::chrono::microseconds(
-                frame.duration_90khz * 1'000'000ULL / 90000ULL);
-        std::this_thread::sleep_for(frame_interval);
+        if (!reader_.is_live()) {
+            const auto frame_interval =
+                std::chrono::microseconds(
+                    frame.duration_90khz * 1'000'000ULL / 90000ULL);
+            std::this_thread::sleep_for(frame_interval);
+        }
     }
 
     std::cerr << "srt_connected=0" << std::endl;
     return send_ok;
+}
+
+bool SenderApp::receive_network_reports(SrtSocket &socket) {
+    for (;;) {
+        std::vector<uint8_t> message;
+        const auto result = socket.receive(message);
+        if (result == ReceiveResult::Timeout) {
+            return true;
+        }
+        if (result == ReceiveResult::Closed) {
+            std::cerr << "srt_receive_failed=" << srt_last_error()
+                      << " state=" << socket.state_name() << std::endl;
+            return false;
+        }
+
+        const auto parsed = parse_message(message.data(), message.size());
+        if (!parsed || !parsed->network_report ||
+            parsed->network_report->sequence <= network_report_sequence_) {
+            continue;
+        }
+
+        network_report_sequence_ = parsed->network_report->sequence;
+        receiver_loss_percent_ =
+            parsed->network_report->loss_basis_points / 100.0;
+        network_report_received_at_ = std::chrono::steady_clock::now();
+    }
 }
 
 SendResult SenderApp::send_frame(SrtSocket &socket,
@@ -133,12 +173,12 @@ SendResult SenderApp::send_frame(SrtSocket &socket,
     }
 
     const uint32_t crc = frame_crc32(frame.data.data(), frame.data.size());
-    const uint64_t pts_us = static_cast<uint64_t>(monotonic_us());
     for (std::size_t index = 0; index < block.shards.size(); ++index) {
         ShardPacket packet;
         packet.stream_epoch = stream_epoch;
         packet.frame_id = frame_id;
-        packet.pts_us = pts_us;
+        packet.encoded_at_unix_us = frame.encoded_at_unix_us;
+        packet.source_to_encoded_us = frame.source_to_encoded_us;
         packet.original_size = static_cast<uint32_t>(frame.data.size());
         packet.frame_crc = crc;
         packet.bitrate_kbps = static_cast<uint32_t>(profile.bitrate_kbps);
@@ -163,7 +203,8 @@ SendResult SenderApp::send_frame(SrtSocket &socket,
             }
         }
         if (result == SendResult::Closed) {
-            std::cerr << "srt_send_failed=" << srt_last_error() << std::endl;
+            std::cerr << "srt_send_failed=" << srt_last_error()
+                      << " state=" << socket.state_name() << std::endl;
             return result;
         }
         if (result == SendResult::WouldBlock) {

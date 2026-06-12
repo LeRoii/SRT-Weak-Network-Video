@@ -1,37 +1,51 @@
 #pragma once
 
+#include "common/runtime_config.hpp"
 #include "common/types.hpp"
 
+#include <cstddef>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 struct AVCodecContext;
 struct AVFrame;
 struct AVFormatContext;
 struct SwsContext;
 
-class VideoFileReader {
+class VideoSourceReader {
 public:
-    explicit VideoFileReader(std::string path);
-    ~VideoFileReader();
+    explicit VideoSourceReader(SenderConfig config);
+    ~VideoSourceReader();
 
-    VideoFileReader(const VideoFileReader &) = delete;
-    VideoFileReader &operator=(const VideoFileReader &) = delete;
+    VideoSourceReader(const VideoSourceReader &) = delete;
+    VideoSourceReader &operator=(const VideoSourceReader &) = delete;
 
     bool next_frame(EncodedVideoFrame &frame,
                     const VideoProfile &profile,
                     bool force_keyframe);
     void reset();
+    bool is_live() const;
 
 private:
+    struct CameraBuffer {
+        void *data = nullptr;
+        std::size_t length = 0;
+    };
+
     void open();
+    void open_file();
+    void open_camera();
     void close();
+    void close_camera();
     void close_encoder();
     void configure_encoder(const VideoProfile &profile);
     bool next_decoded_frame();
+    bool next_file_frame();
+    bool next_camera_frame();
     bool should_output_decoded_frame(int fps);
 
-    std::string path_;
+    SenderConfig config_;
     AVFormatContext *format_context_ = nullptr;
     AVCodecContext *decoder_context_ = nullptr;
     AVCodecContext *encoder_context_ = nullptr;
@@ -41,6 +55,10 @@ private:
     int video_stream_index_ = -1;
     int stream_time_base_num_ = 0;
     int stream_time_base_den_ = 1;
+    int camera_fd_ = -1;
+    int camera_bytes_per_line_ = 0;
+    std::vector<CameraBuffer> camera_buffers_;
+    bool camera_streaming_ = false;
     bool input_eof_ = false;
     bool decoder_flushed_ = false;
     bool encoder_configured_ = false;

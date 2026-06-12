@@ -1,4 +1,5 @@
 /build/
 /received.h264
 *.log
-/SRT-Weak-Network-Video.zip
+
+PROJECT_GUIDE.md

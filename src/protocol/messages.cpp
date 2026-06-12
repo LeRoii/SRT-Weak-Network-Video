@@ -6,8 +6,8 @@
 namespace {
 
 constexpr std::array<uint8_t, 4> kMagic{{'S', 'V', 'T', '1'}};
-constexpr uint8_t kProtocolVersion = 1;
-constexpr std::size_t kShardHeaderSize = 59;
+constexpr uint8_t kProtocolVersion = 2;
+constexpr std::size_t kShardHeaderSize = 63;
 constexpr std::size_t kControlSize = 22;
 
 void append_u16(std::vector<uint8_t> &output, uint16_t value) {
@@ -96,7 +96,8 @@ std::vector<uint8_t> encode_shard_packet(const ShardPacket &packet) {
     append_u16(output, packet.keyframe ? 1U : 0U);
     append_u32(output, packet.stream_epoch);
     append_u64(output, packet.frame_id);
-    append_u64(output, packet.pts_us);
+    append_u64(output, packet.encoded_at_unix_us);
+    append_u32(output, packet.source_to_encoded_us);
     append_u32(output, packet.original_size);
     append_u32(output, packet.frame_crc);
     append_u32(output, packet.bitrate_kbps);
@@ -121,6 +122,16 @@ std::vector<uint8_t> encode_control_packet(const ControlPacket &packet) {
     return output;
 }
 
+std::vector<uint8_t> encode_network_report(const NetworkReport &report) {
+    std::vector<uint8_t> output;
+    output.reserve(kControlSize);
+    append_prefix(output, MessageType::NetworkReport);
+    append_u32(output, report.loss_basis_points);
+    append_u64(output, report.sequence);
+    append_u32(output, 0);
+    return output;
+}
+
 std::optional<ParsedMessage> parse_message(const uint8_t *data,
                                            std::size_t size) {
     MessageType type{};
@@ -138,7 +149,8 @@ std::optional<ParsedMessage> parse_message(const uint8_t *data,
         if (!read_u16(data, size, offset, flags) ||
             !read_u32(data, size, offset, packet.stream_epoch) ||
             !read_u64(data, size, offset, packet.frame_id) ||
-            !read_u64(data, size, offset, packet.pts_us) ||
+            !read_u64(data, size, offset, packet.encoded_at_unix_us) ||
+            !read_u32(data, size, offset, packet.source_to_encoded_us) ||
             !read_u32(data, size, offset, packet.original_size) ||
             !read_u32(data, size, offset, packet.frame_crc) ||
             !read_u32(data, size, offset, packet.bitrate_kbps) ||
@@ -170,6 +182,20 @@ std::optional<ParsedMessage> parse_message(const uint8_t *data,
             return std::nullopt;
         }
         parsed.control = packet;
+        return parsed;
+    }
+
+    if (type == MessageType::NetworkReport) {
+        NetworkReport report;
+        uint32_t reserved = 0;
+        if (!read_u32(data, size, offset, report.loss_basis_points) ||
+            !read_u64(data, size, offset, report.sequence) ||
+            !read_u32(data, size, offset, reserved) ||
+            offset != size ||
+            report.loss_basis_points > 10'000) {
+            return std::nullopt;
+        }
+        parsed.network_report = report;
         return parsed;
     }
     return std::nullopt;

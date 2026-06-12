@@ -9,12 +9,14 @@ enum class MessageType : uint8_t {
     VideoShard = 1,
     FrameAck = 2,
     KeyframeRequest = 3,
+    NetworkReport = 4,
 };
 
 struct ShardPacket {
     uint32_t stream_epoch = 0;
     uint64_t frame_id = 0;
-    uint64_t pts_us = 0;
+    uint64_t encoded_at_unix_us = 0;
+    uint32_t source_to_encoded_us = 0;
     uint32_t original_size = 0;
     uint32_t frame_crc = 0;
     uint32_t bitrate_kbps = 0;
@@ -34,13 +36,20 @@ struct ControlPacket {
     uint64_t frame_id = 0;
 };
 
+struct NetworkReport {
+    uint64_t sequence = 0;
+    uint32_t loss_basis_points = 0;
+};
+
 struct ParsedMessage {
     MessageType type = MessageType::VideoShard;
     std::optional<ShardPacket> shard;
     std::optional<ControlPacket> control;
+    std::optional<NetworkReport> network_report;
 };
 
 std::vector<uint8_t> encode_shard_packet(const ShardPacket &packet);
 std::vector<uint8_t> encode_control_packet(const ControlPacket &packet);
+std::vector<uint8_t> encode_network_report(const NetworkReport &report);
 std::optional<ParsedMessage> parse_message(const uint8_t *data,
                                            std::size_t size);

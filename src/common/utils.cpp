@@ -15,6 +15,13 @@ int64_t monotonic_us() {
         .count();
 }
 
+uint64_t unix_time_us() {
+    return static_cast<uint64_t>(
+        std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::system_clock::now().time_since_epoch())
+            .count());
+}
+
 Endpoint parse_endpoint(const std::string &text) {
     const auto separator = text.rfind(':');
     if (separator == std::string::npos ||
