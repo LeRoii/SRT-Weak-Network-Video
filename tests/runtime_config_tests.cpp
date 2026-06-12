@@ -24,8 +24,13 @@ std::string complete_config(const std::string &metric = "encode_to_decode",
                             const std::string &write_h264 = "true") {
     return
         "sender:\n"
+        "  input: camera\n"
         "  connect: 127.0.0.1:9000\n"
         "  video_file: /tmp/input.mp4\n"
+        "  camera_device: /dev/video9\n"
+        "  camera_width: 640\n"
+        "  camera_height: 480\n"
+        "  camera_fps: 30\n"
         "  max_video_kbps: 500\n"
         "receiver:\n"
         "  listen: 0.0.0.0:9000\n"
@@ -46,6 +51,15 @@ bool load_fails(const std::filesystem::path &path) {
     }
 }
 
+std::string replace_once(std::string text,
+                         const std::string &from,
+                         const std::string &to) {
+    const auto position = text.find(from);
+    assert(position != std::string::npos);
+    text.replace(position, from.size(), to);
+    return text;
+}
+
 } // namespace
 
 int main() {
@@ -55,6 +69,11 @@ int main() {
     std::filesystem::remove(missing);
     const auto defaults = load_runtime_config(missing, true);
     assert(defaults.sender.connect == "127.0.0.1:9000");
+    assert(defaults.sender.input == SenderInput::Camera);
+    assert(defaults.sender.camera_device == "/dev/video0");
+    assert(defaults.sender.camera_width == 640);
+    assert(defaults.sender.camera_height == 480);
+    assert(defaults.sender.camera_fps == 30);
     assert(defaults.sender.max_video_kbps == 2000);
     assert(defaults.receiver.listen == "0.0.0.0:9000");
     assert(defaults.receiver.display);
@@ -69,6 +88,8 @@ int main() {
         complete_config("encode_to_assemble", "5", "false"));
     const auto config = load_runtime_config(valid, false);
     assert(config.sender.video_file == "/tmp/input.mp4");
+    assert(config.sender.input == SenderInput::Camera);
+    assert(config.sender.camera_device == "/dev/video9");
     assert(config.sender.max_video_kbps == 500);
     assert(!config.receiver.display);
     assert(!config.receiver.write_h264);
@@ -94,9 +115,24 @@ int main() {
 
     const auto invalid_bitrate = write_config(
         "srt-runtime-config-invalid-bitrate.yaml",
-        complete_config() +
-        "  max_video_kbps: 3000\n");
+        replace_once(complete_config(),
+                     "max_video_kbps: 500",
+                     "max_video_kbps: 3000"));
     assert(load_fails(invalid_bitrate));
+
+    const auto invalid_input = write_config(
+        "srt-runtime-config-invalid-input.yaml",
+        replace_once(complete_config(),
+                     "input: camera",
+                     "input: stream"));
+    assert(load_fails(invalid_input));
+
+    const auto invalid_camera_fps = write_config(
+        "srt-runtime-config-invalid-camera-fps.yaml",
+        replace_once(complete_config(),
+                     "camera_fps: 30",
+                     "camera_fps: 0"));
+    assert(load_fails(invalid_camera_fps));
 
     const auto invalid_boolean = write_config(
         "srt-runtime-config-invalid-boolean.yaml",
@@ -114,6 +150,8 @@ int main() {
     std::filesystem::remove(invalid_metric);
     std::filesystem::remove(invalid_window);
     std::filesystem::remove(invalid_bitrate);
+    std::filesystem::remove(invalid_input);
+    std::filesystem::remove(invalid_camera_fps);
     std::filesystem::remove(invalid_boolean);
     std::filesystem::remove(missing_section);
 

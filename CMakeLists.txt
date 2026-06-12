@@ -60,7 +60,7 @@ add_executable(srt_weak_video
     src/receiver.cpp
     src/sender.cpp
     src/video/h264_decoder.cpp
-    src/video/video_file_reader.cpp
+    src/video/video_source_reader.cpp
     src/video/video_renderer.cpp
 )
 

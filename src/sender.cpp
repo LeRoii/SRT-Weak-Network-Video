@@ -9,12 +9,10 @@
 #include <iostream>
 #include <thread>
 
-SenderApp::SenderApp(Endpoint peer,
-                     std::string video_file,
-                     int max_video_kbps)
+SenderApp::SenderApp(Endpoint peer, SenderConfig config)
     : peer_(std::move(peer)),
-      reader_(std::move(video_file)),
-      adaptation_(max_video_kbps) {}
+      reader_(config),
+      adaptation_(config.max_video_kbps) {}
 
 void SenderApp::run() {
     int reconnect_delay_ms = 100;
@@ -121,10 +119,12 @@ bool SenderApp::run_connection(SrtSocket &socket,
             next_stats = now + std::chrono::seconds(1);
         }
 
-        const auto frame_interval =
-            std::chrono::microseconds(
-                frame.duration_90khz * 1'000'000ULL / 90000ULL);
-        std::this_thread::sleep_for(frame_interval);
+        if (!reader_.is_live()) {
+            const auto frame_interval =
+                std::chrono::microseconds(
+                    frame.duration_90khz * 1'000'000ULL / 90000ULL);
+            std::this_thread::sleep_for(frame_interval);
+        }
     }
 
     std::cerr << "srt_connected=0" << std::endl;

@@ -58,8 +58,7 @@ int main(int argc, char **argv) {
             default_runtime_config_path(), true);
         if (*role == Role::Sender) {
             SenderApp(parse_endpoint(config.sender.connect),
-                      config.sender.video_file,
-                      config.sender.max_video_kbps).run();
+                      config.sender).run();
         } else {
             ReceiverApp(parse_endpoint(config.receiver.listen),
                         config.receiver.output_file,

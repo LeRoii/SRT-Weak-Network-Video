@@ -39,6 +39,16 @@ LatencyMetric parse_metric(const std::string &value) {
         "or source_to_display");
 }
 
+SenderInput parse_sender_input(const std::string &value) {
+    if (value == "camera") {
+        return SenderInput::Camera;
+    }
+    if (value == "file") {
+        return SenderInput::File;
+    }
+    throw std::runtime_error("sender.input must be camera or file");
+}
+
 int parse_integer(const std::string &value,
                   const std::string &name,
                   int minimum,
@@ -99,6 +109,16 @@ const char *latency_metric_name(LatencyMetric metric) {
         return "encode_to_decode";
     case LatencyMetric::SourceToDisplay:
         return "source_to_display";
+    }
+    return "unknown";
+}
+
+const char *sender_input_name(SenderInput input) {
+    switch (input) {
+    case SenderInput::Camera:
+        return "camera";
+    case SenderInput::File:
+        return "file";
     }
     return "unknown";
 }
@@ -187,10 +207,23 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
                 "duplicate runtime config key '" + key + "'");
         }
         if (section == Section::Sender) {
-            if (key == "connect") {
+            if (key == "input") {
+                config.sender.input = parse_sender_input(value);
+            } else if (key == "connect") {
                 config.sender.connect = value;
             } else if (key == "video_file") {
                 config.sender.video_file = value;
+            } else if (key == "camera_device") {
+                config.sender.camera_device = value;
+            } else if (key == "camera_width") {
+                config.sender.camera_width = parse_integer(
+                    value, "sender.camera_width", 16, 8192);
+            } else if (key == "camera_height") {
+                config.sender.camera_height = parse_integer(
+                    value, "sender.camera_height", 16, 8192);
+            } else if (key == "camera_fps") {
+                config.sender.camera_fps = parse_integer(
+                    value, "sender.camera_fps", 1, 240);
             } else if (key == "max_video_kbps") {
                 config.sender.max_video_kbps = parse_integer(
                     value, "sender.max_video_kbps", 8, 2000);

@@ -1,7 +1,7 @@
 metadata:
   purpose: "Record parameters tuned during weak-network video development."
   runtime_loaded: false
-  updated_at: "2026-06-11"
+  updated_at: "2026-06-12"
   units_note: "Bitrates are kbps unless a different unit is stated."
 
 current:
@@ -11,8 +11,15 @@ current:
     command_line_parameters: [role]
     missing_config_behavior: "Use compiled defaults."
     sender:
+      input: camera
       connect: "127.0.0.1:9000"
       video_file: "/home/u20/code/jetson-2k.mp4"
+      camera:
+        device: /dev/video0
+        pixel_format: yuyv422
+        width: 640
+        height: 480
+        fps: 30
       max_video_kbps: 2000
     receiver:
       listen: "0.0.0.0:9000"
@@ -149,6 +156,21 @@ current:
     bandwidth_units_examples: [500kbit, 2mbit, 1gbit]
 
 development_history:
+  - parameter: sender_video_input
+    previous: "Only a looping local video file was supported."
+    current:
+      selectable_inputs: [camera, file]
+      default_input: camera
+      camera:
+        api: V4L2
+        device: /dev/video0
+        pixel_format: yuyv422
+        width: 640
+        height: 480
+        fps: 30
+      file: "/home/u20/code/jetson-2k.mp4"
+    reason: "Transmit live frames from the attached USB camera while retaining file-based test input."
+
   - parameter: runtime_configuration_source
     previous: "Endpoint, media path, bitrate limit, output path, and display mode were command-line parameters."
     current: "All startup settings are loaded from runtime-config.yaml; command line accepts only role."
@@ -249,6 +271,7 @@ development_history:
     reason: "Prevent decoder errors and corrupted reference chains during abrupt packet loss."
 
 validation_scenarios:
+  - {input: camera, device: /dev/video0, capture: "640x480/30fps YUYV", result: "Rendered continuously with decoder_errors=0 and FFmpeg-valid H.264 output."}
   - {loss_percent: 30, delay_ms: 50, direction: both, expected_profile: "426x240/2fps/120kbps"}
   - {loss_percent: 50, delay_ms: 50, direction: both, expected_profile_range: "426x240 at 120-250kbps"}
   - {loss_percent: 71, delay_ms: 50, direction: tx, expected_resolution: "320x180"}

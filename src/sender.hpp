@@ -1,10 +1,11 @@
 #pragma once
 
 #include "common/adaptation.hpp"
+#include "common/runtime_config.hpp"
 #include "common/types.hpp"
 #include "fec/reed_solomon.hpp"
 #include "transport/srt_transport.hpp"
-#include "video/video_file_reader.hpp"
+#include "video/video_source_reader.hpp"
 
 #include <atomic>
 #include <chrono>
@@ -14,7 +15,7 @@
 
 class SenderApp {
 public:
-    SenderApp(Endpoint peer, std::string video_file, int max_video_kbps);
+    SenderApp(Endpoint peer, SenderConfig config);
     void run();
 
 private:
@@ -27,7 +28,7 @@ private:
     bool receive_network_reports(SrtSocket &socket);
 
     Endpoint peer_;
-    VideoFileReader reader_;
+    VideoSourceReader reader_;
     AdaptationController adaptation_;
     ReedSolomon fec_;
     std::atomic<bool> keyframe_requested_{true};

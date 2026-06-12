@@ -46,8 +46,13 @@ future build directories consistent. The default configuration is:
 
 ```yaml
 sender:
+  input: camera
   connect: 127.0.0.1:9000
   video_file: /home/u20/code/jetson-2k.mp4
+  camera_device: /dev/video0
+  camera_width: 640
+  camera_height: 480
+  camera_fps: 30
   max_video_kbps: 2000
 
 receiver:
@@ -71,6 +76,28 @@ Start the receiver and sender:
 The command line accepts only `--role`. Set `receiver.display: false` for
 headless operation. Set `receiver.write_h264: false` to disable creation and
 writing of the H.264 output file; writing is enabled by default.
+
+### Sender Input
+
+`sender.input` selects the video source:
+
+- `camera` uses a Linux V4L2 camera and is the default.
+- `file` loops the local file configured by `sender.video_file`.
+
+Camera mode currently requests YUYV 4:2:2 using `camera_device`,
+`camera_width`, `camera_height`, and `camera_fps`. The driver may adjust the
+requested camera mode; the negotiated values are printed as
+`video_input=camera ...` when the sender starts.
+
+To use the local file instead:
+
+```yaml
+sender:
+  input: file
+```
+
+The remaining sender fields stay unchanged. The sender process must have read
+and write permission for the configured `/dev/video*` device.
 
 ## Latency Metrics
 

@@ -1,4 +1,4 @@
-#include "video/video_file_reader.hpp"
+#include "video/video_source_reader.hpp"
 
 #include "common/utils.hpp"
 
@@ -8,8 +8,16 @@
 #include <cstddef>
 #include <cstring>
 #include <limits>
+#include <iostream>
 #include <stdexcept>
 #include <utility>
+
+#include <fcntl.h>
+#include <linux/videodev2.h>
+#include <poll.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <unistd.h>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -34,19 +42,35 @@ void check_ffmpeg(int result, const char *operation) {
     }
 }
 
+int camera_ioctl(int fd, unsigned long request, void *argument) {
+    int result = 0;
+    do {
+        result = ioctl(fd, request, argument);
+    } while (result < 0 && errno == EINTR);
+    return result;
+}
+
+void check_camera(int result, const std::string &operation) {
+    if (result < 0) {
+        throw std::runtime_error(
+            operation + " failed: " + std::strerror(errno));
+    }
+}
+
 } // namespace
 
-VideoFileReader::VideoFileReader(std::string path) : path_(std::move(path)) {
+VideoSourceReader::VideoSourceReader(SenderConfig config)
+    : config_(std::move(config)) {
     open();
 }
 
-VideoFileReader::~VideoFileReader() {
+VideoSourceReader::~VideoSourceReader() {
     close();
 }
 
-bool VideoFileReader::next_frame(EncodedVideoFrame &frame,
-                                 const VideoProfile &profile,
-                                 bool force_keyframe) {
+bool VideoSourceReader::next_frame(EncodedVideoFrame &frame,
+                                   const VideoProfile &profile,
+                                   bool force_keyframe) {
     if (!encoder_configured_ || encoder_profile_ != profile) {
         configure_encoder(profile);
         force_keyframe = true;
@@ -54,7 +78,9 @@ bool VideoFileReader::next_frame(EncodedVideoFrame &frame,
 
     while (next_decoded_frame()) {
         if (!should_output_decoded_frame(profile.fps)) {
-            av_frame_unref(decoded_frame_);
+            if (config_.input == SenderInput::File) {
+                av_frame_unref(decoded_frame_);
+            }
             continue;
         }
         const int64_t source_ready_monotonic_us = monotonic_us();
@@ -84,7 +110,9 @@ bool VideoFileReader::next_frame(EncodedVideoFrame &frame,
                   decoded_frame_->height,
                   scaled_frame_->data,
                   scaled_frame_->linesize);
-        av_frame_unref(decoded_frame_);
+        if (config_.input == SenderInput::File) {
+            av_frame_unref(decoded_frame_);
+        }
 
         scaled_frame_->pts = encoder_pts_++;
         scaled_frame_->pict_type =
@@ -134,16 +162,30 @@ bool VideoFileReader::next_frame(EncodedVideoFrame &frame,
     return false;
 }
 
-void VideoFileReader::reset() {
+void VideoSourceReader::reset() {
     close();
     open();
 }
 
-void VideoFileReader::open() {
+bool VideoSourceReader::is_live() const {
+    return config_.input == SenderInput::Camera;
+}
+
+void VideoSourceReader::open() {
+    if (config_.input == SenderInput::Camera) {
+        open_camera();
+    } else {
+        open_file();
+    }
+}
+
+void VideoSourceReader::open_file() {
     int result =
-        avformat_open_input(&format_context_, path_.c_str(), nullptr, nullptr);
+        avformat_open_input(&format_context_, config_.video_file.c_str(),
+                            nullptr, nullptr);
     if (result < 0) {
-        throw std::runtime_error("cannot open video file '" + path_ + "': " +
+        throw std::runtime_error(
+            "cannot open video file '" + config_.video_file + "': " +
                                  ffmpeg_error(result));
     }
 
@@ -185,9 +227,127 @@ void VideoFileReader::open() {
     input_eof_ = false;
     decoder_flushed_ = false;
     next_output_source_seconds_ = -1.0;
+    std::cerr << "video_input=file path=" << config_.video_file
+              << std::endl;
 }
 
-void VideoFileReader::close() {
+void VideoSourceReader::open_camera() {
+    camera_fd_ = ::open(config_.camera_device.c_str(),
+                        O_RDWR | O_NONBLOCK);
+    if (camera_fd_ < 0) {
+        throw std::runtime_error(
+            "cannot open camera '" + config_.camera_device + "': " +
+            std::strerror(errno));
+    }
+
+    try {
+        v4l2_capability capability{};
+        check_camera(camera_ioctl(camera_fd_, VIDIOC_QUERYCAP, &capability),
+                     "VIDIOC_QUERYCAP");
+        if ((capability.capabilities & V4L2_CAP_VIDEO_CAPTURE) == 0 ||
+            (capability.capabilities & V4L2_CAP_STREAMING) == 0) {
+            throw std::runtime_error(
+                "camera does not support streaming video capture");
+        }
+
+        v4l2_format format{};
+        format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        format.fmt.pix.width =
+            static_cast<uint32_t>(config_.camera_width);
+        format.fmt.pix.height =
+            static_cast<uint32_t>(config_.camera_height);
+        format.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
+        format.fmt.pix.field = V4L2_FIELD_ANY;
+        check_camera(camera_ioctl(camera_fd_, VIDIOC_S_FMT, &format),
+                     "VIDIOC_S_FMT");
+        if (format.fmt.pix.pixelformat != V4L2_PIX_FMT_YUYV) {
+            throw std::runtime_error(
+                "camera did not accept the yuyv422 pixel format");
+        }
+        config_.camera_width = static_cast<int>(format.fmt.pix.width);
+        config_.camera_height = static_cast<int>(format.fmt.pix.height);
+        camera_bytes_per_line_ = static_cast<int>(
+            format.fmt.pix.bytesperline != 0
+                ? format.fmt.pix.bytesperline
+                : format.fmt.pix.width * 2U);
+
+        v4l2_streamparm parameters{};
+        parameters.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        parameters.parm.capture.timeperframe.numerator = 1;
+        parameters.parm.capture.timeperframe.denominator =
+            static_cast<uint32_t>(config_.camera_fps);
+        check_camera(camera_ioctl(camera_fd_, VIDIOC_S_PARM, &parameters),
+                     "VIDIOC_S_PARM");
+        const auto &time_per_frame =
+            parameters.parm.capture.timeperframe;
+        if (time_per_frame.numerator != 0) {
+            config_.camera_fps = static_cast<int>(
+                time_per_frame.denominator /
+                time_per_frame.numerator);
+        }
+
+        v4l2_requestbuffers request{};
+        request.count = 4;
+        request.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        request.memory = V4L2_MEMORY_MMAP;
+        check_camera(camera_ioctl(camera_fd_, VIDIOC_REQBUFS, &request),
+                     "VIDIOC_REQBUFS");
+        if (request.count < 2) {
+            throw std::runtime_error(
+                "camera returned too few streaming buffers");
+        }
+
+        camera_buffers_.resize(request.count);
+        for (uint32_t index = 0; index < request.count; ++index) {
+            v4l2_buffer buffer{};
+            buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+            buffer.memory = V4L2_MEMORY_MMAP;
+            buffer.index = index;
+            check_camera(camera_ioctl(camera_fd_, VIDIOC_QUERYBUF, &buffer),
+                         "VIDIOC_QUERYBUF");
+            void *data = mmap(nullptr, buffer.length,
+                              PROT_READ | PROT_WRITE, MAP_SHARED,
+                              camera_fd_, buffer.m.offset);
+            if (data == MAP_FAILED) {
+                throw std::runtime_error(
+                    "camera mmap failed: " +
+                    std::string(std::strerror(errno)));
+            }
+            camera_buffers_[index] = {data, buffer.length};
+            check_camera(camera_ioctl(camera_fd_, VIDIOC_QBUF, &buffer),
+                         "VIDIOC_QBUF");
+        }
+
+        decoded_frame_ = av_frame_alloc();
+        if (!decoded_frame_) {
+            throw std::runtime_error("av_frame_alloc camera failed");
+        }
+        decoded_frame_->format = AV_PIX_FMT_YUYV422;
+        decoded_frame_->width = config_.camera_width;
+        decoded_frame_->height = config_.camera_height;
+        check_ffmpeg(av_frame_get_buffer(decoded_frame_, 32),
+                     "av_frame_get_buffer camera");
+
+        int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        check_camera(camera_ioctl(camera_fd_, VIDIOC_STREAMON, &type),
+                     "VIDIOC_STREAMON");
+        camera_streaming_ = true;
+        next_output_source_seconds_ = -1.0;
+        std::cerr << "video_input=camera device="
+                  << config_.camera_device
+                  << " format=yuyv422 resolution="
+                  << config_.camera_width << "x"
+                  << config_.camera_height
+                  << " fps=" << config_.camera_fps
+                  << std::endl;
+    } catch (...) {
+        close_camera();
+        av_frame_free(&decoded_frame_);
+        throw;
+    }
+}
+
+void VideoSourceReader::close() {
     close_encoder();
     sws_freeContext(sws_context_);
     sws_context_ = nullptr;
@@ -196,19 +356,38 @@ void VideoFileReader::close() {
     if (format_context_) {
         avformat_close_input(&format_context_);
     }
+    close_camera();
     video_stream_index_ = -1;
     input_eof_ = false;
     decoder_flushed_ = false;
     next_output_source_seconds_ = -1.0;
 }
 
-void VideoFileReader::close_encoder() {
+void VideoSourceReader::close_camera() {
+    if (camera_streaming_ && camera_fd_ >= 0) {
+        int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        camera_ioctl(camera_fd_, VIDIOC_STREAMOFF, &type);
+    }
+    camera_streaming_ = false;
+    for (const auto &buffer : camera_buffers_) {
+        if (buffer.data && buffer.data != MAP_FAILED) {
+            munmap(buffer.data, buffer.length);
+        }
+    }
+    camera_buffers_.clear();
+    if (camera_fd_ >= 0) {
+        ::close(camera_fd_);
+        camera_fd_ = -1;
+    }
+}
+
+void VideoSourceReader::close_encoder() {
     av_frame_free(&scaled_frame_);
     avcodec_free_context(&encoder_context_);
     encoder_configured_ = false;
 }
 
-void VideoFileReader::configure_encoder(const VideoProfile &profile) {
+void VideoSourceReader::configure_encoder(const VideoProfile &profile) {
     close_encoder();
 
     const AVCodec *encoder = avcodec_find_encoder_by_name("libx264");
@@ -274,7 +453,13 @@ void VideoFileReader::configure_encoder(const VideoProfile &profile) {
     }
 }
 
-bool VideoFileReader::next_decoded_frame() {
+bool VideoSourceReader::next_decoded_frame() {
+    return config_.input == SenderInput::Camera
+        ? next_camera_frame()
+        : next_file_frame();
+}
+
+bool VideoSourceReader::next_file_frame() {
     while (true) {
         av_frame_unref(decoded_frame_);
         const int receive_result =
@@ -327,9 +512,71 @@ bool VideoFileReader::next_decoded_frame() {
     }
 }
 
-bool VideoFileReader::should_output_decoded_frame(int fps) {
+bool VideoSourceReader::next_camera_frame() {
+    while (!g_stop_requested.load()) {
+        pollfd descriptor{};
+        descriptor.fd = camera_fd_;
+        descriptor.events = POLLIN;
+        const int poll_result = poll(&descriptor, 1, 500);
+        if (poll_result < 0) {
+            if (errno == EINTR) {
+                continue;
+            }
+            throw std::runtime_error(
+                "camera poll failed: " +
+                std::string(std::strerror(errno)));
+        }
+        if (poll_result == 0) {
+            continue;
+        }
+
+        v4l2_buffer buffer{};
+        buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+        buffer.memory = V4L2_MEMORY_MMAP;
+        if (camera_ioctl(camera_fd_, VIDIOC_DQBUF, &buffer) < 0) {
+            if (errno == EAGAIN) {
+                continue;
+            }
+            check_camera(-1, "VIDIOC_DQBUF");
+        }
+        if (buffer.index >= camera_buffers_.size()) {
+            throw std::runtime_error(
+                "camera returned an invalid buffer index");
+        }
+
+        check_ffmpeg(av_frame_make_writable(decoded_frame_),
+                     "av_frame_make_writable camera");
+        const auto *source = static_cast<const uint8_t *>(
+            camera_buffers_[buffer.index].data);
+        const int row_bytes = config_.camera_width * 2;
+        const std::size_t required = static_cast<std::size_t>(
+            camera_bytes_per_line_) * config_.camera_height;
+        if (buffer.bytesused < required) {
+            camera_ioctl(camera_fd_, VIDIOC_QBUF, &buffer);
+            throw std::runtime_error(
+                "camera returned a truncated frame");
+        }
+        for (int row = 0; row < config_.camera_height; ++row) {
+            std::memcpy(
+                decoded_frame_->data[0] +
+                    row * decoded_frame_->linesize[0],
+                source + row * camera_bytes_per_line_,
+                static_cast<std::size_t>(row_bytes));
+        }
+        check_camera(camera_ioctl(camera_fd_, VIDIOC_QBUF, &buffer),
+                     "VIDIOC_QBUF");
+        decoded_frame_->pts = monotonic_us();
+        return true;
+    }
+    return false;
+}
+
+bool VideoSourceReader::should_output_decoded_frame(int fps) {
     double source_seconds = 0.0;
-    if (decoded_frame_->best_effort_timestamp != AV_NOPTS_VALUE &&
+    if (config_.input == SenderInput::Camera) {
+        source_seconds =
+            static_cast<double>(monotonic_us()) / 1'000'000.0;
+    } else if (decoded_frame_->best_effort_timestamp != AV_NOPTS_VALUE &&
         stream_time_base_den_ > 0) {
         source_seconds =
             static_cast<double>(decoded_frame_->best_effort_timestamp) *
