@@ -6,7 +6,18 @@
 #include <set>
 #include <stdexcept>
 #include <string_view>
+
+#ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif
 
 namespace {
 
@@ -267,6 +278,15 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
 }
 
 std::filesystem::path default_runtime_config_path() {
+#ifdef _WIN32
+    char executable[MAX_PATH + 1] = {};
+    const DWORD size = GetModuleFileNameA(
+        nullptr, executable, static_cast<DWORD>(sizeof(executable)));
+    if (size > 0 && size < sizeof(executable)) {
+        return std::filesystem::path(executable).parent_path() /
+               "runtime-config.yaml";
+    }
+#else
     char executable[PATH_MAX + 1] = {};
     const auto size =
         readlink("/proc/self/exe", executable, PATH_MAX);
@@ -275,5 +295,6 @@ std::filesystem::path default_runtime_config_path() {
         return std::filesystem::path(executable).parent_path() /
                "runtime-config.yaml";
     }
+#endif
     return "runtime-config.yaml";
 }

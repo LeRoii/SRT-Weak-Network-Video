@@ -48,6 +48,37 @@ function(add_imported_library target_name include_dir library_path)
     endif()
 endfunction()
 
+function(target_project_warnings target_name)
+    if(MSVC)
+        target_compile_options("${target_name}" PRIVATE /W4 /permissive- /EHsc /utf-8)
+    else()
+        target_compile_options("${target_name}" PRIVATE
+            -Wall
+            -Wextra
+            -Wpedantic
+        )
+    endif()
+endfunction()
+
+function(target_test_compile_options target_name)
+    if(MSVC)
+        target_compile_options("${target_name}" PRIVATE
+            /UNDEBUG
+            /W4
+            /permissive-
+            /EHsc
+            /utf-8
+        )
+    else()
+        target_compile_options("${target_name}" PRIVATE
+            -UNDEBUG
+            -Wall
+            -Wextra
+            -Wpedantic
+        )
+    endif()
+endfunction()
+
 if(WIN32)
     find_package(FFmpeg CONFIG QUIET)
     find_package(FFMPEG CONFIG QUIET)
@@ -250,15 +281,7 @@ if(WIN32)
     )
     target_link_libraries(srt_weak_video PRIVATE ws2_32)
 endif()
-if(MSVC)
-    target_compile_options(srt_weak_video PRIVATE /W4 /permissive- /EHsc /utf-8)
-else()
-    target_compile_options(srt_weak_video PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
-    )
-endif()
+target_project_warnings(srt_weak_video)
 
 enable_testing()
 add_executable(protocol_tests
@@ -273,15 +296,7 @@ target_link_libraries(protocol_tests PRIVATE ${ISAL_TARGET})
 if(WIN32)
     target_compile_definitions(protocol_tests PRIVATE NOMINMAX WIN32_LEAN_AND_MEAN)
 endif()
-if(MSVC)
-    target_compile_options(protocol_tests PRIVATE /W4 /permissive- /EHsc /utf-8)
-else()
-    target_compile_options(protocol_tests PRIVATE
-        -Wall
-        -Wextra
-        -Wpedantic
-    )
-endif()
+target_project_warnings(protocol_tests)
 add_test(NAME protocol_tests COMMAND protocol_tests)
 
 add_executable(adaptation_tests
@@ -289,12 +304,7 @@ add_executable(adaptation_tests
     tests/adaptation_tests.cpp
 )
 target_include_directories(adaptation_tests PRIVATE src)
-target_compile_options(adaptation_tests PRIVATE
-    -UNDEBUG
-    -Wall
-    -Wextra
-    -Wpedantic
-)
+target_test_compile_options(adaptation_tests)
 add_test(NAME adaptation_tests COMMAND adaptation_tests)
 
 add_executable(network_quality_tests
@@ -302,12 +312,7 @@ add_executable(network_quality_tests
     tests/network_quality_tests.cpp
 )
 target_include_directories(network_quality_tests PRIVATE src)
-target_compile_options(network_quality_tests PRIVATE
-    -UNDEBUG
-    -Wall
-    -Wextra
-    -Wpedantic
-)
+target_test_compile_options(network_quality_tests)
 add_test(NAME network_quality_tests COMMAND network_quality_tests)
 
 add_executable(runtime_config_tests
@@ -315,12 +320,7 @@ add_executable(runtime_config_tests
     tests/runtime_config_tests.cpp
 )
 target_include_directories(runtime_config_tests PRIVATE src)
-target_compile_options(runtime_config_tests PRIVATE
-    -UNDEBUG
-    -Wall
-    -Wextra
-    -Wpedantic
-)
+target_test_compile_options(runtime_config_tests)
 add_test(NAME runtime_config_tests COMMAND runtime_config_tests)
 
 add_executable(latency_stats_tests
@@ -328,10 +328,5 @@ add_executable(latency_stats_tests
     tests/latency_stats_tests.cpp
 )
 target_include_directories(latency_stats_tests PRIVATE src)
-target_compile_options(latency_stats_tests PRIVATE
-    -UNDEBUG
-    -Wall
-    -Wextra
-    -Wpedantic
-)
+target_test_compile_options(latency_stats_tests)
 add_test(NAME latency_stats_tests COMMAND latency_stats_tests)

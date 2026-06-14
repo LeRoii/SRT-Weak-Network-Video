@@ -12,12 +12,14 @@
 #include <stdexcept>
 #include <utility>
 
+#ifndef _WIN32
 #include <fcntl.h>
 #include <linux/videodev2.h>
 #include <poll.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#endif
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -42,6 +44,7 @@ void check_ffmpeg(int result, const char *operation) {
     }
 }
 
+#ifndef _WIN32
 int camera_ioctl(int fd, unsigned long request, void *argument) {
     int result = 0;
     do {
@@ -56,6 +59,7 @@ void check_camera(int result, const std::string &operation) {
             operation + " failed: " + std::strerror(errno));
     }
 }
+#endif
 
 } // namespace
 
@@ -117,7 +121,6 @@ bool VideoSourceReader::next_frame(EncodedVideoFrame &frame,
         scaled_frame_->pts = encoder_pts_++;
         scaled_frame_->pict_type =
             force_keyframe ? AV_PICTURE_TYPE_I : AV_PICTURE_TYPE_NONE;
-        scaled_frame_->key_frame = force_keyframe ? 1 : 0;
 
         check_ffmpeg(avcodec_send_frame(encoder_context_, scaled_frame_),
                      "avcodec_send_frame");
@@ -232,6 +235,11 @@ void VideoSourceReader::open_file() {
 }
 
 void VideoSourceReader::open_camera() {
+#ifdef _WIN32
+    throw std::runtime_error(
+        "camera input is not supported on Windows by this build; "
+        "set sender.input to file in runtime-config.yaml");
+#else
     camera_fd_ = ::open(config_.camera_device.c_str(),
                         O_RDWR | O_NONBLOCK);
     if (camera_fd_ < 0) {
@@ -345,6 +353,7 @@ void VideoSourceReader::open_camera() {
         av_frame_free(&decoded_frame_);
         throw;
     }
+#endif
 }
 
 void VideoSourceReader::close() {
@@ -364,6 +373,7 @@ void VideoSourceReader::close() {
 }
 
 void VideoSourceReader::close_camera() {
+#ifndef _WIN32
     if (camera_streaming_ && camera_fd_ >= 0) {
         int type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         camera_ioctl(camera_fd_, VIDIOC_STREAMOFF, &type);
@@ -379,6 +389,9 @@ void VideoSourceReader::close_camera() {
         ::close(camera_fd_);
         camera_fd_ = -1;
     }
+#else
+    camera_streaming_ = false;
+#endif
 }
 
 void VideoSourceReader::close_encoder() {
@@ -513,6 +526,11 @@ bool VideoSourceReader::next_file_frame() {
 }
 
 bool VideoSourceReader::next_camera_frame() {
+#ifdef _WIN32
+    throw std::runtime_error(
+        "camera input is not supported on Windows by this build; "
+        "set sender.input to file in runtime-config.yaml");
+#else
     while (!g_stop_requested.load()) {
         pollfd descriptor{};
         descriptor.fd = camera_fd_;
@@ -569,6 +587,7 @@ bool VideoSourceReader::next_camera_frame() {
         return true;
     }
     return false;
+#endif
 }
 
 bool VideoSourceReader::should_output_decoded_frame(int fps) {

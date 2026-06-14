@@ -27,8 +27,24 @@ the public nonblocking API waiting indefinitely on an internal mutex.
 
 Windows with vcpkg:
 
+vcpkg 安装
+
+git clone https://github.com/microsoft/vcpkg.git E:\vcpkg
+cd E:\vcpkg
+./bootstrap-vcpkg.bat 
+.\vcpkg integrate install
+验证vcpkg是否安装成功
+.\vcpkg --version
+设置环境变量
+setx VCPKG_ROOT "E:\vcpkg"
+setx PATH "%VCPKG_ROOT%;%PATH%"
+
 ```powershell
-vcpkg install ffmpeg[x264]:x64-windows sdl2:x64-windows isal:x64-windows
+vcpkg install ffmpeg[x264]:x64-windows sdl2:x64-windows isal:x64-windows openssl:x64-windows
+
+如果ffmpeg无法安装，需要手动下载，地址：https://github.com/GyanD/codexffmpeg/releases下载 ffmpeg-8.1.1-full_build-shared.7z，解压到ffmpeg-8.1.1-full_build-shared目录下
+地址
+vcpkg install sdl2:x64-windows isal:x64-windows openssl:x64-windows
 ```
 
 If your FFmpeg port does not provide x264, install an FFmpeg development build
@@ -46,8 +62,11 @@ ctest --test-dir build --output-on-failure
 Windows with Visual Studio and vcpkg:
 
 ```powershell
-cmake -S . -B build -G "Visual Studio 17 2022" -A x64 `
-    -DCMAKE_TOOLCHAIN_FILE=D:\SoftWare\vcpkg\scripts\buildsystems\vcpkg.cmake
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=D:\SoftWare\vcpkg\scripts\buildsystems\vcpkg.cmake
+
+ffmpeg预编译版本
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=E:\softwares\vcpkg\scripts\buildsystems\vcpkg.cmake -DCMAKE_PREFIX_PATH=E:\C++\SRT-Weak-Network-Video\ffmpeg-8.1.1-full_build-shared
+
 cmake --build build --config Release
 ```
 
