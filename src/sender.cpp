@@ -44,7 +44,7 @@ void SenderApp::run_srt() {
     uint32_t connection_epoch = 0;
     while (!g_stop_requested.load()) {
         try {
-            std::cerr << "transport=srt srt_connecting="
+            std::cerr << "srt_connecting="
                       << peer_.host << ":" << peer_.port << std::endl;
             auto socket = SrtSocket::connect_to(peer_);
             reconnect_delay_ms = 100;
@@ -55,13 +55,13 @@ void SenderApp::run_srt() {
             keyframe_requested_.store(true);
             const uint64_t session_id = random_session_id();
             const uint64_t session_started_unix_us = unix_time_us();
-            std::cerr << "transport=srt srt_connected=1 connection_epoch="
+            std::cerr << "srt_connected=1 connection_epoch="
                       << connection_epoch << std::endl;
             run_srt_connection(
                 socket, connection_epoch, session_id,
                 session_started_unix_us);
         } catch (const std::exception &error) {
-            std::cerr << "transport=srt srt_connection_failed="
+            std::cerr << "srt_connection_failed="
                       << error.what() << std::endl;
         }
 
@@ -82,11 +82,11 @@ void SenderApp::run_udp() {
     uint64_t frame_id = 1;
     uint32_t stream_epoch = 1;
     bool recovering = true;
-    bool weak_network_mode = false;
-    int healthy_udp_windows = 0;
     uint64_t last_recovery_frame_id = 0;
     uint64_t recovery_report_baseline = 0;
-    auto profile = udp_recovery_profile(sender_config_.max_video_kbps);
+    uint64_t last_adaptation_feedback_sequence = 0;
+    adaptation_.force_emergency();
+    auto profile = adaptation_.current();
     auto next_stats =
         std::chrono::steady_clock::now() + std::chrono::seconds(1);
 
@@ -97,7 +97,7 @@ void SenderApp::run_udp() {
             udp_feedback_loop(socket, session_id);
         });
 
-    std::cerr << "transport=udp udp_ready=1 peer="
+    std::cerr << "udp_ready=1 peer="
               << peer_.host << ":" << peer_.port
               << " session_id=" << session_id << std::endl;
 
@@ -114,28 +114,16 @@ void SenderApp::run_udp() {
                 feedback.request_keyframe ||
                 feedback.last_frame_age_ms > 1500;
 
-            if (feedback_stale || receiver_stalled ||
+            const bool recovery_required =
+                feedback_stale || receiver_stalled ||
                 (feedback.loss_percent &&
-                 *feedback.loss_percent > 85.0)) {
+                 *feedback.loss_percent > 85.0);
+            if (recovery_required && !recovering) {
                 recovering = true;
-            }
-            if (feedback.loss_percent &&
-                *feedback.loss_percent > 60.0) {
-                weak_network_mode = true;
-                healthy_udp_windows = 0;
-            } else if (weak_network_mode &&
-                       feedback.loss_percent &&
-                       *feedback.loss_percent < 50.0) {
-                if (++healthy_udp_windows >= 5) {
-                    weak_network_mode = false;
-                    healthy_udp_windows = 0;
-                }
-            } else if (weak_network_mode) {
-                healthy_udp_windows = 0;
+                adaptation_.force_emergency();
             }
 
-            VideoProfile desired =
-                udp_recovery_profile(sender_config_.max_video_kbps);
+            VideoProfile desired = adaptation_.current();
             if (recovering && last_recovery_frame_id != 0 &&
                 !feedback_stale &&
                 !receiver_stalled &&
@@ -148,20 +136,19 @@ void SenderApp::run_udp() {
                 recovering = false;
             }
 
-            if (!recovering && feedback.loss_percent) {
-                if (weak_network_mode) {
-                    desired = udp_profile_for_loss(
-                        *feedback.loss_percent,
-                        sender_config_.max_video_kbps);
-                } else {
-                    NetworkSnapshot network;
-                    network.loss_percent = *feedback.loss_percent;
-                    network.rtt_ms = feedback.rtt_ms;
-                    network.bandwidth_kbps =
-                        feedback.bandwidth_kbps;
-                    network.valid = true;
-                    desired = adaptation_.update(network);
-                }
+            if (!recovering &&
+                feedback.loss_percent &&
+                feedback.sequence >
+                    last_adaptation_feedback_sequence) {
+                NetworkSnapshot network;
+                network.loss_percent = *feedback.loss_percent;
+                network.rtt_ms = feedback.rtt_ms;
+                network.bandwidth_kbps =
+                    feedback.bandwidth_kbps;
+                network.valid = true;
+                desired = adaptation_.update(network);
+                last_adaptation_feedback_sequence =
+                    feedback.sequence;
             }
 
             if (desired != profile) {
@@ -187,9 +174,13 @@ void SenderApp::run_udp() {
                 current_frame_id, session_id,
                 session_started_unix_us, packet_sequence);
             if (result != UdpResult::Data) {
+                if (!recovering) {
+                    adaptation_.force_emergency();
+                    profile = adaptation_.current();
+                }
                 recovering = true;
                 keyframe_requested_.store(true);
-                std::cerr << "transport=udp udp_send_congested=1"
+                std::cerr << "udp_send_congested=1"
                           << std::endl;
             } else if (recovering) {
                 last_recovery_frame_id = current_frame_id;
@@ -203,7 +194,6 @@ void SenderApp::run_udp() {
                 const double loss =
                     stats.loss_percent.value_or(100.0);
                 std::cout
-                    << "transport=udp "
                     << "loss=" << loss << "% "
                     << "rtt=" << stats.rtt_ms << "ms "
                     << "bandwidth=" << stats.bandwidth_kbps << "kbps "
@@ -212,9 +202,9 @@ void SenderApp::run_udp() {
                     << profile.fps << "fps/"
                     << profile.width << "x" << profile.height << " "
                     << "fec=" << profile.parity_ratio << " "
-                    << "recovery=" << (recovering ? 1 : 0) << " "
-                    << "last_frame_age_ms="
-                    << stats.last_frame_age_ms
+                    << "keyframe_fec="
+                    << profile.keyframe_parity_ratio << " "
+                    << "recovery=" << (recovering ? 1 : 0)
                     << std::endl;
                 next_stats = stats_now + std::chrono::seconds(1);
             }
@@ -284,7 +274,7 @@ bool SenderApp::run_srt_connection(
             congestion.valid = true;
             profile = adaptation_.update(congestion);
             keyframe_requested_.store(true);
-            std::cerr << "transport=srt srt_send_congested=1 profile="
+            std::cerr << "srt_send_congested=1 profile="
                       << profile.bitrate_kbps << "kbps/"
                       << profile.fps << "fps/"
                       << profile.width << "x" << profile.height
@@ -306,8 +296,7 @@ bool SenderApp::run_srt_connection(
                 profile = next_profile;
                 keyframe_requested_.store(true);
             }
-            std::cout << "transport=srt "
-                      << "loss=" << network.loss_percent << "% "
+            std::cout << "loss=" << network.loss_percent << "% "
                       << "rtt=" << network.rtt_ms << "ms "
                       << "bandwidth=" << network.bandwidth_kbps
                       << "kbps "
@@ -316,7 +305,9 @@ bool SenderApp::run_srt_connection(
                       << "profile=" << profile.bitrate_kbps << "kbps/"
                       << profile.fps << "fps/"
                       << profile.width << "x" << profile.height << " "
-                      << "fec=" << profile.parity_ratio << std::endl;
+                      << "fec=" << profile.parity_ratio << " "
+                      << "keyframe_fec="
+                      << profile.keyframe_parity_ratio << std::endl;
             next_stats = now + std::chrono::seconds(1);
         }
 
@@ -328,7 +319,7 @@ bool SenderApp::run_srt_connection(
         }
     }
 
-    std::cerr << "transport=srt srt_connected=0" << std::endl;
+    std::cerr << "srt_connected=0" << std::endl;
     return send_ok;
 }
 
@@ -340,8 +331,12 @@ std::vector<std::vector<uint8_t>> SenderApp::encode_frame_packets(
     uint64_t session_id,
     uint64_t session_started_unix_us,
     uint64_t &packet_sequence) {
+    const double parity_ratio =
+        frame.keyframe
+            ? profile.keyframe_parity_ratio
+            : profile.parity_ratio;
     const auto blocks =
-        fec_.encode_blocks(frame.data, profile.parity_ratio, 4);
+        fec_.encode_blocks(frame.data, parity_ratio, 4);
     if (blocks.size() > 64) {
         throw std::runtime_error("encoded frame has too many FEC blocks");
     }

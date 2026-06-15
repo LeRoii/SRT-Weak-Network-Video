@@ -19,8 +19,11 @@ public:
     ReceiverApp(Endpoint local,
                 std::string output_file,
                 bool display_enabled,
-                int output_width,
-                int output_height,
+                int minimum_output_width,
+                int minimum_output_height,
+                int minimum_output_fps,
+                UpscaleMode upscale_mode,
+                InterpolationMode interpolation_mode,
                 bool write_h264,
                 LatencyConfig latency_config,
                 TransportConfig transport_config);

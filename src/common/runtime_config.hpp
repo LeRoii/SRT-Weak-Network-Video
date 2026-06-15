@@ -19,6 +19,16 @@ enum class TransportMode {
     Srt,
 };
 
+enum class UpscaleMode {
+    Bilinear,
+    LanczosSharpen,
+};
+
+enum class InterpolationMode {
+    Repeat,
+    Blend,
+};
+
 struct LatencyConfig {
     LatencyMetric metric = LatencyMetric::EncodeToDecode;
     int window_seconds = 10;
@@ -45,8 +55,11 @@ struct SenderConfig {
 struct ReceiverConfig {
     std::string listen = "0.0.0.0:9000";
     bool display = true;
-    int output_width = 640;
-    int output_height = 360;
+    int minimum_output_width = 640;
+    int minimum_output_height = 360;
+    int minimum_output_fps = 5;
+    UpscaleMode upscale_mode = UpscaleMode::LanczosSharpen;
+    InterpolationMode interpolation_mode = InterpolationMode::Blend;
     bool write_h264 = true;
     std::string output_file = "received.h264";
 };
@@ -61,6 +74,8 @@ struct RuntimeConfig {
 const char *latency_metric_name(LatencyMetric metric);
 const char *sender_input_name(SenderInput input);
 const char *transport_mode_name(TransportMode mode);
+const char *upscale_mode_name(UpscaleMode mode);
+const char *interpolation_mode_name(InterpolationMode mode);
 RuntimeConfig load_runtime_config(const std::filesystem::path &path,
                                   bool missing_is_default);
 std::filesystem::path default_runtime_config_path();

@@ -1,9 +1,5 @@
 #include "common/latency_stats.hpp"
 
-#include <algorithm>
-#include <cmath>
-#include <vector>
-
 namespace {
 constexpr uint64_t kMaximumLatencyUs = 60'000'000;
 }
@@ -50,18 +46,11 @@ LatencySnapshot LatencyStats::snapshot(int64_t now_monotonic_us) {
     }
 
     uint64_t total = 0;
-    std::vector<uint64_t> sorted;
-    sorted.reserve(samples_.size());
     for (const auto &sample : samples_) {
         total += sample.latency_us;
-        sorted.push_back(sample.latency_us);
     }
-    std::sort(sorted.begin(), sorted.end());
-    const std::size_t p95_index = static_cast<std::size_t>(
-        std::ceil(sorted.size() * 0.95)) - 1;
     result.average_ms =
         static_cast<double>(total) / samples_.size() / 1000.0;
-    result.p95_ms = static_cast<double>(sorted[p95_index]) / 1000.0;
     return result;
 }
 

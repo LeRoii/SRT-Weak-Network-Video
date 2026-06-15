@@ -39,8 +39,11 @@ uint64_t source_timestamp(const RecoveredFrame &frame) {
 ReceiverApp::ReceiverApp(Endpoint local,
                          std::string output_file,
                          bool display_enabled,
-                         int output_width,
-                         int output_height,
+                         int minimum_output_width,
+                         int minimum_output_height,
+                         int minimum_output_fps,
+                         UpscaleMode upscale_mode,
+                         InterpolationMode interpolation_mode,
                          bool write_h264,
                          LatencyConfig latency_config,
                          TransportConfig transport_config)
@@ -48,7 +51,12 @@ ReceiverApp::ReceiverApp(Endpoint local,
       latency_config_(latency_config),
       transport_config_(transport_config),
       latency_stats_(latency_config.window_seconds),
-      renderer_(output_width, output_height, &latency_stats_),
+      renderer_(minimum_output_width,
+                minimum_output_height,
+                minimum_output_fps,
+                upscale_mode,
+                interpolation_mode,
+                &latency_stats_),
       decoder_(renderer_),
       display_enabled_(display_enabled),
       write_h264_(write_h264) {
@@ -77,21 +85,21 @@ void ReceiverApp::run() {
 
 void ReceiverApp::run_srt() {
     auto listener = SrtSocket::create_listener(local_);
-    std::cerr << "transport=srt srt_listening="
+    std::cerr << "srt_listening="
               << local_.host << ":" << local_.port << std::endl;
 
     while (!g_stop_requested.load()) {
         try {
             auto socket = listener.accept();
-            std::cerr << "transport=srt srt_connected=1"
+            std::cerr << "srt_connected=1"
                       << std::endl;
             reset_media_session();
             run_srt_connection(socket);
-            std::cerr << "transport=srt srt_connected=0"
+            std::cerr << "srt_connected=0"
                       << std::endl;
         } catch (const std::exception &error) {
             if (!g_stop_requested.load()) {
-                std::cerr << "transport=srt srt_accept_failed="
+                std::cerr << "srt_accept_failed="
                           << error.what() << std::endl;
             }
         }
@@ -192,18 +200,13 @@ void ReceiverApp::run_srt_connection(SrtSocket &socket) {
             }
             const auto latency =
                 latency_stats_.snapshot(monotonic_us());
+            const auto renderer_stats = renderer_.take_stats();
             std::cout
-                << "transport=srt "
                 << "bandwidth=" << network.bandwidth_kbps
                 << "kbps "
                 << "rtt=" << network.rtt_ms << "ms "
-                << "latency_type="
-                << latency_metric_name(latency_config_.metric)
-                << " "
                 << "latency_avg="
                 << format_latency(latency.average_ms) << " "
-                << "latency_p95="
-                << format_latency(latency.p95_ms) << " "
                 << "latency_invalid="
                 << latency.invalid_samples << " "
                 << "frames=" << completed_frames_ << " "
@@ -212,6 +215,8 @@ void ReceiverApp::run_srt_connection(SrtSocket &socket) {
                 << "sync=" << (synchronized_ ? 1 : 0) << " "
                 << "rendered=" << renderer_.rendered_frames()
                 << " "
+                << "decoded_fps="
+                << renderer_stats.decoded_frames << " "
                 << "last_frame_age_ms=" << last_frame_age_ms()
                 << " "
                 << "max_frame_gap_ms=" << maximum_frame_gap_ms()
@@ -244,7 +249,7 @@ void ReceiverApp::run_udp() {
     uint64_t stats_unique = 0;
     auto stats_at = std::chrono::steady_clock::now();
 
-    std::cerr << "transport=udp udp_listening="
+    std::cerr << "udp_listening="
               << local_.host << ":" << local_.port << std::endl;
 
     while (!g_stop_requested.load()) {
@@ -279,7 +284,7 @@ void ReceiverApp::run_udp() {
                     sequence_order.clear();
                     feedback_sequence = 0;
                     std::cerr
-                        << "transport=udp udp_session=1 session_id="
+                        << "udp_session=1 session_id="
                         << active_session_id_ << std::endl;
                 }
 
@@ -402,17 +407,12 @@ void ReceiverApp::run_udp() {
                     : 0.0;
             const auto latency =
                 latency_stats_.snapshot(monotonic_us());
+            const auto renderer_stats = renderer_.take_stats();
             std::cout
-                << "transport=udp "
                 << "bandwidth=" << bandwidth_kbps << "kbps "
                 << "loss=" << loss_percent << "% "
-                << "latency_type="
-                << latency_metric_name(latency_config_.metric)
-                << " "
                 << "latency_avg="
                 << format_latency(latency.average_ms) << " "
-                << "latency_p95="
-                << format_latency(latency.p95_ms) << " "
                 << "latency_invalid="
                 << latency.invalid_samples << " "
                 << "frames=" << completed_frames_ << " "
@@ -421,6 +421,8 @@ void ReceiverApp::run_udp() {
                 << "sync=" << (synchronized_ ? 1 : 0) << " "
                 << "rendered=" << renderer_.rendered_frames()
                 << " "
+                << "decoded_fps="
+                << renderer_stats.decoded_frames << " "
                 << "last_frame_age_ms=" << last_frame_age_ms()
                 << " "
                 << "max_frame_gap_ms=" << maximum_frame_gap_ms()

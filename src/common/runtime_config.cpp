@@ -59,6 +59,28 @@ TransportMode parse_transport_mode(const std::string &value) {
     throw std::runtime_error("transport.mode must be udp or srt");
 }
 
+UpscaleMode parse_upscale_mode(const std::string &value) {
+    if (value == "bilinear") {
+        return UpscaleMode::Bilinear;
+    }
+    if (value == "lanczos_sharpen") {
+        return UpscaleMode::LanczosSharpen;
+    }
+    throw std::runtime_error(
+        "receiver.upscale_mode must be bilinear or lanczos_sharpen");
+}
+
+InterpolationMode parse_interpolation_mode(const std::string &value) {
+    if (value == "repeat") {
+        return InterpolationMode::Repeat;
+    }
+    if (value == "blend") {
+        return InterpolationMode::Blend;
+    }
+    throw std::runtime_error(
+        "receiver.interpolation_mode must be repeat or blend");
+}
+
 int parse_integer(const std::string &value,
                   const std::string &name,
                   int minimum,
@@ -152,6 +174,26 @@ const char *transport_mode_name(TransportMode mode) {
         return "udp";
     case TransportMode::Srt:
         return "srt";
+    }
+    return "unknown";
+}
+
+const char *upscale_mode_name(UpscaleMode mode) {
+    switch (mode) {
+    case UpscaleMode::Bilinear:
+        return "bilinear";
+    case UpscaleMode::LanczosSharpen:
+        return "lanczos_sharpen";
+    }
+    return "unknown";
+}
+
+const char *interpolation_mode_name(InterpolationMode mode) {
+    switch (mode) {
+    case InterpolationMode::Repeat:
+        return "repeat";
+    case InterpolationMode::Blend:
+        return "blend";
     }
     return "unknown";
 }
@@ -278,7 +320,7 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
                     value, "sender.camera_fps", 1, 240);
             } else if (key == "max_video_kbps") {
                 config.sender.max_video_kbps = parse_integer(
-                    value, "sender.max_video_kbps", 8, 2000);
+                    value, "sender.max_video_kbps", 30, 2000);
             } else {
                 throw std::runtime_error(
                     "unknown sender config key '" + key + "'");
@@ -289,12 +331,23 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
             } else if (key == "display") {
                 config.receiver.display =
                     parse_boolean(value, "receiver.display");
-            } else if (key == "output_width") {
-                config.receiver.output_width =
-                    parse_even_dimension(value, "receiver.output_width");
-            } else if (key == "output_height") {
-                config.receiver.output_height =
-                    parse_even_dimension(value, "receiver.output_height");
+            } else if (key == "minimum_output_width") {
+                config.receiver.minimum_output_width =
+                    parse_even_dimension(
+                        value, "receiver.minimum_output_width");
+            } else if (key == "minimum_output_height") {
+                config.receiver.minimum_output_height =
+                    parse_even_dimension(
+                        value, "receiver.minimum_output_height");
+            } else if (key == "minimum_output_fps") {
+                config.receiver.minimum_output_fps = parse_integer(
+                    value, "receiver.minimum_output_fps", 1, 240);
+            } else if (key == "upscale_mode") {
+                config.receiver.upscale_mode =
+                    parse_upscale_mode(value);
+            } else if (key == "interpolation_mode") {
+                config.receiver.interpolation_mode =
+                    parse_interpolation_mode(value);
             } else if (key == "write_h264") {
                 config.receiver.write_h264 =
                     parse_boolean(value, "receiver.write_h264");

@@ -8,6 +8,7 @@ public:
 
     VideoProfile update(const NetworkSnapshot &network);
     VideoProfile current() const;
+    void force_emergency();
 
 private:
     VideoProfile profile_for_level(int level) const;
@@ -20,5 +21,3 @@ private:
 };
 
 VideoProfile udp_recovery_profile(int max_video_kbps);
-VideoProfile udp_profile_for_loss(double loss_percent,
-                                  int max_video_kbps);
