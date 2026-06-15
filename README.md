@@ -6,8 +6,9 @@ packet loss. The transport combines:
 - connectionless UDP as the default high-loss media transport
 - optional SRT live transport for compatibility and comparison
 - per-frame Reed-Solomon erasure coding through Intel ISA-L
-- nine adaptive H.264 profiles from 2000 kbps down to 8 kbps
+- nine adaptive H.264 profiles from 2000 kbps down to 30 kbps
 - CRC validation and strict complete-frame/keyframe gating
+- CPU display upscaling and frame synthesis with a minimum output specification
 - a receiver display that keeps the last good frame across disconnects
 
 The project is independent from the libdatachannel WebRTC demo.
@@ -65,8 +66,11 @@ sender:
 receiver:
   listen: 10.88.0.2:9000
   display: true
-  output_width: 640
-  output_height: 360
+  minimum_output_width: 640
+  minimum_output_height: 360
+  minimum_output_fps: 5
+  upscale_mode: lanczos_sharpen
+  interpolation_mode: blend
   write_h264: true
   output_file: received.h264
 
@@ -85,10 +89,22 @@ Start the receiver and sender:
 The command line accepts only `--role`. Set `receiver.display: false` for
 headless operation. Set `receiver.write_h264: false` to disable creation and
 writing of the H.264 output file; writing is enabled by default.
-The display window and rendered frames use the fixed size selected by
-`receiver.output_width` and `receiver.output_height` (default `640x360`).
-Decoded frames at adaptive resolutions are scaled to this size for display;
-the decoded data and optional H.264 output file are not modified.
+The display uses a minimum output specification rather than a fixed size.
+Frames already at or above the configured minimum width and height keep their
+decoded resolution. Smaller frames are scaled up without changing aspect
+ratio. When complete decoded frames arrive slower than the minimum output
+frame rate, the display generates CPU-processed frames at that cadence. The
+decoded data and optional H.264 output file are not modified.
+
+`upscale_mode` selects `bilinear` or `lanczos_sharpen`; the latter is the
+default and applies light luma sharpening only after an upscale.
+`interpolation_mode` selects `repeat` or `blend`; the default `blend` emits one
+50/50 transition frame before displaying a newly received low-rate frame.
+Both modes retain the last complete frame during a prolonged gap.
+
+Receiver statistics keep `decoded_fps` for input-rate diagnosis. Generated
+output rate, synthetic-frame rate, output resolution, and the configured
+latency metric name are not repeated in every log line.
 
 ### Transport Mode
 
@@ -100,11 +116,27 @@ the decoded data and optional H.264 output file are not modified.
 - `srt` keeps the previous SRT caller/listener behavior for compatibility and
   comparison. SRT still uses its 350 ms latency budget and ARQ.
 
-UDP cold start and feedback loss enter a recovery profile at
-`128x72/1fps/8kbps` with 20x parity. After complete-frame confirmation, 70%
-loss uses `320x180/1fps/50kbps` with 8x parity and 80% loss uses
-`160x90/1fps/20kbps` with 15x parity. Feedback is emitted every 200 ms, with
-10 copies spread across the interval.
+UDP cold start, stale feedback, send congestion, or a receiver frame age above
+1500 ms immediately selects Level 8 at `256x144/2fps/30kbps`. UDP and SRT use
+the same nine-level ladder after recovery. Every profile uses an approximately
+one-second GOP; keyframes receive stronger FEC than P-frames. Feedback is
+emitted every 200 ms, with 10 copies spread across the interval.
+
+| Level | H.264 profile | P-frame FEC | keyframe FEC |
+|---:|---|---:|---:|
+| 0 | 1280x720 / 30 fps / 2000 kbps | 0.10 | 0.30 |
+| 1 | 960x540 / 20 fps / 1200 kbps | 0.15 | 0.50 |
+| 2 | 640x360 / 15 fps / 700 kbps | 0.25 | 0.75 |
+| 3 | 640x360 / 10 fps / 400 kbps | 0.40 | 1.00 |
+| 4 | 426x240 / 5 fps / 220 kbps | 0.75 | 2.00 |
+| 5 | 426x240 / 3 fps / 140 kbps | 1.25 | 3.00 |
+| 6 | 320x180 / 3 fps / 80 kbps | 2.50 | 5.00 |
+| 7 | 320x180 / 2 fps / 50 kbps | 4.00 | 7.00 |
+| 8 | 256x144 / 2 fps / 30 kbps | 8.00 | 12.00 |
+
+Loss thresholds above 3, 7, 15, 30, 50, 65, 72, and 77 percent select Levels
+1 through 8. Degradation is immediate; recovery advances one level after five
+fresh healthy or emergency-recovery feedback windows.
 
 ### Sender Input
 
@@ -157,7 +189,7 @@ link: binding the receiver to `0.0.0.0` only covers interfaces in the
 receiver's current network namespace.
 
 `ns-up` installs permanent neighbor entries between the veth endpoints. This
-keeps 70%-80% netem tests focused on IP media and feedback loss; otherwise ARP
+keeps 70%-85% netem tests focused on IP media and feedback loss; otherwise ARP
 requests and replies are also dropped and cold-start timing mostly measures
 neighbor discovery luck.
 
@@ -235,7 +267,11 @@ recovered. It never forwards incomplete or CRC-invalid frames to the decoder.
 The SDL window and its last decoded frame stay alive. In UDP mode there is no
 SRT connection or reconnect state.
 
-The reference validation used `/home/u20/code/jetson-2k.mp4`, 30% loss in both
-directions, and 50 ms delay. Complete frames continued throughout the loss
-period at a reduced profile, the receiver reported zero decoder errors, and
-the saved H.264 stream passed FFmpeg's `-err_detect explode` check.
+The current reference validation used `/home/u20/code/jetson-2k.mp4` and
+50 ms delay with 70%, 80%, and 85% loss in both directions. Each scenario ran
+for 600 seconds. Maximum complete-frame gaps were 1595, 2104, and 2103 ms;
+the display produced 2998 frames in each run at `640x360`, decoder errors
+remained zero, and every saved H.264 stream passed FFmpeg's
+`-err_detect explode` check. Five repeated transitions from an unimpaired link
+to 80% and 85% loss also stayed below three seconds, with worst gaps of 2189
+and 2236 ms.

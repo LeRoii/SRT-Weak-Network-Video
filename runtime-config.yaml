@@ -17,8 +17,11 @@ sender:
 receiver:
   listen: 10.88.0.2:9000
   display: true
-  output_width: 640
-  output_height: 360
+  minimum_output_width: 640
+  minimum_output_height: 360
+  minimum_output_fps: 5
+  upscale_mode: lanczos_sharpen
+  interpolation_mode: blend
   write_h264: true
   output_file: received.h264
 

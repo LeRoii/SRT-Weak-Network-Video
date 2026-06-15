@@ -61,6 +61,7 @@ add_executable(srt_weak_video
     src/receiver.cpp
     src/sender.cpp
     src/video/h264_decoder.cpp
+    src/video/output_processor.cpp
     src/video/video_source_reader.cpp
     src/video/video_renderer.cpp
 )
@@ -152,3 +153,17 @@ target_compile_options(latency_stats_tests PRIVATE
     -Wpedantic
 )
 add_test(NAME latency_stats_tests COMMAND latency_stats_tests)
+
+add_executable(output_processing_tests
+    src/video/output_processor.cpp
+    tests/output_processing_tests.cpp
+)
+target_include_directories(output_processing_tests PRIVATE src)
+target_link_libraries(output_processing_tests PRIVATE PkgConfig::FFMPEG)
+target_compile_options(output_processing_tests PRIVATE
+    -UNDEBUG
+    -Wall
+    -Wextra
+    -Wpedantic
+)
+add_test(NAME output_processing_tests COMMAND output_processing_tests)

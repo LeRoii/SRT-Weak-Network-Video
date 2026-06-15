@@ -20,6 +20,7 @@ void expect_profile(const VideoProfile &profile,
                     int width,
                     int height,
                     double parity_ratio,
+                    double keyframe_parity_ratio,
                     bool all_intra) {
     assert(profile.level == level);
     assert(profile.bitrate_kbps == bitrate);
@@ -27,6 +28,8 @@ void expect_profile(const VideoProfile &profile,
     assert(profile.width == width);
     assert(profile.height == height);
     assert(profile.parity_ratio == parity_ratio);
+    assert(profile.keyframe_parity_ratio ==
+           keyframe_parity_ratio);
     assert(profile.all_intra == all_intra);
 }
 
@@ -39,26 +42,27 @@ void test_profile_ladder_and_loss_boundaries() {
         int width;
         int height;
         double parity_ratio;
+        double keyframe_parity_ratio;
         bool all_intra;
     };
     const Expected cases[] = {
-        {0.0, 0, 2000, 30, 1280, 720, 0.15, false},
-        {3.0, 0, 2000, 30, 1280, 720, 0.15, false},
-        {3.01, 1, 1400, 20, 1280, 720, 0.25, false},
-        {7.0, 1, 1400, 20, 1280, 720, 0.25, false},
-        {7.01, 2, 900, 10, 960, 540, 0.50, false},
-        {15.0, 2, 900, 10, 960, 540, 0.50, false},
-        {15.01, 3, 500, 5, 640, 360, 0.75, false},
-        {30.0, 3, 500, 5, 640, 360, 0.75, false},
-        {30.01, 4, 250, 3, 426, 240, 1.00, false},
-        {50.0, 4, 250, 3, 426, 240, 1.00, false},
-        {50.01, 5, 120, 2, 426, 240, 2.00, true},
-        {70.0, 5, 120, 2, 426, 240, 2.00, true},
-        {70.01, 6, 50, 1, 320, 180, 3.00, true},
-        {80.0, 6, 50, 1, 320, 180, 3.00, true},
-        {80.01, 7, 20, 1, 160, 90, 5.00, true},
-        {90.0, 7, 20, 1, 160, 90, 5.00, true},
-        {90.01, 8, 8, 1, 128, 72, 11.00, true},
+        {0.0, 0, 2000, 30, 1280, 720, 0.10, 0.30, false},
+        {3.0, 0, 2000, 30, 1280, 720, 0.10, 0.30, false},
+        {3.01, 1, 1200, 20, 960, 540, 0.15, 0.50, false},
+        {7.0, 1, 1200, 20, 960, 540, 0.15, 0.50, false},
+        {7.01, 2, 700, 15, 640, 360, 0.25, 0.75, false},
+        {15.0, 2, 700, 15, 640, 360, 0.25, 0.75, false},
+        {15.01, 3, 400, 10, 640, 360, 0.40, 1.00, false},
+        {30.0, 3, 400, 10, 640, 360, 0.40, 1.00, false},
+        {30.01, 4, 220, 5, 426, 240, 0.75, 2.00, false},
+        {50.0, 4, 220, 5, 426, 240, 0.75, 2.00, false},
+        {50.01, 5, 140, 3, 426, 240, 1.25, 3.00, false},
+        {65.0, 5, 140, 3, 426, 240, 1.25, 3.00, false},
+        {65.01, 6, 80, 3, 320, 180, 2.50, 5.00, false},
+        {72.0, 6, 80, 3, 320, 180, 2.50, 5.00, false},
+        {72.01, 7, 50, 2, 320, 180, 4.00, 7.00, false},
+        {77.0, 7, 50, 2, 320, 180, 4.00, 7.00, false},
+        {77.01, 8, 30, 2, 256, 144, 8.00, 12.00, false},
     };
 
     for (const auto &expected : cases) {
@@ -70,6 +74,7 @@ void test_profile_ladder_and_loss_boundaries() {
                        expected.width,
                        expected.height,
                        expected.parity_ratio,
+                       expected.keyframe_parity_ratio,
                        expected.all_intra);
     }
 }
@@ -95,12 +100,12 @@ void test_rtt_floor_and_fast_degradation() {
 
     AdaptationController emergency(2000);
     expect_profile(emergency.update(network(100.0, 500.0)),
-                   8, 8, 1, 128, 72, 11.00, true);
+                   8, 30, 2, 256, 144, 8.00, 12.00, false);
 }
 
 void test_recovery_requires_five_healthy_windows() {
     AdaptationController controller(2000);
-    assert(controller.update(network(75.0)).level == 6);
+    assert(controller.update(network(70.0)).level == 6);
 
     for (int sample = 0; sample < 4; ++sample) {
         assert(controller.update(network(0.0, 50.0)).level == 6);
@@ -139,10 +144,14 @@ void test_emergency_recovers_to_current_network_level() {
 
 void test_max_video_bitrate_selects_supported_profile() {
     AdaptationController capped(1000);
-    expect_profile(capped.current(), 2, 900, 10, 960, 540, 0.50, false);
+    expect_profile(
+        capped.current(), 2, 700, 15, 640, 360,
+        0.25, 0.75, false);
 
     AdaptationController minimum(1);
-    expect_profile(minimum.current(), 8, 8, 1, 128, 72, 11.00, true);
+    expect_profile(
+        minimum.current(), 8, 30, 2, 256, 144,
+        8.00, 12.00, false);
 }
 
 void test_invalid_snapshot_keeps_current_profile() {
@@ -153,19 +162,16 @@ void test_invalid_snapshot_keeps_current_profile() {
     assert(controller.update(invalid).level == 5);
 }
 
-void test_udp_weak_network_profiles() {
+void test_udp_recovery_profile() {
     expect_profile(
         udp_recovery_profile(2000),
-        8, 8, 1, 128, 72, 20.0, true);
+        8, 30, 2, 256, 144, 8.0, 12.0, false);
+
+    AdaptationController controller(2000);
+    controller.force_emergency();
     expect_profile(
-        udp_profile_for_loss(70.0, 2000),
-        6, 50, 1, 320, 180, 8.0, true);
-    expect_profile(
-        udp_profile_for_loss(80.0, 2000),
-        7, 20, 1, 160, 90, 15.0, true);
-    expect_profile(
-        udp_profile_for_loss(90.0, 2000),
-        8, 8, 1, 128, 72, 20.0, true);
+        controller.current(),
+        8, 30, 2, 256, 144, 8.0, 12.0, false);
 }
 
 } // namespace
@@ -177,7 +183,7 @@ int main() {
     test_emergency_recovers_to_current_network_level();
     test_max_video_bitrate_selects_supported_profile();
     test_invalid_snapshot_keeps_current_profile();
-    test_udp_weak_network_profiles();
+    test_udp_recovery_profile();
     std::cout << "adaptation_tests=passed" << std::endl;
     return 0;
 }

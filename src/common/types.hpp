@@ -21,6 +21,7 @@ struct VideoProfile {
     int width = 1280;
     int height = 720;
     double parity_ratio = 0.15;
+    double keyframe_parity_ratio = 0.30;
     bool all_intra = false;
 
     bool operator==(const VideoProfile &other) const {
@@ -30,6 +31,7 @@ struct VideoProfile {
                width == other.width &&
                height == other.height &&
                parity_ratio == other.parity_ratio &&
+               keyframe_parity_ratio == other.keyframe_parity_ratio &&
                all_intra == other.all_intra;
     }
 

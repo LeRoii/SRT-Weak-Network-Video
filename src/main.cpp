@@ -29,8 +29,11 @@ void run_app(const Role role, const RuntimeConfig &config) {
     ReceiverApp(parse_endpoint(config.receiver.listen),
                 config.receiver.output_file,
                 config.receiver.display,
-                config.receiver.output_width,
-                config.receiver.output_height,
+                config.receiver.minimum_output_width,
+                config.receiver.minimum_output_height,
+                config.receiver.minimum_output_fps,
+                config.receiver.upscale_mode,
+                config.receiver.interpolation_mode,
                 config.receiver.write_h264,
                 config.latency,
                 config.transport).run();

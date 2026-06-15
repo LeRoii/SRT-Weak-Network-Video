@@ -6,21 +6,21 @@
 namespace {
 
 constexpr std::array<VideoProfile, 9> kProfiles{{
-    {0, 2000, 30, 1280, 720, 0.15, false},
-    {1, 1400, 20, 1280, 720, 0.25, false},
-    {2, 900, 10, 960, 540, 0.50, false},
-    {3, 500, 5, 640, 360, 0.75, false},
-    {4, 250, 3, 426, 240, 1.00, false},
-    {5, 120, 2, 426, 240, 2.00, true},
-    {6, 50, 1, 320, 180, 3.00, true},
-    {7, 20, 1, 160, 90, 5.00, true},
-    {8, 8, 1, 128, 72, 11.00, true},
+    {0, 2000, 30, 1280, 720, 0.10, 0.30, false},
+    {1, 1200, 20, 960, 540, 0.15, 0.50, false},
+    {2, 700, 15, 640, 360, 0.25, 0.75, false},
+    {3, 400, 10, 640, 360, 0.40, 1.00, false},
+    {4, 220, 5, 426, 240, 0.75, 2.00, false},
+    {5, 140, 3, 426, 240, 1.25, 3.00, false},
+    {6, 80, 3, 320, 180, 2.50, 5.00, false},
+    {7, 50, 2, 320, 180, 4.00, 7.00, false},
+    {8, 30, 2, 256, 144, 8.00, 12.00, false},
 }};
 
 } // namespace
 
 AdaptationController::AdaptationController(int max_video_kbps)
-    : max_video_kbps_(std::clamp(max_video_kbps, 8, 2000)) {
+    : max_video_kbps_(std::clamp(max_video_kbps, 30, 2000)) {
     while (level_ + 1 < static_cast<int>(kProfiles.size()) &&
            kProfiles[static_cast<std::size_t>(level_)].bitrate_kbps >
                max_video_kbps_) {
@@ -35,11 +35,11 @@ VideoProfile AdaptationController::update(const NetworkSnapshot &network) {
     }
 
     int required = 0;
-    if (network.loss_percent > 90.0) {
+    if (network.loss_percent > 77.0) {
         required = 8;
-    } else if (network.loss_percent > 80.0) {
+    } else if (network.loss_percent > 72.0) {
         required = 7;
-    } else if (network.loss_percent > 70.0) {
+    } else if (network.loss_percent > 65.0) {
         required = 6;
     } else if (network.loss_percent > 50.0) {
         required = 5;
@@ -93,6 +93,13 @@ VideoProfile AdaptationController::current() const {
     return current_;
 }
 
+void AdaptationController::force_emergency() {
+    level_ = static_cast<int>(kProfiles.size()) - 1;
+    healthy_windows_ = 0;
+    emergency_recovery_active_ = true;
+    current_ = profile_for_level(level_);
+}
+
 VideoProfile AdaptationController::profile_for_level(int level) const {
     VideoProfile profile =
         kProfiles[static_cast<std::size_t>(
@@ -103,24 +110,8 @@ VideoProfile AdaptationController::profile_for_level(int level) const {
 }
 
 VideoProfile udp_recovery_profile(int max_video_kbps) {
-    VideoProfile profile{8, 8, 1, 128, 72, 20.0, true};
+    VideoProfile profile = kProfiles.back();
     profile.bitrate_kbps =
-        std::min(profile.bitrate_kbps, std::max(8, max_video_kbps));
-    return profile;
-}
-
-VideoProfile udp_profile_for_loss(double loss_percent,
-                                  int max_video_kbps) {
-    VideoProfile profile;
-    if (loss_percent > 85.0) {
-        return udp_recovery_profile(max_video_kbps);
-    }
-    if (loss_percent > 75.0) {
-        profile = {7, 20, 1, 160, 90, 15.0, true};
-    } else {
-        profile = {6, 50, 1, 320, 180, 8.0, true};
-    }
-    profile.bitrate_kbps =
-        std::min(profile.bitrate_kbps, std::max(8, max_video_kbps));
+        std::min(profile.bitrate_kbps, std::max(30, max_video_kbps));
     return profile;
 }
