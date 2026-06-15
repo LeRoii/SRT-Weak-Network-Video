@@ -1,7 +1,7 @@
 metadata:
   purpose: "Record parameters tuned during weak-network video development."
   runtime_loaded: false
-  updated_at: "2026-06-12"
+  updated_at: "2026-06-15"
   units_note: "Bitrates are kbps unless a different unit is stated."
 
 current:
@@ -10,9 +10,19 @@ current:
     config_location: "Directory containing the executable."
     command_line_parameters: [role]
     missing_config_behavior: "Use compiled defaults."
+    compiled_fallback:
+      sender_input: camera
+      sender_connect: "127.0.0.1:9000"
+      receiver_listen: "0.0.0.0:9000"
+    transport:
+      mode: udp
+      selectable_modes: [udp, srt]
+      feedback_interval_ms: 200
+      feedback_redundancy: 10
+      feedback_timeout_ms: 1000
     sender:
-      input: camera
-      connect: "127.0.0.1:9000"
+      input: file
+      connect: "10.88.0.2:9000"
       video_file: "/home/u20/code/jetson-2k.mp4"
       camera:
         device: /dev/video0
@@ -22,12 +32,15 @@ current:
         fps: 30
       max_video_kbps: 2000
     receiver:
-      listen: "0.0.0.0:9000"
+      listen: "10.88.0.2:9000"
       display: true
+      output_width: 640
+      output_height: 360
       write_h264: true
       output_file: received.h264
 
   srt:
+    role: "Optional compatibility transport."
     transport_type: live
     message_api: true
     timestamp_based_delivery: true
@@ -63,6 +76,19 @@ current:
       synthetic_loss_percent: 100
       synthetic_rtt_ms: 500
       retry_delay_ms: 100
+    udp:
+      socket_send_buffer_bytes: 4194304
+      socket_receive_buffer_bytes: 4194304
+      feedback_loss_minimum_packets: 32
+      feedback_loss_ewma_previous_weight: 0.8
+      weak_network_enter_loss_percent: 60
+      weak_network_exit_loss_below_percent: 50
+      weak_network_exit_consecutive_windows: 5
+      recovery_feedback_timeout_ms: 1000
+      recovery_receiver_frame_age_ms: 1500
+      recovery_profile: {bitrate_kbps: 8, fps: 1, width: 128, height: 72, fec_ratio: 20.0, all_intra: true}
+      loss_70_profile: {bitrate_kbps: 50, fps: 1, width: 320, height: 180, fec_ratio: 8.0, all_intra: true}
+      loss_80_profile: {bitrate_kbps: 20, fps: 1, width: 160, height: 90, fec_ratio: 15.0, all_intra: true}
 
   receiver:
     timeout_poll_delay_ms: 2
@@ -80,6 +106,11 @@ current:
     frame_continuity_gate:
       enabled: true
       action_on_frame_id_gap: "Drop non-keyframes until the next complete keyframe."
+    udp:
+      feedback_copy_spacing_ms: 20
+      keyframe_request_frame_age_ms: 1500
+      packet_sequence_history: 20000
+      maximum_blocks_per_frame: 64
 
   adaptation:
     max_video_kbps:
@@ -121,12 +152,30 @@ current:
   fec:
     target_shard_bytes: 1000
     maximum_total_shards: 255
+    minimum_data_shards_per_block: 4
+    multiple_blocks_per_frame: true
 
   protocol:
-    version: 2
-    shard_header_bytes: 63
+    version: 3
+    shard_header_bytes: 98
     encoded_timestamp: encoded_at_unix_us
     source_processing_duration: source_to_encoded_us
+    udp_session_fields:
+      - session_id
+      - session_started_unix_us
+      - packet_sequence
+      - sent_monotonic_us
+      - block_index
+      - block_count
+      - block_original_size
+    udp_feedback_fields:
+      - highest_packet_sequence
+      - unique_packets
+      - received_bytes
+      - last_complete_frame_id
+      - echoed_sender_monotonic_us
+      - last_frame_age_ms
+      - request_keyframe
     clock_requirement: "Sender and receiver CLOCK_REALTIME synchronized by NTP or PTP."
     backward_compatible: false
 
@@ -154,8 +203,57 @@ current:
     right_address: "10.88.0.2/24"
     default_loss_direction: tx
     bandwidth_units_examples: [500kbit, 2mbit, 1gbit]
+    permanent_neighbor_entries: true
 
 development_history:
+  - parameter: primary_transport
+    previous: "SRT caller/listener was the only media transport."
+    current:
+      default: udp
+      optional: srt
+      udp_connection_state: none
+    reason: "Remove SRT handshake, peer-idle disconnect, and reconnect delays under 70-80 percent bidirectional loss."
+
+  - parameter: udp_recovery_state
+    previous: "A stalled SRT socket forced the normal adaptation controller to Level 8 and then reconnected."
+    current:
+      trigger: "Cold start, feedback timeout, receiver frame age above 1500 ms, or smoothed loss above 85 percent."
+      exit: "A recovery frame is acknowledged by at least two fresh feedback reports."
+      profile: "8kbps/1fps/128x72, all-intra, FEC ratio 20."
+    reason: "Recover a complete keyframe without waiting for a transport connection."
+
+  - parameter: udp_high_loss_profiles
+    previous: "70 percent used FEC ratio 3 and 80 percent used FEC ratio 5."
+    current:
+      loss_70: "50kbps/1fps/320x180, FEC ratio 8."
+      loss_80: "20kbps/1fps/160x90, FEC ratio 15."
+      loss_above_85: "Recovery profile with FEC ratio 20."
+    reason: "Keep complete-frame failure probability low enough for a three-second frame-gap target."
+
+  - parameter: fec_frame_layout
+    previous: "One frame was limited to one Reed-Solomon block and 255 total shards."
+    current: "A frame may contain up to 64 independently recoverable blocks; every block has at least four data shards."
+    reason: "Support 15-20x parity without limiting encoded frame size to one small block."
+
+  - parameter: protocol_version
+    previous: 2
+    current: 3
+    reason: "Carry UDP session, packet sequence, feedback echo, and multi-block FEC metadata."
+
+  - parameter: netem_neighbor_resolution
+    previous: "ARP requests and responses were subjected to the configured netem loss."
+    current: "ns-up installs permanent neighbor entries for both veth endpoints."
+    reason: "Measure media recovery rather than random ARP cold-start delay at 70-80 percent bidirectional loss."
+
+  - parameter: receiver_display_size
+    previous: "The SDL window and texture followed each decoded frame resolution."
+    current:
+      output_width: 640
+      output_height: 360
+      scaling: bilinear
+      scope: display_only
+    reason: "Keep the displayed picture at a stable size while adaptive profiles change encoded resolution."
+
   - parameter: sender_video_input
     previous: "Only a looping local video file was supported."
     current:
@@ -271,6 +369,17 @@ development_history:
     reason: "Prevent decoder errors and corrupted reference chains during abrupt packet loss."
 
 validation_scenarios:
+  - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 600, frames: 573, dropped_frames: 1, max_frame_gap_ms: 2062, decoder_errors: 0, ffmpeg_strict: passed}
+  - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 600, frames: 574, dropped_frames: 1, max_frame_gap_ms: 2069, decoder_errors: 0, ffmpeg_strict: passed}
+  - {transport: udp, scenario: cold_start, loss_percent: 70, runs: 10, passed_under_3000_ms: 10, worst_first_frame_ms: 738}
+  - {transport: udp, scenario: cold_start, loss_percent: 80, runs: 10, passed_under_3000_ms: 10, worst_first_frame_ms: 726}
+  - {transport: udp, scenario: "0% to impaired transition", loss_percent: 70, runs: 5, passed_under_3000_ms: 5, worst_frame_gap_ms: 2096}
+  - {transport: udp, scenario: "0% to impaired transition", loss_percent: 80, runs: 5, passed_under_3000_ms: 5, worst_frame_gap_ms: 2050}
+  - {transport: udp, transition: "0% to 70% bidirectional loss, 50ms delay", duration_seconds: 38, max_frame_gap_ms: 2067, decoder_errors: 0}
+  - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 35, profile: "320x180/1fps/FEC8", max_frame_gap_ms: 1083, decoder_errors: 0}
+  - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 35, profile: "160x90/1fps/FEC15", max_frame_gap_ms: 1092, decoder_errors: 0}
+  - {transport: srt, loss_percent: 0, result: "Protocol v3 and multi-block FEC regression passed with decoder_errors=0 and FFmpeg-valid H.264."}
+  - {encoded_resolution: "128x72", display_resolution: "640x360", result: "X11 reported a fixed 640x360 window with decoder_errors=0."}
   - {input: camera, device: /dev/video0, capture: "640x480/30fps YUYV", result: "Rendered continuously with decoder_errors=0 and FFmpeg-valid H.264 output."}
   - {loss_percent: 30, delay_ms: 50, direction: both, expected_profile: "426x240/2fps/120kbps"}
   - {loss_percent: 50, delay_ms: 50, direction: both, expected_profile_range: "426x240 at 120-250kbps"}

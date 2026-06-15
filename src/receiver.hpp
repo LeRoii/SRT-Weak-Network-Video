@@ -5,9 +5,11 @@
 #include "common/types.hpp"
 #include "protocol/frame_assembler.hpp"
 #include "transport/srt_transport.hpp"
+#include "transport/udp_transport.hpp"
 #include "video/h264_decoder.hpp"
 #include "video/video_renderer.hpp"
 
+#include <chrono>
 #include <cstdint>
 #include <fstream>
 #include <string>
@@ -17,19 +19,28 @@ public:
     ReceiverApp(Endpoint local,
                 std::string output_file,
                 bool display_enabled,
+                int output_width,
+                int output_height,
                 bool write_h264,
-                LatencyConfig latency_config);
+                LatencyConfig latency_config,
+                TransportConfig transport_config);
     ~ReceiverApp();
 
     void run();
 
 private:
-    void run_connection(SrtSocket &socket);
+    void run_srt();
+    void run_udp();
+    void run_srt_connection(SrtSocket &socket);
     void handle_frame(RecoveredFrame frame);
+    void reset_media_session();
+    uint32_t last_frame_age_ms() const;
+    uint64_t maximum_frame_gap_ms() const;
 
     Endpoint local_;
     std::ofstream output_;
     LatencyConfig latency_config_;
+    TransportConfig transport_config_;
     LatencyStats latency_stats_;
     VideoRenderer renderer_;
     H264Decoder decoder_;
@@ -45,4 +56,10 @@ private:
     uint64_t dropped_frames_ = 0;
     uint64_t decoder_errors_ = 0;
     uint64_t latency_generation_ = 0;
+    uint64_t active_session_id_ = 0;
+    uint64_t active_session_started_unix_us_ = 0;
+    std::chrono::steady_clock::time_point receiver_started_at_{
+        std::chrono::steady_clock::now()};
+    std::chrono::steady_clock::time_point last_complete_frame_at_{};
+    uint64_t maximum_complete_frame_gap_ms_ = 0;
 };

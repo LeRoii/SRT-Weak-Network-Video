@@ -18,29 +18,45 @@ std::vector<uint8_t> make_coding_matrix(int total, int data) {
     return matrix;
 }
 
-} // namespace
+int maximum_data_shards(double parity_ratio) {
+    for (int data_shards = ReedSolomon::kMaxShards - 1;
+         data_shards > 0;
+         --data_shards) {
+        const int parity_shards = std::max(
+            1, static_cast<int>(std::ceil(data_shards * parity_ratio)));
+        if (data_shards + parity_shards <= ReedSolomon::kMaxShards) {
+            return data_shards;
+        }
+    }
+    return 0;
+}
 
-FecBlock ReedSolomon::encode(const std::vector<uint8_t> &data,
-                             double parity_ratio) const {
-    if (data.empty()) {
-        throw std::runtime_error("cannot FEC-encode an empty frame");
+FecBlock encode_block(const uint8_t *data,
+                      std::size_t size,
+                      double parity_ratio,
+                      int minimum_data_shards) {
+    if (!data || size == 0) {
+        throw std::runtime_error("cannot FEC-encode an empty block");
     }
 
-    const int data_shards = static_cast<int>(
-        (data.size() + kTargetShardBytes - 1) / kTargetShardBytes);
-    if (data_shards <= 0 || data_shards >= kMaxShards) {
-        throw std::runtime_error("encoded frame is too large for one FEC block");
+    const int maximum_data = maximum_data_shards(parity_ratio);
+    int data_shards = static_cast<int>(
+        (size + ReedSolomon::kTargetShardBytes - 1) /
+        ReedSolomon::kTargetShardBytes);
+    data_shards = std::max(data_shards, minimum_data_shards);
+    if (data_shards <= 0 || data_shards > maximum_data) {
+        throw std::runtime_error("FEC block exceeds the shard limit");
     }
 
     const std::size_t shard_size =
-        (data.size() + static_cast<std::size_t>(data_shards) - 1) /
+        (size + static_cast<std::size_t>(data_shards) - 1) /
         static_cast<std::size_t>(data_shards);
-    int parity_shards = std::max(
+    const int parity_shards = std::max(
         1, static_cast<int>(std::ceil(data_shards * parity_ratio)));
-    parity_shards = std::min(parity_shards, kMaxShards - data_shards);
     const int total_shards = data_shards + parity_shards;
 
     FecBlock result;
+    result.original_size = static_cast<uint32_t>(size);
     result.data_shards = static_cast<uint16_t>(data_shards);
     result.parity_shards = static_cast<uint16_t>(parity_shards);
     result.shard_size = static_cast<uint16_t>(shard_size);
@@ -51,10 +67,10 @@ FecBlock ReedSolomon::encode(const std::vector<uint8_t> &data,
     for (int index = 0; index < data_shards; ++index) {
         const std::size_t offset = static_cast<std::size_t>(index) * shard_size;
         const std::size_t bytes =
-            std::min(shard_size, data.size() - std::min(offset, data.size()));
+            std::min(shard_size, size - std::min(offset, size));
         if (bytes > 0) {
             std::memcpy(result.shards[static_cast<std::size_t>(index)].data(),
-                        data.data() + offset, bytes);
+                        data + offset, bytes);
         }
     }
 
@@ -78,6 +94,44 @@ FecBlock ReedSolomon::encode(const std::vector<uint8_t> &data,
     ec_encode_data(static_cast<int>(shard_size), data_shards, parity_shards,
                    tables.data(), inputs.data(), outputs.data());
     return result;
+}
+
+} // namespace
+
+FecBlock ReedSolomon::encode(const std::vector<uint8_t> &data,
+                             double parity_ratio) const {
+    if (data.empty()) {
+        throw std::runtime_error("cannot FEC-encode an empty frame");
+    }
+    return encode_block(data.data(), data.size(), parity_ratio, 1);
+}
+
+std::vector<FecBlock> ReedSolomon::encode_blocks(
+    const std::vector<uint8_t> &data,
+    double parity_ratio,
+    int minimum_data_shards) const {
+    if (data.empty()) {
+        throw std::runtime_error("cannot FEC-encode an empty frame");
+    }
+    if (parity_ratio < 0.0 || minimum_data_shards <= 0) {
+        throw std::runtime_error("invalid FEC block parameters");
+    }
+    const int maximum_data = maximum_data_shards(parity_ratio);
+    if (maximum_data < minimum_data_shards) {
+        throw std::runtime_error("FEC ratio leaves too few data shards");
+    }
+    const std::size_t maximum_block_bytes =
+        static_cast<std::size_t>(maximum_data) * kTargetShardBytes;
+
+    std::vector<FecBlock> blocks;
+    for (std::size_t offset = 0; offset < data.size();) {
+        const std::size_t bytes =
+            std::min(maximum_block_bytes, data.size() - offset);
+        blocks.push_back(encode_block(
+            data.data() + offset, bytes, parity_ratio, minimum_data_shards));
+        offset += bytes;
+    }
+    return blocks;
 }
 
 std::optional<std::vector<uint8_t>> ReedSolomon::decode(

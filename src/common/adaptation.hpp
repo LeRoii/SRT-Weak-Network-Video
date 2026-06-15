@@ -18,3 +18,7 @@ private:
     bool emergency_recovery_active_ = false;
     VideoProfile current_;
 };
+
+VideoProfile udp_recovery_profile(int max_video_kbps);
+VideoProfile udp_profile_for_loss(double loss_percent,
+                                  int max_video_kbps);

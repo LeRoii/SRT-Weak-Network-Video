@@ -101,3 +101,26 @@ VideoProfile AdaptationController::profile_for_level(int level) const {
         std::min(profile.bitrate_kbps, max_video_kbps_);
     return profile;
 }
+
+VideoProfile udp_recovery_profile(int max_video_kbps) {
+    VideoProfile profile{8, 8, 1, 128, 72, 20.0, true};
+    profile.bitrate_kbps =
+        std::min(profile.bitrate_kbps, std::max(8, max_video_kbps));
+    return profile;
+}
+
+VideoProfile udp_profile_for_loss(double loss_percent,
+                                  int max_video_kbps) {
+    VideoProfile profile;
+    if (loss_percent > 85.0) {
+        return udp_recovery_profile(max_video_kbps);
+    }
+    if (loss_percent > 75.0) {
+        profile = {7, 20, 1, 160, 90, 15.0, true};
+    } else {
+        profile = {6, 50, 1, 320, 180, 8.0, true};
+    }
+    profile.bitrate_kbps =
+        std::min(profile.bitrate_kbps, std::max(8, max_video_kbps));
+    return profile;
+}

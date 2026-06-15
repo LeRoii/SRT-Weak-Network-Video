@@ -23,6 +23,11 @@ std::string complete_config(const std::string &metric = "encode_to_decode",
                             const std::string &window = "10",
                             const std::string &write_h264 = "true") {
     return
+        "transport:\n"
+        "  mode: udp\n"
+        "  feedback_interval_ms: 200\n"
+        "  feedback_redundancy: 10\n"
+        "  feedback_timeout_ms: 1000\n"
         "sender:\n"
         "  input: camera\n"
         "  connect: 127.0.0.1:9000\n"
@@ -35,6 +40,8 @@ std::string complete_config(const std::string &metric = "encode_to_decode",
         "receiver:\n"
         "  listen: 0.0.0.0:9000\n"
         "  display: false\n"
+        "  output_width: 800\n"
+        "  output_height: 450\n"
         "  write_h264: " + write_h264 + "\n"
         "  output_file: /tmp/output.h264\n"
         "latency:\n"
@@ -68,6 +75,10 @@ int main() {
         "srt-runtime-config-missing.yaml";
     std::filesystem::remove(missing);
     const auto defaults = load_runtime_config(missing, true);
+    assert(defaults.transport.mode == TransportMode::Udp);
+    assert(defaults.transport.feedback_interval_ms == 200);
+    assert(defaults.transport.feedback_redundancy == 10);
+    assert(defaults.transport.feedback_timeout_ms == 1000);
     assert(defaults.sender.connect == "127.0.0.1:9000");
     assert(defaults.sender.input == SenderInput::Camera);
     assert(defaults.sender.camera_device == "/dev/video0");
@@ -77,6 +88,8 @@ int main() {
     assert(defaults.sender.max_video_kbps == 2000);
     assert(defaults.receiver.listen == "0.0.0.0:9000");
     assert(defaults.receiver.display);
+    assert(defaults.receiver.output_width == 640);
+    assert(defaults.receiver.output_height == 360);
     assert(defaults.receiver.write_h264);
     assert(defaults.receiver.output_file == "received.h264");
     assert(defaults.latency.metric == LatencyMetric::EncodeToDecode);
@@ -87,11 +100,14 @@ int main() {
         "srt-runtime-config-valid.yaml",
         complete_config("encode_to_assemble", "5", "false"));
     const auto config = load_runtime_config(valid, false);
+    assert(config.transport.mode == TransportMode::Udp);
     assert(config.sender.video_file == "/tmp/input.mp4");
     assert(config.sender.input == SenderInput::Camera);
     assert(config.sender.camera_device == "/dev/video9");
     assert(config.sender.max_video_kbps == 500);
     assert(!config.receiver.display);
+    assert(config.receiver.output_width == 800);
+    assert(config.receiver.output_height == 450);
     assert(!config.receiver.write_h264);
     assert(config.receiver.output_file == "/tmp/output.h264");
     assert(config.latency.metric == LatencyMetric::EncodeToAssemble);
@@ -139,6 +155,34 @@ int main() {
         complete_config("encode_to_decode", "10", "yes"));
     assert(load_fails(invalid_boolean));
 
+    const auto invalid_transport = write_config(
+        "srt-runtime-config-invalid-transport.yaml",
+        replace_once(complete_config(),
+                     "mode: udp",
+                     "mode: tcp"));
+    assert(load_fails(invalid_transport));
+
+    const auto invalid_feedback_redundancy = write_config(
+        "srt-runtime-config-invalid-feedback-redundancy.yaml",
+        replace_once(complete_config(),
+                     "feedback_redundancy: 10",
+                     "feedback_redundancy: 0"));
+    assert(load_fails(invalid_feedback_redundancy));
+
+    const auto invalid_output_width = write_config(
+        "srt-runtime-config-invalid-output-width.yaml",
+        replace_once(complete_config(),
+                     "output_width: 800",
+                     "output_width: 639"));
+    assert(load_fails(invalid_output_width));
+
+    const auto invalid_output_height = write_config(
+        "srt-runtime-config-invalid-output-height.yaml",
+        replace_once(complete_config(),
+                     "output_height: 450",
+                     "output_height: 8"));
+    assert(load_fails(invalid_output_height));
+
     const auto missing_section = write_config(
         "srt-runtime-config-missing-section.yaml",
         "latency:\n"
@@ -153,6 +197,10 @@ int main() {
     std::filesystem::remove(invalid_input);
     std::filesystem::remove(invalid_camera_fps);
     std::filesystem::remove(invalid_boolean);
+    std::filesystem::remove(invalid_transport);
+    std::filesystem::remove(invalid_feedback_redundancy);
+    std::filesystem::remove(invalid_output_width);
+    std::filesystem::remove(invalid_output_height);
     std::filesystem::remove(missing_section);
 
     std::cout << "runtime_config_tests=passed" << std::endl;

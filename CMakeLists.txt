@@ -46,6 +46,7 @@ set(COMMON_SOURCES
     src/protocol/frame_assembler.cpp
     src/protocol/messages.cpp
     src/transport/srt_transport.cpp
+    src/transport/udp_transport.cpp
 )
 
 configure_file(
@@ -93,6 +94,7 @@ add_executable(protocol_tests
 target_include_directories(protocol_tests PRIVATE src)
 target_link_libraries(protocol_tests PRIVATE PkgConfig::ISAL)
 target_compile_options(protocol_tests PRIVATE
+    -UNDEBUG
     -Wall
     -Wextra
     -Wpedantic

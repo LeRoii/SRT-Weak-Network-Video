@@ -14,9 +14,21 @@ enum class SenderInput {
     File,
 };
 
+enum class TransportMode {
+    Udp,
+    Srt,
+};
+
 struct LatencyConfig {
     LatencyMetric metric = LatencyMetric::EncodeToDecode;
     int window_seconds = 10;
+};
+
+struct TransportConfig {
+    TransportMode mode = TransportMode::Udp;
+    int feedback_interval_ms = 200;
+    int feedback_redundancy = 10;
+    int feedback_timeout_ms = 1000;
 };
 
 struct SenderConfig {
@@ -33,11 +45,14 @@ struct SenderConfig {
 struct ReceiverConfig {
     std::string listen = "0.0.0.0:9000";
     bool display = true;
+    int output_width = 640;
+    int output_height = 360;
     bool write_h264 = true;
     std::string output_file = "received.h264";
 };
 
 struct RuntimeConfig {
+    TransportConfig transport;
     SenderConfig sender;
     ReceiverConfig receiver;
     LatencyConfig latency;
@@ -45,6 +60,7 @@ struct RuntimeConfig {
 
 const char *latency_metric_name(LatencyMetric metric);
 const char *sender_input_name(SenderInput input);
+const char *transport_mode_name(TransportMode mode);
 RuntimeConfig load_runtime_config(const std::filesystem::path &path,
                                   bool missing_is_default);
 std::filesystem::path default_runtime_config_path();

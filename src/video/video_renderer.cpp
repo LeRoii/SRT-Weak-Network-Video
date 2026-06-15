@@ -18,8 +18,12 @@ namespace {
 constexpr std::size_t kMaxQueuedFrames = 3;
 }
 
-VideoRenderer::VideoRenderer(LatencyStats *latency_stats)
-    : latency_stats_(latency_stats) {}
+VideoRenderer::VideoRenderer(int output_width,
+                             int output_height,
+                             LatencyStats *latency_stats)
+    : output_width_(output_width),
+      output_height_(output_height),
+      latency_stats_(latency_stats) {}
 
 VideoRenderer::~VideoRenderer() {
     stop();
@@ -78,8 +82,8 @@ void VideoRenderer::render_loop() {
     SDL_Texture *texture = nullptr;
     SwsContext *sws = nullptr;
     AVFrame *yuv_frame = nullptr;
-    int width = 0;
-    int height = 0;
+    int source_width = 0;
+    int source_height = 0;
     AVPixelFormat source_format = AV_PIX_FMT_NONE;
 
     while (!stopping_.load()) {
@@ -107,16 +111,17 @@ void VideoRenderer::render_loop() {
         }
 
         const auto frame_format = static_cast<AVPixelFormat>(frame->format);
-        if (!window || width != frame->width || height != frame->height ||
+        if (!window || source_width != frame->width ||
+            source_height != frame->height ||
             source_format != frame_format) {
-            width = frame->width;
-            height = frame->height;
+            source_width = frame->width;
+            source_height = frame->height;
             source_format = frame_format;
 
             if (!window) {
                 window = SDL_CreateWindow("WebRTC Receiver", SDL_WINDOWPOS_CENTERED,
-                                          SDL_WINDOWPOS_CENTERED, width, height,
-                                          SDL_WINDOW_RESIZABLE);
+                                          SDL_WINDOWPOS_CENTERED,
+                                          output_width_, output_height_, 0);
                 renderer = window ? SDL_CreateRenderer(
                                         window, -1, SDL_RENDERER_ACCELERATED)
                                   : nullptr;
@@ -124,8 +129,6 @@ void VideoRenderer::render_loop() {
                     renderer = SDL_CreateRenderer(
                         window, -1, SDL_RENDERER_SOFTWARE);
                 }
-            } else {
-                SDL_SetWindowSize(window, width, height);
             }
 
             if (!window || !renderer) {
@@ -138,23 +141,25 @@ void VideoRenderer::render_loop() {
                 SDL_DestroyTexture(texture);
             }
             texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_IYUV,
-                                        SDL_TEXTUREACCESS_STREAMING, width, height);
+                                        SDL_TEXTUREACCESS_STREAMING,
+                                        output_width_, output_height_);
 
             sws_freeContext(sws);
-            sws = sws_getContext(width, height, source_format, width, height,
+            sws = sws_getContext(source_width, source_height, source_format,
+                                 output_width_, output_height_,
                                  AV_PIX_FMT_YUV420P, SWS_BILINEAR, nullptr, nullptr,
                                  nullptr);
 
             av_frame_free(&yuv_frame);
             yuv_frame = av_frame_alloc();
             yuv_frame->format = AV_PIX_FMT_YUV420P;
-            yuv_frame->width = width;
-            yuv_frame->height = height;
+            yuv_frame->width = output_width_;
+            yuv_frame->height = output_height_;
             av_frame_get_buffer(yuv_frame, 32);
         }
 
         av_frame_make_writable(yuv_frame);
-        sws_scale(sws, frame->data, frame->linesize, 0, height,
+        sws_scale(sws, frame->data, frame->linesize, 0, source_height,
                   yuv_frame->data, yuv_frame->linesize);
 
         SDL_UpdateYUVTexture(texture, nullptr,

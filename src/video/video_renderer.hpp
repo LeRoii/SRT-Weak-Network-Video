@@ -14,7 +14,9 @@ struct AVFrame;
 
 class VideoRenderer {
 public:
-    explicit VideoRenderer(LatencyStats *latency_stats = nullptr);
+    VideoRenderer(int output_width,
+                  int output_height,
+                  LatencyStats *latency_stats = nullptr);
     ~VideoRenderer();
 
     VideoRenderer(const VideoRenderer &) = delete;
@@ -43,6 +45,8 @@ private:
     std::atomic<uint64_t> rendered_frames_{0};
     std::mutex mutex_;
     std::condition_variable cv_;
+    int output_width_ = 640;
+    int output_height_ = 360;
     LatencyStats *latency_stats_ = nullptr;
     std::deque<QueuedFrame> frames_;
     std::thread thread_;

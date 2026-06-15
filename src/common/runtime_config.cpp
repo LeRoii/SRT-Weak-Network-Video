@@ -49,6 +49,16 @@ SenderInput parse_sender_input(const std::string &value) {
     throw std::runtime_error("sender.input must be camera or file");
 }
 
+TransportMode parse_transport_mode(const std::string &value) {
+    if (value == "udp") {
+        return TransportMode::Udp;
+    }
+    if (value == "srt") {
+        return TransportMode::Srt;
+    }
+    throw std::runtime_error("transport.mode must be udp or srt");
+}
+
 int parse_integer(const std::string &value,
                   const std::string &name,
                   int minimum,
@@ -68,6 +78,15 @@ int parse_integer(const std::string &value,
     return result;
 }
 
+int parse_even_dimension(const std::string &value,
+                         const std::string &name) {
+    const int result = parse_integer(value, name, 16, 8192);
+    if (result % 2 != 0) {
+        throw std::runtime_error(name + " must be even");
+    }
+    return result;
+}
+
 bool parse_boolean(const std::string &value, const std::string &name) {
     if (value == "true") {
         return true;
@@ -80,12 +99,16 @@ bool parse_boolean(const std::string &value, const std::string &name) {
 
 enum class Section {
     None,
+    Transport,
     Sender,
     Receiver,
     Latency,
 };
 
 Section parse_section(const std::string &content) {
+    if (content == "transport:") {
+        return Section::Transport;
+    }
     if (content == "sender:") {
         return Section::Sender;
     }
@@ -96,7 +119,7 @@ Section parse_section(const std::string &content) {
         return Section::Latency;
     }
     throw std::runtime_error(
-        "runtime config section must be sender, receiver, or latency");
+        "runtime config section must be transport, sender, receiver, or latency");
 }
 
 } // namespace
@@ -123,6 +146,16 @@ const char *sender_input_name(SenderInput input) {
     return "unknown";
 }
 
+const char *transport_mode_name(TransportMode mode) {
+    switch (mode) {
+    case TransportMode::Udp:
+        return "udp";
+    case TransportMode::Srt:
+        return "srt";
+    }
+    return "unknown";
+}
+
 RuntimeConfig load_runtime_config(const std::filesystem::path &path,
                                   bool missing_is_default) {
     std::ifstream input(path);
@@ -137,6 +170,7 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
 
     RuntimeConfig config;
     Section section = Section::None;
+    bool saw_transport = false;
     bool saw_sender = false;
     bool saw_receiver = false;
     bool saw_latency = false;
@@ -166,7 +200,9 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
         if (indent == 0) {
             section = parse_section(content);
             bool *seen = nullptr;
-            if (section == Section::Sender) {
+            if (section == Section::Transport) {
+                seen = &saw_transport;
+            } else if (section == Section::Sender) {
                 seen = &saw_sender;
             } else if (section == Section::Receiver) {
                 seen = &saw_receiver;
@@ -206,7 +242,23 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
             throw std::runtime_error(
                 "duplicate runtime config key '" + key + "'");
         }
-        if (section == Section::Sender) {
+        if (section == Section::Transport) {
+            if (key == "mode") {
+                config.transport.mode = parse_transport_mode(value);
+            } else if (key == "feedback_interval_ms") {
+                config.transport.feedback_interval_ms = parse_integer(
+                    value, "transport.feedback_interval_ms", 50, 5000);
+            } else if (key == "feedback_redundancy") {
+                config.transport.feedback_redundancy = parse_integer(
+                    value, "transport.feedback_redundancy", 1, 100);
+            } else if (key == "feedback_timeout_ms") {
+                config.transport.feedback_timeout_ms = parse_integer(
+                    value, "transport.feedback_timeout_ms", 100, 30000);
+            } else {
+                throw std::runtime_error(
+                    "unknown transport config key '" + key + "'");
+            }
+        } else if (section == Section::Sender) {
             if (key == "input") {
                 config.sender.input = parse_sender_input(value);
             } else if (key == "connect") {
@@ -237,6 +289,12 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
             } else if (key == "display") {
                 config.receiver.display =
                     parse_boolean(value, "receiver.display");
+            } else if (key == "output_width") {
+                config.receiver.output_width =
+                    parse_even_dimension(value, "receiver.output_width");
+            } else if (key == "output_height") {
+                config.receiver.output_height =
+                    parse_even_dimension(value, "receiver.output_height");
             } else if (key == "write_h264") {
                 config.receiver.write_h264 =
                     parse_boolean(value, "receiver.write_h264");
@@ -259,9 +317,10 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
         }
     }
 
-    if (!saw_sender || !saw_receiver || !saw_latency) {
+    if (!saw_transport || !saw_sender || !saw_receiver || !saw_latency) {
         throw std::runtime_error(
-            "runtime config must contain sender, receiver, and latency sections");
+            "runtime config must contain transport, sender, receiver, and "
+            "latency sections");
     }
     return config;
 }

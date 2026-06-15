@@ -153,6 +153,21 @@ void test_invalid_snapshot_keeps_current_profile() {
     assert(controller.update(invalid).level == 5);
 }
 
+void test_udp_weak_network_profiles() {
+    expect_profile(
+        udp_recovery_profile(2000),
+        8, 8, 1, 128, 72, 20.0, true);
+    expect_profile(
+        udp_profile_for_loss(70.0, 2000),
+        6, 50, 1, 320, 180, 8.0, true);
+    expect_profile(
+        udp_profile_for_loss(80.0, 2000),
+        7, 20, 1, 160, 90, 15.0, true);
+    expect_profile(
+        udp_profile_for_loss(90.0, 2000),
+        8, 8, 1, 128, 72, 20.0, true);
+}
+
 } // namespace
 
 int main() {
@@ -162,6 +177,7 @@ int main() {
     test_emergency_recovers_to_current_network_level();
     test_max_video_bitrate_selects_supported_profile();
     test_invalid_snapshot_keeps_current_profile();
+    test_udp_weak_network_profiles();
     std::cout << "adaptation_tests=passed" << std::endl;
     return 0;
 }
