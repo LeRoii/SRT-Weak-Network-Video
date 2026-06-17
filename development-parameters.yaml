@@ -237,8 +237,8 @@ development_history:
   - parameter: udp_recovery_state
     previous: "A stalled SRT socket forced the normal adaptation controller to Level 8 and then reconnected."
     current:
-      trigger: "Cold start, feedback timeout, receiver frame age above 1500 ms, or smoothed loss above 85 percent."
-      exit: "A recovery frame is acknowledged by at least two fresh feedback reports."
+      trigger: "Feedback timeout after startup grace, receiver frame age above 1500 ms, send congestion, or smoothed loss above 85 percent."
+      exit: "A recovery frame is acknowledged by at least two fresh feedback reports; the sender then immediately selects the level implied by current feedback."
       profile: "Level 8: 30kbps/2fps/256x144, one-second GOP, P-frame FEC 8 and keyframe FEC 12."
     reason: "Recover a complete keyframe without waiting for a transport connection."
 
@@ -424,6 +424,21 @@ development_history:
     previous: "Sender UDP statistics printed the receiver-reported last_frame_age_ms."
     current: "The field remains in UDP feedback and recovery control but is no longer printed by the sender."
     reason: "Keep sender output concise while preserving receiver-side frame-age diagnostics and adaptation behavior."
+
+  - parameter: udp_recovery_exit_profile
+    previous: "After cold-start recovery, the adaptation controller remained at Level 8 and recovered one level per five healthy feedback windows."
+    current: "After a recovery frame is acknowledged, the controller immediately resets to the level required by fresh feedback; 0 percent loss and low RTT selects Level 0."
+    reason: "Avoid normal 0-loss startup being stuck at 30kbps/2fps/256x144 while preserving Level 8 for no-feedback recovery."
+
+  - parameter: udp_recovery_frame_tracking
+    previous: "While recovering, each successful send refreshed the recovery frame ID and feedback baseline."
+    current: "The first successfully sent recovery frame is kept as the acknowledgement target until recovery exits or send congestion restarts recovery."
+    reason: "Prevent the recovery target from moving forward forever, which kept 0-loss startup at Level 8."
+
+  - parameter: udp_startup_profile
+    previous: "UDP startup forced Level 8 before any feedback was received."
+    current: "UDP startup begins at the normal adaptation profile; missing feedback triggers Level 8 only after the feedback timeout."
+    reason: "Make 0-loss, low-latency startup use 1280x720/30fps instead of briefly reporting 30kbps/2fps/256x144."
 
 validation_scenarios:
   - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1066, dropped_frames: 72, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 1595, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}

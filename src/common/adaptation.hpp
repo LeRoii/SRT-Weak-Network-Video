@@ -9,6 +9,7 @@ public:
     VideoProfile update(const NetworkSnapshot &network);
     VideoProfile current() const;
     void force_emergency();
+    VideoProfile reset_to_network(const NetworkSnapshot &network);
 
 private:
     VideoProfile profile_for_level(int level) const;

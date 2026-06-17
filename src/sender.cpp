@@ -81,12 +81,12 @@ void SenderApp::run_udp() {
     uint64_t packet_sequence = 0;
     uint64_t frame_id = 1;
     uint32_t stream_epoch = 1;
-    bool recovering = true;
+    bool recovering = false;
     uint64_t last_recovery_frame_id = 0;
     uint64_t recovery_report_baseline = 0;
     uint64_t last_adaptation_feedback_sequence = 0;
-    adaptation_.force_emergency();
     auto profile = adaptation_.current();
+    const auto udp_started_at = std::chrono::steady_clock::now();
     auto next_stats =
         std::chrono::steady_clock::now() + std::chrono::seconds(1);
 
@@ -105,11 +105,16 @@ void SenderApp::run_udp() {
         while (!g_stop_requested.load()) {
             const auto now = std::chrono::steady_clock::now();
             const auto feedback = udp_feedback_snapshot();
+            const bool have_feedback =
+                feedback.received_at.time_since_epoch().count() != 0;
             const bool feedback_stale =
-                feedback.received_at.time_since_epoch().count() == 0 ||
-                now - feedback.received_at >=
-                    std::chrono::milliseconds(
-                        transport_config_.feedback_timeout_ms);
+                have_feedback
+                    ? now - feedback.received_at >=
+                          std::chrono::milliseconds(
+                              transport_config_.feedback_timeout_ms)
+                    : now - udp_started_at >=
+                          std::chrono::milliseconds(
+                              transport_config_.feedback_timeout_ms);
             const bool receiver_stalled =
                 feedback.request_keyframe ||
                 feedback.last_frame_age_ms > 1500;
@@ -120,6 +125,9 @@ void SenderApp::run_udp() {
                  *feedback.loss_percent > 85.0);
             if (recovery_required && !recovering) {
                 recovering = true;
+                last_recovery_frame_id = 0;
+                recovery_report_baseline =
+                    feedback.complete_report_count;
                 adaptation_.force_emergency();
             }
 
@@ -134,6 +142,16 @@ void SenderApp::run_udp() {
                 feedback.loss_percent &&
                 *feedback.loss_percent <= 85.0) {
                 recovering = false;
+                last_recovery_frame_id = 0;
+                NetworkSnapshot network;
+                network.loss_percent = *feedback.loss_percent;
+                network.rtt_ms = feedback.rtt_ms;
+                network.bandwidth_kbps =
+                    feedback.bandwidth_kbps;
+                network.valid = true;
+                desired = adaptation_.reset_to_network(network);
+                last_adaptation_feedback_sequence =
+                    feedback.sequence;
             }
 
             if (!recovering &&
@@ -179,10 +197,13 @@ void SenderApp::run_udp() {
                     profile = adaptation_.current();
                 }
                 recovering = true;
+                last_recovery_frame_id = 0;
+                recovery_report_baseline =
+                    feedback.complete_report_count;
                 keyframe_requested_.store(true);
                 std::cerr << "udp_send_congested=1"
                           << std::endl;
-            } else if (recovering) {
+            } else if (recovering && last_recovery_frame_id == 0) {
                 last_recovery_frame_id = current_frame_id;
                 recovery_report_baseline =
                     feedback.complete_report_count;

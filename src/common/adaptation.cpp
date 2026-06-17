@@ -17,23 +17,7 @@ constexpr std::array<VideoProfile, 9> kProfiles{{
     {8, 30, 2, 256, 144, 8.00, 12.00, false},
 }};
 
-} // namespace
-
-AdaptationController::AdaptationController(int max_video_kbps)
-    : max_video_kbps_(std::clamp(max_video_kbps, 30, 2000)) {
-    while (level_ + 1 < static_cast<int>(kProfiles.size()) &&
-           kProfiles[static_cast<std::size_t>(level_)].bitrate_kbps >
-               max_video_kbps_) {
-        ++level_;
-    }
-    current_ = profile_for_level(level_);
-}
-
-VideoProfile AdaptationController::update(const NetworkSnapshot &network) {
-    if (!network.valid) {
-        return current_;
-    }
-
+int required_level_for_network(const NetworkSnapshot &network) {
     int required = 0;
     if (network.loss_percent > 77.0) {
         required = 8;
@@ -62,6 +46,27 @@ VideoProfile AdaptationController::update(const NetworkSnapshot &network) {
     } else if (network.rtt_ms > 150.0) {
         required = std::max(required, 3);
     }
+    return required;
+}
+
+} // namespace
+
+AdaptationController::AdaptationController(int max_video_kbps)
+    : max_video_kbps_(std::clamp(max_video_kbps, 30, 2000)) {
+    while (level_ + 1 < static_cast<int>(kProfiles.size()) &&
+           kProfiles[static_cast<std::size_t>(level_)].bitrate_kbps >
+               max_video_kbps_) {
+        ++level_;
+    }
+    current_ = profile_for_level(level_);
+}
+
+VideoProfile AdaptationController::update(const NetworkSnapshot &network) {
+    if (!network.valid) {
+        return current_;
+    }
+
+    const int required = required_level_for_network(network);
 
     if (required > level_) {
         level_ = required;
@@ -98,6 +103,23 @@ void AdaptationController::force_emergency() {
     healthy_windows_ = 0;
     emergency_recovery_active_ = true;
     current_ = profile_for_level(level_);
+}
+
+VideoProfile AdaptationController::reset_to_network(
+    const NetworkSnapshot &network) {
+    if (!network.valid) {
+        return current_;
+    }
+    level_ = required_level_for_network(network);
+    while (level_ + 1 < static_cast<int>(kProfiles.size()) &&
+           kProfiles[static_cast<std::size_t>(level_)].bitrate_kbps >
+               max_video_kbps_) {
+        ++level_;
+    }
+    healthy_windows_ = 0;
+    emergency_recovery_active_ = false;
+    current_ = profile_for_level(level_);
+    return current_;
 }
 
 VideoProfile AdaptationController::profile_for_level(int level) const {

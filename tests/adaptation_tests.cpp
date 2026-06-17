@@ -174,6 +174,19 @@ void test_udp_recovery_profile() {
         8, 30, 2, 256, 144, 8.0, 12.0, false);
 }
 
+void test_reset_to_network_after_udp_recovery() {
+    AdaptationController controller(2000);
+    controller.force_emergency();
+    expect_profile(
+        controller.reset_to_network(network(0.0, 50.0)),
+        0, 2000, 30, 1280, 720, 0.10, 0.30, false);
+
+    controller.force_emergency();
+    expect_profile(
+        controller.reset_to_network(network(70.0, 50.0)),
+        6, 80, 3, 320, 180, 2.50, 5.00, false);
+}
+
 } // namespace
 
 int main() {
@@ -184,6 +197,7 @@ int main() {
     test_max_video_bitrate_selects_supported_profile();
     test_invalid_snapshot_keeps_current_profile();
     test_udp_recovery_profile();
+    test_reset_to_network_after_udp_recovery();
     std::cout << "adaptation_tests=passed" << std::endl;
     return 0;
 }

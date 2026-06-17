@@ -116,9 +116,12 @@ latency metric name are not repeated in every log line.
 - `srt` keeps the previous SRT caller/listener behavior for compatibility and
   comparison. SRT still uses its 350 ms latency budget and ARQ.
 
-UDP cold start, stale feedback, send congestion, or a receiver frame age above
-1500 ms immediately selects Level 8 at `256x144/2fps/30kbps`. UDP and SRT use
-the same nine-level ladder after recovery. Every profile uses an approximately
+UDP starts with the normal Level 0 profile (`1280x720/30fps`) and switches to
+Level 8 at `256x144/2fps/30kbps` only after stale or missing feedback, send
+congestion, a receiver frame age above 1500 ms, or very high reported loss. A
+recovery frame keeps Level 8 until it is acknowledged, then the sender
+immediately selects the level implied by the fresh feedback. UDP and SRT use the
+same nine-level ladder after recovery. Every profile uses an approximately
 one-second GOP; keyframes receive stronger FEC than P-frames. Feedback is
 emitted every 200 ms, with 10 copies spread across the interval.
 
