@@ -6,9 +6,10 @@
 namespace {
 
 constexpr std::array<uint8_t, 4> kMagic{{'S', 'V', 'T', '1'}};
-constexpr uint8_t kProtocolVersion = 2;
-constexpr std::size_t kShardHeaderSize = 63;
+constexpr uint8_t kProtocolVersion = 3;
+constexpr std::size_t kShardHeaderSize = 98;
 constexpr std::size_t kControlSize = 22;
+constexpr std::size_t kUdpFeedbackSize = 70;
 
 void append_u16(std::vector<uint8_t> &output, uint16_t value) {
     output.push_back(static_cast<uint8_t>(value >> 8U));
@@ -94,6 +95,10 @@ std::vector<uint8_t> encode_shard_packet(const ShardPacket &packet) {
     output.reserve(kShardHeaderSize + packet.payload.size());
     append_prefix(output, MessageType::VideoShard);
     append_u16(output, packet.keyframe ? 1U : 0U);
+    append_u64(output, packet.session_id);
+    append_u64(output, packet.session_started_unix_us);
+    append_u64(output, packet.packet_sequence);
+    append_u64(output, packet.sent_monotonic_us);
     append_u32(output, packet.stream_epoch);
     append_u64(output, packet.frame_id);
     append_u64(output, packet.encoded_at_unix_us);
@@ -103,6 +108,9 @@ std::vector<uint8_t> encode_shard_packet(const ShardPacket &packet) {
     append_u32(output, packet.bitrate_kbps);
     append_u16(output, packet.width);
     append_u16(output, packet.height);
+    append_u16(output, packet.block_index);
+    append_u16(output, packet.block_count);
+    append_u32(output, packet.block_original_size);
     append_u16(output, packet.data_shards);
     append_u16(output, packet.parity_shards);
     append_u16(output, packet.shard_index);
@@ -132,6 +140,22 @@ std::vector<uint8_t> encode_network_report(const NetworkReport &report) {
     return output;
 }
 
+std::vector<uint8_t> encode_udp_feedback(const UdpFeedback &feedback) {
+    std::vector<uint8_t> output;
+    output.reserve(kUdpFeedbackSize);
+    append_prefix(output, MessageType::UdpFeedback);
+    append_u64(output, feedback.session_id);
+    append_u64(output, feedback.sequence);
+    append_u64(output, feedback.highest_packet_sequence);
+    append_u64(output, feedback.unique_packets);
+    append_u64(output, feedback.received_bytes);
+    append_u64(output, feedback.last_complete_frame_id);
+    append_u64(output, feedback.echoed_sender_monotonic_us);
+    append_u32(output, feedback.last_frame_age_ms);
+    append_u32(output, feedback.request_keyframe ? 1U : 0U);
+    return output;
+}
+
 std::optional<ParsedMessage> parse_message(const uint8_t *data,
                                            std::size_t size) {
     MessageType type{};
@@ -147,6 +171,10 @@ std::optional<ParsedMessage> parse_message(const uint8_t *data,
         uint16_t payload_size = 0;
         ShardPacket packet;
         if (!read_u16(data, size, offset, flags) ||
+            !read_u64(data, size, offset, packet.session_id) ||
+            !read_u64(data, size, offset, packet.session_started_unix_us) ||
+            !read_u64(data, size, offset, packet.packet_sequence) ||
+            !read_u64(data, size, offset, packet.sent_monotonic_us) ||
             !read_u32(data, size, offset, packet.stream_epoch) ||
             !read_u64(data, size, offset, packet.frame_id) ||
             !read_u64(data, size, offset, packet.encoded_at_unix_us) ||
@@ -156,6 +184,9 @@ std::optional<ParsedMessage> parse_message(const uint8_t *data,
             !read_u32(data, size, offset, packet.bitrate_kbps) ||
             !read_u16(data, size, offset, packet.width) ||
             !read_u16(data, size, offset, packet.height) ||
+            !read_u16(data, size, offset, packet.block_index) ||
+            !read_u16(data, size, offset, packet.block_count) ||
+            !read_u32(data, size, offset, packet.block_original_size) ||
             !read_u16(data, size, offset, packet.data_shards) ||
             !read_u16(data, size, offset, packet.parity_shards) ||
             !read_u16(data, size, offset, packet.shard_index) ||
@@ -196,6 +227,28 @@ std::optional<ParsedMessage> parse_message(const uint8_t *data,
             return std::nullopt;
         }
         parsed.network_report = report;
+        return parsed;
+    }
+    if (type == MessageType::UdpFeedback) {
+        UdpFeedback feedback;
+        uint32_t flags = 0;
+        if (!read_u64(data, size, offset, feedback.session_id) ||
+            !read_u64(data, size, offset, feedback.sequence) ||
+            !read_u64(data, size, offset,
+                      feedback.highest_packet_sequence) ||
+            !read_u64(data, size, offset, feedback.unique_packets) ||
+            !read_u64(data, size, offset, feedback.received_bytes) ||
+            !read_u64(data, size, offset,
+                      feedback.last_complete_frame_id) ||
+            !read_u64(data, size, offset,
+                      feedback.echoed_sender_monotonic_us) ||
+            !read_u32(data, size, offset, feedback.last_frame_age_ms) ||
+            !read_u32(data, size, offset, flags) ||
+            offset != size) {
+            return std::nullopt;
+        }
+        feedback.request_keyframe = (flags & 1U) != 0;
+        parsed.udp_feedback = feedback;
         return parsed;
     }
     return std::nullopt;

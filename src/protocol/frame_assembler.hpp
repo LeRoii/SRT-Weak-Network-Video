@@ -6,8 +6,11 @@
 #include <cstdint>
 #include <map>
 #include <optional>
+#include <tuple>
 
 struct RecoveredFrame {
+    uint64_t session_id = 0;
+    uint64_t session_started_unix_us = 0;
     uint32_t stream_epoch = 0;
     uint64_t frame_id = 0;
     uint64_t encoded_at_unix_us = 0;
@@ -31,14 +34,23 @@ public:
     void reset();
 
 private:
+    struct PartialBlock {
+        ShardPacket metadata;
+        std::size_t received = 0;
+        std::vector<std::optional<std::vector<uint8_t>>> shards;
+        std::optional<std::vector<uint8_t>> recovered;
+    };
+
     struct PartialFrame {
         ShardPacket metadata;
         int64_t first_seen_us = 0;
-        std::size_t received = 0;
-        std::vector<std::optional<std::vector<uint8_t>>> shards;
+        std::size_t recovered_blocks = 0;
+        std::vector<PartialBlock> blocks;
     };
 
+    using FrameKey = std::tuple<uint64_t, uint32_t, uint64_t>;
+
     ReedSolomon fec_;
-    std::map<std::pair<uint32_t, uint64_t>, PartialFrame> frames_;
-    std::map<std::pair<uint32_t, uint64_t>, int64_t> completed_;
+    std::map<FrameKey, PartialFrame> frames_;
+    std::map<FrameKey, int64_t> completed_;
 };

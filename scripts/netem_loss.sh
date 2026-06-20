@@ -144,6 +144,17 @@ setup_namespaces() {
     ip netns exec "${DEFAULT_LEFT_NS}" ip link set "${DEFAULT_LEFT_VETH}" up
     ip netns exec "${DEFAULT_RIGHT_NS}" ip link set "${DEFAULT_RIGHT_VETH}" up
 
+    local left_mac
+    local right_mac
+    left_mac="$(ip netns exec "${DEFAULT_LEFT_NS}" \
+        cat "/sys/class/net/${DEFAULT_LEFT_VETH}/address")"
+    right_mac="$(ip netns exec "${DEFAULT_RIGHT_NS}" \
+        cat "/sys/class/net/${DEFAULT_RIGHT_VETH}/address")"
+    ip netns exec "${DEFAULT_LEFT_NS}" ip neigh replace 10.88.0.2 \
+        lladdr "${right_mac}" dev "${DEFAULT_LEFT_VETH}" nud permanent
+    ip netns exec "${DEFAULT_RIGHT_NS}" ip neigh replace 10.88.0.1 \
+        lladdr "${left_mac}" dev "${DEFAULT_RIGHT_VETH}" nud permanent
+
     echo "created namespace topology:"
     echo "  ${DEFAULT_LEFT_NS}/${DEFAULT_LEFT_VETH} ${DEFAULT_LEFT_IP}"
     echo "  ${DEFAULT_RIGHT_NS}/${DEFAULT_RIGHT_VETH} ${DEFAULT_RIGHT_IP}"

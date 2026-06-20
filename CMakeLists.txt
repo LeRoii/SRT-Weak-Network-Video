@@ -242,6 +242,7 @@ set(COMMON_SOURCES
     src/protocol/frame_assembler.cpp
     src/protocol/messages.cpp
     src/transport/srt_transport.cpp
+    src/transport/udp_transport.cpp
 )
 
 configure_file(
@@ -256,6 +257,7 @@ add_executable(srt_weak_video
     src/receiver.cpp
     src/sender.cpp
     src/video/h264_decoder.cpp
+    src/video/output_processor.cpp
     src/video/video_source_reader.cpp
     src/video/video_renderer.cpp
 )

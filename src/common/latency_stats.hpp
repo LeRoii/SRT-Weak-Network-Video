@@ -7,7 +7,6 @@
 
 struct LatencySnapshot {
     std::optional<double> average_ms;
-    std::optional<double> p95_ms;
     uint64_t invalid_samples = 0;
 };
 

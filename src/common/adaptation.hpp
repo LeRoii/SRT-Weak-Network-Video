@@ -8,6 +8,8 @@ public:
 
     VideoProfile update(const NetworkSnapshot &network);
     VideoProfile current() const;
+    void force_emergency();
+    VideoProfile reset_to_network(const NetworkSnapshot &network);
 
 private:
     VideoProfile profile_for_level(int level) const;
@@ -18,3 +20,5 @@ private:
     bool emergency_recovery_active_ = false;
     VideoProfile current_;
 };
+
+VideoProfile udp_recovery_profile(int max_video_kbps);

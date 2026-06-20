@@ -6,6 +6,7 @@
 #include <vector>
 
 struct FecBlock {
+    uint32_t original_size = 0;
     uint16_t data_shards = 0;
     uint16_t parity_shards = 0;
     uint16_t shard_size = 0;
@@ -19,6 +20,10 @@ public:
 
     FecBlock encode(const std::vector<uint8_t> &data,
                     double parity_ratio) const;
+    std::vector<FecBlock> encode_blocks(
+        const std::vector<uint8_t> &data,
+        double parity_ratio,
+        int minimum_data_shards = 4) const;
 
     std::optional<std::vector<uint8_t>> decode(
         uint16_t data_shards,

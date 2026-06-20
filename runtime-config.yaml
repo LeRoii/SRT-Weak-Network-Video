@@ -1,6 +1,12 @@
+transport:
+  mode: udp
+  feedback_interval_ms: 200
+  feedback_redundancy: 10
+  feedback_timeout_ms: 1000
+
 sender:
-  input: camera
-  connect: 127.0.0.1:9000
+  input: file
+  connect: 0.0.0.0:9000
   video_file: /home/u20/code/jetson-2k.mp4
   camera_device: /dev/video0
   camera_width: 640
@@ -11,6 +17,11 @@ sender:
 receiver:
   listen: 0.0.0.0:9000
   display: true
+  minimum_output_width: 640
+  minimum_output_height: 360
+  minimum_output_fps: 5
+  upscale_mode: lanczos_sharpen
+  interpolation_mode: blend
   write_h264: true
   output_file: received.h264
 

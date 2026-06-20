@@ -6,20 +6,47 @@
 
 #include <chrono>
 #include <iostream>
-#include <stdexcept>
 
 extern "C" {
 #include <libavutil/frame.h>
-#include <libavutil/pixfmt.h>
-#include <libswscale/swscale.h>
 }
 
 namespace {
+
 constexpr std::size_t kMaxQueuedFrames = 3;
+
+int64_t steady_time_ms() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+               std::chrono::steady_clock::now().time_since_epoch())
+        .count();
 }
 
-VideoRenderer::VideoRenderer(LatencyStats *latency_stats)
-    : latency_stats_(latency_stats) {}
+struct CachedFrame {
+    AVFrame *frame = nullptr;
+    uint64_t latency_start_unix_us = 0;
+    uint64_t latency_generation = 0;
+    bool latency_recorded = false;
+};
+
+void clear_cached(CachedFrame &cached) {
+    av_frame_free(&cached.frame);
+    cached = {};
+}
+
+} // namespace
+
+VideoRenderer::VideoRenderer(int minimum_output_width,
+                             int minimum_output_height,
+                             int minimum_output_fps,
+                             UpscaleMode upscale_mode,
+                             InterpolationMode interpolation_mode,
+                             LatencyStats *latency_stats)
+    : processor_(minimum_output_width,
+                 minimum_output_height,
+                 upscale_mode),
+      cadence_(minimum_output_fps, interpolation_mode),
+      interpolation_mode_(interpolation_mode),
+      latency_stats_(latency_stats) {}
 
 VideoRenderer::~VideoRenderer() {
     stop();
@@ -45,7 +72,7 @@ void VideoRenderer::stop() {
 void VideoRenderer::submit(const AVFrame *frame,
                            uint64_t latency_start_unix_us,
                            uint64_t latency_generation) {
-    rendered_frames_.fetch_add(1, std::memory_order_relaxed);
+    decoded_interval_frames_.fetch_add(1, std::memory_order_relaxed);
     if (!enabled_.load()) {
         return;
     }
@@ -62,7 +89,10 @@ void VideoRenderer::submit(const AVFrame *frame,
             av_frame_free(&old);
         }
         frames_.push_back(
-            {copy, latency_start_unix_us, latency_generation});
+            {copy,
+             latency_start_unix_us,
+             latency_generation,
+             steady_time_ms()});
     }
     cv_.notify_one();
 }
@@ -77,22 +107,117 @@ void VideoRenderer::render_loop() {
     SDL_Window *window = nullptr;
     SDL_Renderer *renderer = nullptr;
     SDL_Texture *texture = nullptr;
-    SwsContext *sws = nullptr;
-    AVFrame *yuv_frame = nullptr;
-    int width = 0;
-    int height = 0;
-    AVPixelFormat source_format = AV_PIX_FMT_NONE;
+    int texture_width = 0;
+    int texture_height = 0;
+    CachedFrame previous;
+    CachedFrame current;
+
+    auto ensure_output = [&](int width, int height) {
+        if (!window) {
+            window = SDL_CreateWindow(
+                "Weak-Network Receiver",
+                SDL_WINDOWPOS_CENTERED,
+                SDL_WINDOWPOS_CENTERED,
+                width,
+                height,
+                0);
+            renderer = window
+                           ? SDL_CreateRenderer(
+                                 window, -1, SDL_RENDERER_ACCELERATED)
+                           : nullptr;
+            if (window && !renderer) {
+                renderer = SDL_CreateRenderer(
+                    window, -1, SDL_RENDERER_SOFTWARE);
+            }
+        }
+        if (!window || !renderer) {
+            return false;
+        }
+        if (texture_width == width && texture_height == height &&
+            texture) {
+            return true;
+        }
+        SDL_SetWindowSize(window, width, height);
+        if (texture) {
+            SDL_DestroyTexture(texture);
+        }
+        texture = SDL_CreateTexture(
+            renderer,
+            SDL_PIXELFORMAT_IYUV,
+            SDL_TEXTUREACCESS_STREAMING,
+            width,
+            height);
+        texture_width = width;
+        texture_height = height;
+        current_output_width_.store(width, std::memory_order_relaxed);
+        current_output_height_.store(height, std::memory_order_relaxed);
+        return texture != nullptr;
+    };
+
+    auto present = [&](OutputAction action) {
+        const bool synthetic =
+            action == OutputAction::BlendSynthetic ||
+            action == OutputAction::RepeatSynthetic;
+        AVFrame *temporary = nullptr;
+        AVFrame *frame = current.frame;
+        if (action == OutputAction::BlendSynthetic &&
+            interpolation_mode_ == InterpolationMode::Blend) {
+            temporary =
+                OutputProcessor::blend(previous.frame, current.frame);
+            if (temporary) {
+                frame = temporary;
+            } else if (previous.frame) {
+                frame = previous.frame;
+            }
+        }
+        if (!frame || !ensure_output(frame->width, frame->height)) {
+            av_frame_free(&temporary);
+            return;
+        }
+
+        SDL_UpdateYUVTexture(
+            texture,
+            nullptr,
+            frame->data[0],
+            frame->linesize[0],
+            frame->data[1],
+            frame->linesize[1],
+            frame->data[2],
+            frame->linesize[2]);
+        SDL_RenderClear(renderer);
+        SDL_RenderCopy(renderer, texture, nullptr, nullptr);
+        SDL_RenderPresent(renderer);
+
+        rendered_frames_.fetch_add(1, std::memory_order_relaxed);
+        output_interval_frames_.fetch_add(
+            1, std::memory_order_relaxed);
+        if (synthetic) {
+            synthetic_interval_frames_.fetch_add(
+                1, std::memory_order_relaxed);
+        } else if (!current.latency_recorded &&
+                   latency_stats_ &&
+                   current.latency_start_unix_us != 0) {
+            latency_stats_->record(
+                current.latency_generation,
+                current.latency_start_unix_us,
+                unix_time_us(),
+                monotonic_us());
+            current.latency_recorded = true;
+        }
+        av_frame_free(&temporary);
+    };
 
     while (!stopping_.load()) {
-        QueuedFrame queued;
+        std::deque<QueuedFrame> pending;
         {
             std::unique_lock<std::mutex> lock(mutex_);
-            cv_.wait_for(lock, std::chrono::milliseconds(50),
-                         [this] { return stopping_.load() || !frames_.empty(); });
-            if (!frames_.empty()) {
-                queued = frames_.front();
-                frames_.pop_front();
-            }
+            cv_.wait_for(
+                lock,
+                std::chrono::milliseconds(10),
+                [this] {
+                    return stopping_.load() || !frames_.empty();
+                });
+            pending.swap(frames_);
         }
 
         SDL_Event event;
@@ -102,81 +227,42 @@ void VideoRenderer::render_loop() {
             }
         }
 
-        AVFrame *frame = queued.frame;
-        if (!frame) {
-            continue;
-        }
-
-        const auto frame_format = static_cast<AVPixelFormat>(frame->format);
-        if (!window || width != frame->width || height != frame->height ||
-            source_format != frame_format) {
-            width = frame->width;
-            height = frame->height;
-            source_format = frame_format;
-
-            if (!window) {
-                window = SDL_CreateWindow("WebRTC Receiver", SDL_WINDOWPOS_CENTERED,
-                                          SDL_WINDOWPOS_CENTERED, width, height,
-                                          SDL_WINDOW_RESIZABLE);
-                renderer = window ? SDL_CreateRenderer(
-                                        window, -1, SDL_RENDERER_ACCELERATED)
-                                  : nullptr;
-                if (window && !renderer) {
-                    renderer = SDL_CreateRenderer(
-                        window, -1, SDL_RENDERER_SOFTWARE);
-                }
-            } else {
-                SDL_SetWindowSize(window, width, height);
+        while (!pending.empty()) {
+            QueuedFrame queued = pending.front();
+            pending.pop_front();
+            AVFrame *processed = processor_.process(queued.frame);
+            av_frame_free(&queued.frame);
+            if (!processed) {
+                continue;
             }
 
-            if (!window || !renderer) {
-                std::cerr << "sdl_window_failed=" << SDL_GetError() << std::endl;
-                av_frame_free(&frame);
-                break;
-            }
-
-            if (texture) {
-                SDL_DestroyTexture(texture);
-            }
-            texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_IYUV,
-                                        SDL_TEXTUREACCESS_STREAMING, width, height);
-
-            sws_freeContext(sws);
-            sws = sws_getContext(width, height, source_format, width, height,
-                                 AV_PIX_FMT_YUV420P, SWS_BILINEAR, nullptr, nullptr,
-                                 nullptr);
-
-            av_frame_free(&yuv_frame);
-            yuv_frame = av_frame_alloc();
-            yuv_frame->format = AV_PIX_FMT_YUV420P;
-            yuv_frame->width = width;
-            yuv_frame->height = height;
-            av_frame_get_buffer(yuv_frame, 32);
-        }
-
-        av_frame_make_writable(yuv_frame);
-        sws_scale(sws, frame->data, frame->linesize, 0, height,
-                  yuv_frame->data, yuv_frame->linesize);
-
-        SDL_UpdateYUVTexture(texture, nullptr,
-                             yuv_frame->data[0], yuv_frame->linesize[0],
-                             yuv_frame->data[1], yuv_frame->linesize[1],
-                             yuv_frame->data[2], yuv_frame->linesize[2]);
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, texture, nullptr, nullptr);
-        SDL_RenderPresent(renderer);
-        if (latency_stats_ && queued.latency_start_unix_us != 0) {
-            latency_stats_->record(
-                queued.latency_generation,
+            clear_cached(previous);
+            previous = current;
+            current = {
+                processed,
                 queued.latency_start_unix_us,
-                unix_time_us(),
-                monotonic_us());
+                queued.latency_generation,
+                false,
+            };
+            const bool can_blend =
+                previous.frame &&
+                previous.frame->width == current.frame->width &&
+                previous.frame->height == current.frame->height;
+            const auto action = cadence_.on_real_frame(
+                queued.received_at_ms, can_blend);
+            if (action != OutputAction::None) {
+                present(action);
+            }
         }
-        av_frame_free(&frame);
+
+        const auto action = cadence_.on_tick(steady_time_ms());
+        if (action != OutputAction::None) {
+            present(action);
+        }
     }
 
-    av_frame_free(&yuv_frame);
-    sws_freeContext(sws);
+    clear_cached(previous);
+    clear_cached(current);
     if (texture) {
         SDL_DestroyTexture(texture);
     }
@@ -191,6 +277,21 @@ void VideoRenderer::render_loop() {
 
 uint64_t VideoRenderer::rendered_frames() const {
     return rendered_frames_.load(std::memory_order_relaxed);
+}
+
+RendererStats VideoRenderer::take_stats() {
+    RendererStats stats;
+    stats.decoded_frames =
+        decoded_interval_frames_.exchange(0, std::memory_order_relaxed);
+    stats.output_frames =
+        output_interval_frames_.exchange(0, std::memory_order_relaxed);
+    stats.synthetic_frames =
+        synthetic_interval_frames_.exchange(0, std::memory_order_relaxed);
+    stats.output_width =
+        current_output_width_.load(std::memory_order_relaxed);
+    stats.output_height =
+        current_output_height_.load(std::memory_order_relaxed);
+    return stats;
 }
 
 void VideoRenderer::discard_pending() {

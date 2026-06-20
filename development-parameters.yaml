@@ -1,7 +1,7 @@
 metadata:
   purpose: "Record parameters tuned during weak-network video development."
   runtime_loaded: false
-  updated_at: "2026-06-12"
+  updated_at: "2026-06-15"
   units_note: "Bitrates are kbps unless a different unit is stated."
 
 current:
@@ -10,9 +10,19 @@ current:
     config_location: "Directory containing the executable."
     command_line_parameters: [role]
     missing_config_behavior: "Use compiled defaults."
+    compiled_fallback:
+      sender_input: camera
+      sender_connect: "127.0.0.1:9000"
+      receiver_listen: "0.0.0.0:9000"
+    transport:
+      mode: udp
+      selectable_modes: [udp, srt]
+      feedback_interval_ms: 200
+      feedback_redundancy: 10
+      feedback_timeout_ms: 1000
     sender:
-      input: camera
-      connect: "127.0.0.1:9000"
+      input: file
+      connect: "10.88.0.2:9000"
       video_file: "/home/u20/code/jetson-2k.mp4"
       camera:
         device: /dev/video0
@@ -22,12 +32,20 @@ current:
         fps: 30
       max_video_kbps: 2000
     receiver:
-      listen: "0.0.0.0:9000"
+      listen: "10.88.0.2:9000"
       display: true
+      minimum_output_width: 640
+      minimum_output_height: 360
+      minimum_output_fps: 5
+      upscale_mode: lanczos_sharpen
+      selectable_upscale_modes: [bilinear, lanczos_sharpen]
+      interpolation_mode: blend
+      selectable_interpolation_modes: [repeat, blend]
       write_h264: true
       output_file: received.h264
 
   srt:
+    role: "Optional compatibility transport."
     transport_type: live
     message_api: true
     timestamp_based_delivery: true
@@ -63,6 +81,15 @@ current:
       synthetic_loss_percent: 100
       synthetic_rtt_ms: 500
       retry_delay_ms: 100
+    udp:
+      socket_send_buffer_bytes: 4194304
+      socket_receive_buffer_bytes: 4194304
+      feedback_loss_minimum_packets: 32
+      feedback_loss_ewma_previous_weight: 0.8
+      recovery_feedback_timeout_ms: 1000
+      recovery_receiver_frame_age_ms: 1500
+      recovery_profile: {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, p_frame_fec_ratio: 8.0, keyframe_fec_ratio: 12.0, all_intra: false}
+      adaptation_feedback_sequence_deduplication: true
 
   receiver:
     timeout_poll_delay_ms: 2
@@ -80,10 +107,15 @@ current:
     frame_continuity_gate:
       enabled: true
       action_on_frame_id_gap: "Drop non-keyframes until the next complete keyframe."
+    udp:
+      feedback_copy_spacing_ms: 20
+      keyframe_request_frame_age_ms: 1500
+      packet_sequence_history: 20000
+      maximum_blocks_per_frame: 64
 
   adaptation:
     max_video_kbps:
-      minimum: 8
+      minimum: 30
       maximum: 2000
       default: 2000
     healthy_window:
@@ -99,34 +131,53 @@ current:
       - {greater_than_percent: 15, level: 3}
       - {greater_than_percent: 30, level: 4}
       - {greater_than_percent: 50, level: 5}
-      - {greater_than_percent: 70, level: 6}
-      - {greater_than_percent: 80, level: 7}
-      - {greater_than_percent: 90, level: 8}
+      - {greater_than_percent: 65, level: 6}
+      - {greater_than_percent: 72, level: 7}
+      - {greater_than_percent: 77, level: 8}
     rtt_minimum_levels:
       - {greater_than_ms: 150, minimum_level: 3}
       - {greater_than_ms: 220, minimum_level: 5}
       - {greater_than_ms: 300, minimum_level: 6}
       - {greater_than_ms: 400, minimum_level: 7}
     profiles:
-      - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, fec_ratio: 0.15, all_intra: false}
-      - {level: 1, bitrate_kbps: 1400, fps: 20, width: 1280, height: 720, fec_ratio: 0.25, all_intra: false}
-      - {level: 2, bitrate_kbps: 900, fps: 10, width: 960, height: 540, fec_ratio: 0.50, all_intra: false}
-      - {level: 3, bitrate_kbps: 500, fps: 5, width: 640, height: 360, fec_ratio: 0.75, all_intra: false}
-      - {level: 4, bitrate_kbps: 250, fps: 3, width: 426, height: 240, fec_ratio: 1.00, all_intra: false}
-      - {level: 5, bitrate_kbps: 120, fps: 2, width: 426, height: 240, fec_ratio: 2.00, all_intra: true}
-      - {level: 6, bitrate_kbps: 50, fps: 1, width: 320, height: 180, fec_ratio: 3.00, all_intra: true}
-      - {level: 7, bitrate_kbps: 20, fps: 1, width: 160, height: 90, fec_ratio: 5.00, all_intra: true}
-      - {level: 8, bitrate_kbps: 8, fps: 1, width: 128, height: 72, fec_ratio: 11.00, all_intra: true}
+      - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, p_frame_fec_ratio: 0.10, keyframe_fec_ratio: 0.30, all_intra: false}
+      - {level: 1, bitrate_kbps: 1200, fps: 20, width: 960, height: 540, p_frame_fec_ratio: 0.15, keyframe_fec_ratio: 0.50, all_intra: false}
+      - {level: 2, bitrate_kbps: 700, fps: 15, width: 640, height: 360, p_frame_fec_ratio: 0.25, keyframe_fec_ratio: 0.75, all_intra: false}
+      - {level: 3, bitrate_kbps: 400, fps: 10, width: 640, height: 360, p_frame_fec_ratio: 0.40, keyframe_fec_ratio: 1.00, all_intra: false}
+      - {level: 4, bitrate_kbps: 220, fps: 5, width: 426, height: 240, p_frame_fec_ratio: 0.75, keyframe_fec_ratio: 2.00, all_intra: false}
+      - {level: 5, bitrate_kbps: 140, fps: 3, width: 426, height: 240, p_frame_fec_ratio: 1.25, keyframe_fec_ratio: 3.00, all_intra: false}
+      - {level: 6, bitrate_kbps: 80, fps: 3, width: 320, height: 180, p_frame_fec_ratio: 2.50, keyframe_fec_ratio: 5.00, all_intra: false}
+      - {level: 7, bitrate_kbps: 50, fps: 2, width: 320, height: 180, p_frame_fec_ratio: 4.00, keyframe_fec_ratio: 7.00, all_intra: false}
+      - {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, p_frame_fec_ratio: 8.00, keyframe_fec_ratio: 12.00, all_intra: false}
+    gop_seconds: 1
 
   fec:
     target_shard_bytes: 1000
     maximum_total_shards: 255
+    minimum_data_shards_per_block: 4
+    multiple_blocks_per_frame: true
 
   protocol:
-    version: 2
-    shard_header_bytes: 63
+    version: 3
+    shard_header_bytes: 98
     encoded_timestamp: encoded_at_unix_us
     source_processing_duration: source_to_encoded_us
+    udp_session_fields:
+      - session_id
+      - session_started_unix_us
+      - packet_sequence
+      - sent_monotonic_us
+      - block_index
+      - block_count
+      - block_original_size
+    udp_feedback_fields:
+      - highest_packet_sequence
+      - unique_packets
+      - received_bytes
+      - last_complete_frame_id
+      - echoed_sender_monotonic_us
+      - last_frame_age_ms
+      - request_keyframe
     clock_requirement: "Sender and receiver CLOCK_REALTIME synchronized by NTP or PTP."
     backward_compatible: false
 
@@ -145,6 +196,24 @@ current:
     source_to_display_headless_value: "n/a"
     source_to_display_endpoint: SDL_RenderPresent
 
+  display_post_processing:
+    scope: display_only
+    preserve_decoded_resolution_at_or_above_minimum: true
+    preserve_decoded_fps_at_or_above_minimum: true
+    minimum_output_width: 640
+    minimum_output_height: 360
+    minimum_output_fps: 5
+    aspect_ratio_preserved: true
+    default_upscale_mode: lanczos_sharpen
+    selectable_upscale_modes: [bilinear, lanczos_sharpen]
+    lanczos_sharpen_scope: luma_after_upscale
+    default_interpolation_mode: blend
+    selectable_interpolation_modes: [repeat, blend]
+    blend_weights: [0.5, 0.5]
+    prolonged_gap_fallback: repeat_last_complete_frame
+    processed_h264_output: false
+    log_fields: [decoded_fps]
+
   netem_script:
     left_namespace: webrtc_tx
     right_namespace: webrtc_rx
@@ -154,8 +223,79 @@ current:
     right_address: "10.88.0.2/24"
     default_loss_direction: tx
     bandwidth_units_examples: [500kbit, 2mbit, 1gbit]
+    permanent_neighbor_entries: true
 
 development_history:
+  - parameter: primary_transport
+    previous: "SRT caller/listener was the only media transport."
+    current:
+      default: udp
+      optional: srt
+      udp_connection_state: none
+    reason: "Remove SRT handshake, peer-idle disconnect, and reconnect delays under 70-80 percent bidirectional loss."
+
+  - parameter: udp_recovery_state
+    previous: "A stalled SRT socket forced the normal adaptation controller to Level 8 and then reconnected."
+    current:
+      trigger: "Feedback timeout after startup grace, receiver frame age above 1500 ms, send congestion, or smoothed loss above 85 percent."
+      exit: "A recovery frame is acknowledged by at least two fresh feedback reports; the sender then immediately selects the level implied by current feedback."
+      profile: "Level 8: 30kbps/2fps/256x144, one-second GOP, P-frame FEC 8 and keyframe FEC 12."
+    reason: "Recover a complete keyframe without waiting for a transport connection."
+
+  - parameter: udp_high_loss_profiles
+    previous: "UDP used a separate three-profile table at high loss."
+    current:
+      loss_70: "Level 6: 80kbps/3fps/320x180, P-frame FEC 2.5, keyframe FEC 5."
+      loss_80_to_85: "Level 8: 30kbps/2fps/256x144, P-frame FEC 8, keyframe FEC 12."
+      transport_alignment: "UDP and SRT use the same nine-level ladder."
+    reason: "Preserve more real motion and spatial detail while keeping complete-frame gaps below three seconds through 85 percent loss."
+
+  - parameter: fec_frame_layout
+    previous: "One frame was limited to one Reed-Solomon block and 255 total shards."
+    current: "A frame may contain up to 64 independently recoverable blocks; every block has at least four data shards."
+    reason: "Support 15-20x parity without limiting encoded frame size to one small block."
+
+  - parameter: protocol_version
+    previous: 2
+    current: 3
+    reason: "Carry UDP session, packet sequence, feedback echo, and multi-block FEC metadata."
+
+  - parameter: netem_neighbor_resolution
+    previous: "ARP requests and responses were subjected to the configured netem loss."
+    current: "ns-up installs permanent neighbor entries for both veth endpoints."
+    reason: "Measure media recovery rather than random ARP cold-start delay at 70-80 percent bidirectional loss."
+
+  - parameter: receiver_display_size
+    previous: "The SDL window and texture followed each decoded frame resolution."
+    current:
+      output_width: 640
+      output_height: 360
+      scaling: bilinear
+      scope: display_only
+    reason: "Keep the displayed picture at a stable size while adaptive profiles change encoded resolution."
+
+  - parameter: minimum_display_output
+    previous: "Every decoded frame was forced to one fixed 640x360 size and no synthetic output cadence was provided."
+    current:
+      minimum_resolution: "640x360"
+      minimum_fps: 5
+      preserve_higher_resolution_and_fps: true
+      upscale_modes: [bilinear, lanczos_sharpen]
+      interpolation_modes: [repeat, blend]
+      defaults: {upscale: lanczos_sharpen, interpolation: blend}
+      output_scope: display_only
+    reason: "Meet a minimum display specification without reducing decoded video that already exceeds it."
+
+  - parameter: unequal_frame_fec
+    previous: "Every frame in a profile used the same parity ratio."
+    current: "Each profile has a P-frame FEC ratio and a stronger keyframe FEC ratio."
+    reason: "Protect decoder recovery points without applying keyframe-level parity to every P-frame."
+
+  - parameter: udp_feedback_window_counting
+    previous: "The same feedback report could be consumed by multiple encoded frames."
+    current: "Each UDP feedback sequence updates adaptation at most once."
+    reason: "Ensure five-window recovery represents five distinct network feedback windows."
+
   - parameter: sender_video_input
     previous: "Only a looping local video file was supported."
     current:
@@ -246,7 +386,7 @@ development_history:
     previous: "Only SRT RTT was reported; no media one-way latency metric."
     current: "Select exactly one of encode_to_assemble, encode_to_decode, or source_to_display; default encode_to_decode."
     rolling_window_seconds: 10
-    outputs: [latency_avg, latency_p95, latency_invalid]
+    outputs: [latency_avg, latency_invalid]
     reason: "Separate SRT round-trip time from media pipeline latency without affecting adaptation."
 
   - parameter: media_timestamp_protocol
@@ -270,7 +410,59 @@ development_history:
     current: "A frame ID gap clears decoder synchronization; non-keyframes are dropped until the next complete keyframe."
     reason: "Prevent decoder errors and corrupted reference chains during abrupt packet loss."
 
+  - parameter: periodic_log_fields
+    previous:
+      sender: [transport]
+      receiver: [transport, latency_type, latency_p95, output_fps, synthetic_fps, output_resolution]
+    current:
+      sender_removed: [transport]
+      receiver_removed: [transport, latency_type, latency_p95, output_fps, synthetic_fps, output_resolution]
+      retained_debug: [srt_events, udp_events, decoded_fps, last_frame_age_ms, max_frame_gap_ms, decoder_errors]
+    reason: "Reduce repetitive output while retaining connection and frame-stall diagnostics."
+
+  - parameter: sender_last_frame_age_log
+    previous: "Sender UDP statistics printed the receiver-reported last_frame_age_ms."
+    current: "The field remains in UDP feedback and recovery control but is no longer printed by the sender."
+    reason: "Keep sender output concise while preserving receiver-side frame-age diagnostics and adaptation behavior."
+
+  - parameter: udp_recovery_exit_profile
+    previous: "After cold-start recovery, the adaptation controller remained at Level 8 and recovered one level per five healthy feedback windows."
+    current: "After a recovery frame is acknowledged, the controller immediately resets to the level required by fresh feedback; 0 percent loss and low RTT selects Level 0."
+    reason: "Avoid normal 0-loss startup being stuck at 30kbps/2fps/256x144 while preserving Level 8 for no-feedback recovery."
+
+  - parameter: udp_recovery_frame_tracking
+    previous: "While recovering, each successful send refreshed the recovery frame ID and feedback baseline."
+    current: "The first successfully sent recovery frame is kept as the acknowledgement target until recovery exits or send congestion restarts recovery."
+    reason: "Prevent the recovery target from moving forward forever, which kept 0-loss startup at Level 8."
+
+  - parameter: udp_startup_profile
+    previous: "UDP startup forced Level 8 before any feedback was received."
+    current: "UDP startup begins at the normal adaptation profile; missing feedback triggers Level 8 only after the feedback timeout."
+    reason: "Make 0-loss, low-latency startup use 1280x720/30fps instead of briefly reporting 30kbps/2fps/256x144."
+
 validation_scenarios:
+  - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1066, dropped_frames: 72, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 1595, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
+  - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1114, dropped_frames: 26, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 2104, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
+  - {transport: udp, loss_percent: 85, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1015, dropped_frames: 122, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 2103, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
+  - {transport: udp, scenario: cold_start, loss_percent: 70, delay_ms: 50, receiver_start_to_first_complete_frame_ms: 1065, decoder_errors: 0, implementation: minimum_output_v2}
+  - {transport: udp, scenario: cold_start, loss_percent: 80, delay_ms: 50, receiver_start_to_first_complete_frame_ms: 1078, decoder_errors: 0, implementation: minimum_output_v2}
+  - {transport: udp, scenario: cold_start, loss_percent: 85, delay_ms: 50, receiver_start_to_first_complete_frame_ms: 1076, decoder_errors: 0, implementation: minimum_output_v2}
+  - {transport: udp, scenario: "0% to impaired transition", loss_percent: 80, delay_ms: 50, runs: 5, passed_under_3000_ms: 5, worst_frame_gap_ms: 2189, decoder_errors: 0, implementation: minimum_output_v2}
+  - {transport: udp, scenario: "0% to impaired transition", loss_percent: 85, delay_ms: 50, runs: 5, passed_under_3000_ms: 5, worst_frame_gap_ms: 2236, decoder_errors: 0, implementation: minimum_output_v2}
+  - {upscale_mode: bilinear, interpolation_mode: repeat, input_fps: 2, output_fps: 5, output_resolution: "640x360", decoder_errors: 0, ffmpeg_strict: passed}
+  - {upscale_mode: lanczos_sharpen, interpolation_mode: blend, input_fps: 2, output_fps: 5, output_resolution: "640x360", decoder_errors: 0, ffmpeg_strict: passed}
+  - {transport: srt, loss_percent: 0, output_resolution: "1280x720", synthetic_fps: 0, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
+  - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 600, frames: 573, dropped_frames: 1, max_frame_gap_ms: 2062, decoder_errors: 0, ffmpeg_strict: passed}
+  - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 600, frames: 574, dropped_frames: 1, max_frame_gap_ms: 2069, decoder_errors: 0, ffmpeg_strict: passed}
+  - {transport: udp, scenario: cold_start, loss_percent: 70, runs: 10, passed_under_3000_ms: 10, worst_first_frame_ms: 738}
+  - {transport: udp, scenario: cold_start, loss_percent: 80, runs: 10, passed_under_3000_ms: 10, worst_first_frame_ms: 726}
+  - {transport: udp, scenario: "0% to impaired transition", loss_percent: 70, runs: 5, passed_under_3000_ms: 5, worst_frame_gap_ms: 2096}
+  - {transport: udp, scenario: "0% to impaired transition", loss_percent: 80, runs: 5, passed_under_3000_ms: 5, worst_frame_gap_ms: 2050}
+  - {transport: udp, transition: "0% to 70% bidirectional loss, 50ms delay", duration_seconds: 38, max_frame_gap_ms: 2067, decoder_errors: 0}
+  - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 35, profile: "320x180/1fps/FEC8", max_frame_gap_ms: 1083, decoder_errors: 0}
+  - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 35, profile: "160x90/1fps/FEC15", max_frame_gap_ms: 1092, decoder_errors: 0}
+  - {transport: srt, loss_percent: 0, result: "Protocol v3 and multi-block FEC regression passed with decoder_errors=0 and FFmpeg-valid H.264."}
+  - {encoded_resolution: "128x72", display_resolution: "640x360", result: "X11 reported a fixed 640x360 window with decoder_errors=0."}
   - {input: camera, device: /dev/video0, capture: "640x480/30fps YUYV", result: "Rendered continuously with decoder_errors=0 and FFmpeg-valid H.264 output."}
   - {loss_percent: 30, delay_ms: 50, direction: both, expected_profile: "426x240/2fps/120kbps"}
   - {loss_percent: 50, delay_ms: 50, direction: both, expected_profile_range: "426x240 at 120-250kbps"}

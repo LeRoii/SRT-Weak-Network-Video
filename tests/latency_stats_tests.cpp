@@ -23,9 +23,7 @@ int main() {
 
     auto snapshot = stats.snapshot(20'000);
     assert(snapshot.average_ms);
-    assert(snapshot.p95_ms);
     assert(near(*snapshot.average_ms, 10.5));
-    assert(near(*snapshot.p95_ms, 19.0));
     assert(snapshot.invalid_samples == 0);
 
     stats.record(generation, 2'000'000, 1'999'999, 21'000);

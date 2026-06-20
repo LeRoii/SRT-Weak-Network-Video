@@ -23,6 +23,11 @@ std::string complete_config(const std::string &metric = "encode_to_decode",
                             const std::string &window = "10",
                             const std::string &write_h264 = "true") {
     return
+        "transport:\n"
+        "  mode: udp\n"
+        "  feedback_interval_ms: 200\n"
+        "  feedback_redundancy: 10\n"
+        "  feedback_timeout_ms: 1000\n"
         "sender:\n"
         "  input: camera\n"
         "  connect: 127.0.0.1:9000\n"
@@ -35,6 +40,11 @@ std::string complete_config(const std::string &metric = "encode_to_decode",
         "receiver:\n"
         "  listen: 0.0.0.0:9000\n"
         "  display: false\n"
+        "  minimum_output_width: 800\n"
+        "  minimum_output_height: 450\n"
+        "  minimum_output_fps: 5\n"
+        "  upscale_mode: lanczos_sharpen\n"
+        "  interpolation_mode: blend\n"
         "  write_h264: " + write_h264 + "\n"
         "  output_file: /tmp/output.h264\n"
         "latency:\n"
@@ -68,6 +78,10 @@ int main() {
         "srt-runtime-config-missing.yaml";
     std::filesystem::remove(missing);
     const auto defaults = load_runtime_config(missing, true);
+    assert(defaults.transport.mode == TransportMode::Udp);
+    assert(defaults.transport.feedback_interval_ms == 200);
+    assert(defaults.transport.feedback_redundancy == 10);
+    assert(defaults.transport.feedback_timeout_ms == 1000);
     assert(defaults.sender.connect == "127.0.0.1:9000");
     assert(defaults.sender.input == SenderInput::Camera);
     assert(defaults.sender.camera_device == "/dev/video0");
@@ -77,6 +91,13 @@ int main() {
     assert(defaults.sender.max_video_kbps == 2000);
     assert(defaults.receiver.listen == "0.0.0.0:9000");
     assert(defaults.receiver.display);
+    assert(defaults.receiver.minimum_output_width == 640);
+    assert(defaults.receiver.minimum_output_height == 360);
+    assert(defaults.receiver.minimum_output_fps == 5);
+    assert(defaults.receiver.upscale_mode ==
+           UpscaleMode::LanczosSharpen);
+    assert(defaults.receiver.interpolation_mode ==
+           InterpolationMode::Blend);
     assert(defaults.receiver.write_h264);
     assert(defaults.receiver.output_file == "received.h264");
     assert(defaults.latency.metric == LatencyMetric::EncodeToDecode);
@@ -87,11 +108,15 @@ int main() {
         "srt-runtime-config-valid.yaml",
         complete_config("encode_to_assemble", "5", "false"));
     const auto config = load_runtime_config(valid, false);
+    assert(config.transport.mode == TransportMode::Udp);
     assert(config.sender.video_file == "/tmp/input.mp4");
     assert(config.sender.input == SenderInput::Camera);
     assert(config.sender.camera_device == "/dev/video9");
     assert(config.sender.max_video_kbps == 500);
     assert(!config.receiver.display);
+    assert(config.receiver.minimum_output_width == 800);
+    assert(config.receiver.minimum_output_height == 450);
+    assert(config.receiver.minimum_output_fps == 5);
     assert(!config.receiver.write_h264);
     assert(config.receiver.output_file == "/tmp/output.h264");
     assert(config.latency.metric == LatencyMetric::EncodeToAssemble);
@@ -120,6 +145,13 @@ int main() {
                      "max_video_kbps: 3000"));
     assert(load_fails(invalid_bitrate));
 
+    const auto bitrate_below_ladder = write_config(
+        "srt-runtime-config-bitrate-below-ladder.yaml",
+        replace_once(complete_config(),
+                     "max_video_kbps: 500",
+                     "max_video_kbps: 29"));
+    assert(load_fails(bitrate_below_ladder));
+
     const auto invalid_input = write_config(
         "srt-runtime-config-invalid-input.yaml",
         replace_once(complete_config(),
@@ -139,6 +171,70 @@ int main() {
         complete_config("encode_to_decode", "10", "yes"));
     assert(load_fails(invalid_boolean));
 
+    const auto invalid_transport = write_config(
+        "srt-runtime-config-invalid-transport.yaml",
+        replace_once(complete_config(),
+                     "mode: udp",
+                     "mode: tcp"));
+    assert(load_fails(invalid_transport));
+
+    const auto invalid_feedback_redundancy = write_config(
+        "srt-runtime-config-invalid-feedback-redundancy.yaml",
+        replace_once(complete_config(),
+                     "feedback_redundancy: 10",
+                     "feedback_redundancy: 0"));
+    assert(load_fails(invalid_feedback_redundancy));
+
+    const auto invalid_output_width = write_config(
+        "srt-runtime-config-invalid-output-width.yaml",
+        replace_once(complete_config(),
+                     "minimum_output_width: 800",
+                     "minimum_output_width: 639"));
+    assert(load_fails(invalid_output_width));
+
+    const auto invalid_output_height = write_config(
+        "srt-runtime-config-invalid-output-height.yaml",
+        replace_once(complete_config(),
+                     "minimum_output_height: 450",
+                     "minimum_output_height: 8"));
+    assert(load_fails(invalid_output_height));
+
+    const auto invalid_output_fps = write_config(
+        "srt-runtime-config-invalid-output-fps.yaml",
+        replace_once(complete_config(),
+                     "minimum_output_fps: 5",
+                     "minimum_output_fps: 0"));
+    assert(load_fails(invalid_output_fps));
+
+    const auto bilinear_repeat = write_config(
+        "srt-runtime-config-bilinear-repeat.yaml",
+        replace_once(
+            replace_once(complete_config(),
+                         "upscale_mode: lanczos_sharpen",
+                         "upscale_mode: bilinear"),
+            "interpolation_mode: blend",
+            "interpolation_mode: repeat"));
+    const auto alternate =
+        load_runtime_config(bilinear_repeat, false);
+    assert(alternate.receiver.upscale_mode ==
+           UpscaleMode::Bilinear);
+    assert(alternate.receiver.interpolation_mode ==
+           InterpolationMode::Repeat);
+
+    const auto invalid_upscale = write_config(
+        "srt-runtime-config-invalid-upscale.yaml",
+        replace_once(complete_config(),
+                     "upscale_mode: lanczos_sharpen",
+                     "upscale_mode: nearest"));
+    assert(load_fails(invalid_upscale));
+
+    const auto invalid_interpolation = write_config(
+        "srt-runtime-config-invalid-interpolation.yaml",
+        replace_once(complete_config(),
+                     "interpolation_mode: blend",
+                     "interpolation_mode: optical_flow"));
+    assert(load_fails(invalid_interpolation));
+
     const auto missing_section = write_config(
         "srt-runtime-config-missing-section.yaml",
         "latency:\n"
@@ -150,9 +246,18 @@ int main() {
     std::filesystem::remove(invalid_metric);
     std::filesystem::remove(invalid_window);
     std::filesystem::remove(invalid_bitrate);
+    std::filesystem::remove(bitrate_below_ladder);
     std::filesystem::remove(invalid_input);
     std::filesystem::remove(invalid_camera_fps);
     std::filesystem::remove(invalid_boolean);
+    std::filesystem::remove(invalid_transport);
+    std::filesystem::remove(invalid_feedback_redundancy);
+    std::filesystem::remove(invalid_output_width);
+    std::filesystem::remove(invalid_output_height);
+    std::filesystem::remove(invalid_output_fps);
+    std::filesystem::remove(bilinear_repeat);
+    std::filesystem::remove(invalid_upscale);
+    std::filesystem::remove(invalid_interpolation);
     std::filesystem::remove(missing_section);
 
     std::cout << "runtime_config_tests=passed" << std::endl;

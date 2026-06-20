@@ -18,6 +18,27 @@ void print_usage(const char *program) {
         << "Usage: " << program << " --role <sender|receiver>\n";
 }
 
+void run_app(const Role role, const RuntimeConfig &config) {
+    if (role == Role::Sender) {
+        SenderApp(parse_endpoint(config.sender.connect),
+                  config.sender,
+                  config.transport).run();
+        return;
+    }
+
+    ReceiverApp(parse_endpoint(config.receiver.listen),
+                config.receiver.output_file,
+                config.receiver.display,
+                config.receiver.minimum_output_width,
+                config.receiver.minimum_output_height,
+                config.receiver.minimum_output_fps,
+                config.receiver.upscale_mode,
+                config.receiver.interpolation_mode,
+                config.receiver.write_h264,
+                config.latency,
+                config.transport).run();
+}
+
 } // namespace
 
 int main(int argc, char **argv) {
@@ -53,18 +74,13 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        SrtRuntime runtime;
         const auto config = load_runtime_config(
             default_runtime_config_path(), true);
-        if (*role == Role::Sender) {
-            SenderApp(parse_endpoint(config.sender.connect),
-                      config.sender).run();
+        if (config.transport.mode == TransportMode::Srt) {
+            SrtRuntime runtime;
+            run_app(*role, config);
         } else {
-            ReceiverApp(parse_endpoint(config.receiver.listen),
-                        config.receiver.output_file,
-                        config.receiver.display,
-                        config.receiver.write_h264,
-                        config.latency).run();
+            run_app(*role, config);
         }
     } catch (const std::exception &error) {
         std::cerr << "fatal: " << error.what() << std::endl;
