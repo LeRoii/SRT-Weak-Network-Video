@@ -1,7 +1,7 @@
 metadata:
   purpose: "Record parameters tuned during weak-network video development."
   runtime_loaded: false
-  updated_at: "2026-06-15"
+  updated_at: "2026-06-23"
   units_note: "Bitrates are kbps unless a different unit is stated."
 
 current:
@@ -89,6 +89,8 @@ current:
       recovery_feedback_timeout_ms: 1000
       recovery_receiver_frame_age_ms: 1500
       recovery_profile: {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, p_frame_fec_ratio: 8.0, keyframe_fec_ratio: 12.0, all_intra: false}
+      missing_feedback_starts_recovery: false
+      missing_feedback_probe_profile: {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, p_frame_fec_ratio: 8.0, keyframe_fec_ratio: 12.0, all_intra: false}
       adaptation_feedback_sequence_deduplication: true
 
   receiver:
@@ -437,8 +439,13 @@ development_history:
 
   - parameter: udp_startup_profile
     previous: "UDP startup forced Level 8 before any feedback was received."
-    current: "UDP startup begins at the normal adaptation profile; missing feedback triggers Level 8 only after the feedback timeout."
+    current: "UDP startup begins at the normal adaptation profile; missing feedback after the feedback timeout uses a transient Level 8 probe profile without entering recovery or forcing the adaptation controller to emergency."
     reason: "Make 0-loss, low-latency startup use 1280x720/30fps instead of briefly reporting 30kbps/2fps/256x144."
+
+  - parameter: udp_missing_feedback_recovery_gate
+    previous: "After the feedback timeout, missing UDP feedback was treated as recovery_required even when no receiver feedback had ever been observed."
+    current: "Feedback timeout starts recovery only after at least one receiver feedback has been observed; before that, the sender may send transient low-rate probe frames while preserving the normal adaptation state."
+    reason: "Avoid sender-first startup being mistaken for severe loss while retaining low-rate probes for lossy cold-start paths."
 
 validation_scenarios:
   - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1066, dropped_frames: 72, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 1595, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}

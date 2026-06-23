@@ -119,10 +119,14 @@ void SenderApp::run_udp() {
                 feedback.request_keyframe ||
                 feedback.last_frame_age_ms > 1500;
 
+            const bool startup_probe =
+                !have_feedback && feedback_stale;
             const bool recovery_required =
-                feedback_stale || receiver_stalled ||
-                (feedback.loss_percent &&
-                 *feedback.loss_percent > 85.0);
+                udp_recovery_required(
+                    have_feedback,
+                    feedback_stale,
+                    receiver_stalled,
+                    feedback.loss_percent);
             if (recovery_required && !recovering) {
                 recovering = true;
                 last_recovery_frame_id = 0;
@@ -131,7 +135,9 @@ void SenderApp::run_udp() {
                 adaptation_.force_emergency();
             }
 
-            VideoProfile desired = adaptation_.current();
+            VideoProfile desired = startup_probe
+                ? udp_recovery_profile(sender_config_.max_video_kbps)
+                : adaptation_.current();
             if (recovering && last_recovery_frame_id != 0 &&
                 !feedback_stale &&
                 !receiver_stalled &&
@@ -192,6 +198,12 @@ void SenderApp::run_udp() {
                 current_frame_id, session_id,
                 session_started_unix_us, packet_sequence);
             if (result != UdpResult::Data) {
+                if (!udp_send_failure_requires_recovery(have_feedback)) {
+                    keyframe_requested_.store(true);
+                    std::this_thread::sleep_for(
+                        std::chrono::milliseconds(20));
+                    continue;
+                }
                 if (!recovering) {
                     adaptation_.force_emergency();
                     profile = adaptation_.current();
