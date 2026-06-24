@@ -1,7 +1,7 @@
 metadata:
   purpose: "Record parameters tuned during weak-network video development."
   runtime_loaded: false
-  updated_at: "2026-06-15"
+  updated_at: "2026-06-24"
   units_note: "Bitrates are kbps unless a different unit is stated."
 
 current:
@@ -89,6 +89,8 @@ current:
       recovery_feedback_timeout_ms: 1000
       recovery_receiver_frame_age_ms: 1500
       recovery_profile: {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, p_frame_fec_ratio: 8.0, keyframe_fec_ratio: 12.0, all_intra: false}
+      missing_feedback_starts_recovery: false
+      missing_feedback_probe_profile: {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, p_frame_fec_ratio: 8.0, keyframe_fec_ratio: 12.0, all_intra: false}
       adaptation_feedback_sequence_deduplication: true
 
   receiver:
@@ -119,21 +121,22 @@ current:
       maximum: 2000
       default: 2000
     healthy_window:
-      loss_below_percent: 3
+      loss_below_percent: 5
       rtt_below_ms: 130
       consecutive_windows: 5
-    degradation: "Immediately jump to the required lower-quality level."
+    degradation: "Immediately jump to the loss-required lower-quality level; RTT-only degradation requires sustained confirmation."
     normal_recovery: "Recover one level after five healthy windows."
     emergency_recovery: "Recover one level every five stable windows until the current network-required level."
     loss_thresholds:
-      - {greater_than_percent: 3, level: 1}
-      - {greater_than_percent: 7, level: 2}
-      - {greater_than_percent: 15, level: 3}
+      - {greater_than_percent: 5, level: 1}
+      - {greater_than_percent: 12, level: 2}
+      - {greater_than_percent: 20, level: 3}
       - {greater_than_percent: 30, level: 4}
       - {greater_than_percent: 50, level: 5}
       - {greater_than_percent: 65, level: 6}
       - {greater_than_percent: 72, level: 7}
       - {greater_than_percent: 77, level: 8}
+    rtt_confirmation_windows: 3
     rtt_minimum_levels:
       - {greater_than_ms: 150, minimum_level: 3}
       - {greater_than_ms: 220, minimum_level: 5}
@@ -158,7 +161,7 @@ current:
     multiple_blocks_per_frame: true
 
   protocol:
-    version: 3
+    version: 4
     shard_header_bytes: 98
     encoded_timestamp: encoded_at_unix_us
     source_processing_duration: source_to_encoded_us
@@ -170,6 +173,11 @@ current:
       - block_index
       - block_count
       - block_original_size
+    udp_probe_fields:
+      - session_id
+      - session_started_unix_us
+      - probe_sequence
+      - sender_monotonic_us
     udp_feedback_fields:
       - highest_packet_sequence
       - unique_packets
@@ -178,7 +186,8 @@ current:
       - echoed_sender_monotonic_us
       - last_frame_age_ms
       - request_keyframe
-    clock_requirement: "Sender and receiver CLOCK_REALTIME synchronized by NTP or PTP."
+    rtt_source: "Independent UDP probe echo sent from the UDP feedback/control thread; media shard sent_monotonic_us is retained for diagnostics but not used for adaptation RTT."
+    clock_requirement: "RTT uses echoed sender monotonic timestamps and does not require synchronized sender/receiver clocks."
     backward_compatible: false
 
   latency_metrics:
@@ -437,8 +446,38 @@ development_history:
 
   - parameter: udp_startup_profile
     previous: "UDP startup forced Level 8 before any feedback was received."
-    current: "UDP startup begins at the normal adaptation profile; missing feedback triggers Level 8 only after the feedback timeout."
+    current: "UDP startup begins at the normal adaptation profile; missing feedback after the feedback timeout uses a transient Level 8 probe profile without entering recovery or forcing the adaptation controller to emergency."
     reason: "Make 0-loss, low-latency startup use 1280x720/30fps instead of briefly reporting 30kbps/2fps/256x144."
+
+  - parameter: udp_missing_feedback_recovery_gate
+    previous: "After the feedback timeout, missing UDP feedback was treated as recovery_required even when no receiver feedback had ever been observed."
+    current: "Feedback timeout starts recovery only after at least one receiver feedback has been observed; before that, the sender may send transient low-rate probe frames while preserving the normal adaptation state."
+    reason: "Avoid sender-first startup being mistaken for severe loss while retaining low-rate probes for lossy cold-start paths."
+
+  - parameter: udp_rtt_measurement
+    previous: "UDP feedback echoed the most recent media shard sent_monotonic_us, so low frame rate, receiver scheduling, or media processing delay could inflate rtt_ms and affect adaptation."
+    current: "Sender emits independent UDP probe messages from the UDP feedback/control thread at the feedback interval; receiver echoes the latest probe sender_monotonic_us in UdpFeedback, and adaptation RTT is computed from that control-plane echo."
+    reason: "Prevent media cadence and receiver decode/render timing from making a healthy link look like high RTT."
+
+  - parameter: udp_probe_scheduler
+    previous: "UDP probes were sent by the sender media loop, so file EOF/reset or encoder reconfiguration could delay new probes and make the echoed probe timestamp look like high RTT."
+    current: "UDP probes are sent by the feedback/control thread, independent of frame reading and encoder lifecycle."
+    reason: "Keep RTT measurement on the control plane even when the media path stalls briefly on a healthy local link."
+
+  - parameter: adaptation_loss_thresholds
+    previous: "Loss thresholds used fine-grained low-loss cuts at 3, 7, and 15 percent before the unchanged high-loss thresholds."
+    current: "Low-loss thresholds are widened to 5, 12, and 20 percent while 30, 50, 65, 72, and 77 percent thresholds remain unchanged."
+    reason: "Avoid unnecessary profile churn below 20 percent loss while preserving strong protection for common 20 percent-plus weak-network cases."
+
+  - parameter: adaptation_rtt_only_degradation
+    previous: "A single RTT sample above 150, 220, 300, or 400 ms could immediately force the corresponding minimum profile level."
+    current: "RTT-only degradation requires three consecutive high-RTT feedback windows; loss-required levels still apply immediately."
+    reason: "Filter Windows scheduler and control-thread RTT spikes without removing sustained high-RTT protection."
+
+  - parameter: protocol_version
+    previous: 3
+    current: 4
+    reason: "Add UDP probe messages and change UdpFeedback echoed_sender_monotonic_us semantics without supporting mixed old/new endpoints."
 
 validation_scenarios:
   - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1066, dropped_frames: 72, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 1595, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
@@ -461,7 +500,7 @@ validation_scenarios:
   - {transport: udp, transition: "0% to 70% bidirectional loss, 50ms delay", duration_seconds: 38, max_frame_gap_ms: 2067, decoder_errors: 0}
   - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 35, profile: "320x180/1fps/FEC8", max_frame_gap_ms: 1083, decoder_errors: 0}
   - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 35, profile: "160x90/1fps/FEC15", max_frame_gap_ms: 1092, decoder_errors: 0}
-  - {transport: srt, loss_percent: 0, result: "Protocol v3 and multi-block FEC regression passed with decoder_errors=0 and FFmpeg-valid H.264."}
+  - {transport: srt, loss_percent: 0, result: "Protocol v4 and multi-block FEC regression passed with decoder_errors=0 and FFmpeg-valid H.264."}
   - {encoded_resolution: "128x72", display_resolution: "640x360", result: "X11 reported a fixed 640x360 window with decoder_errors=0."}
   - {input: camera, device: /dev/video0, capture: "640x480/30fps YUYV", result: "Rendered continuously with decoder_errors=0 and FFmpeg-valid H.264 output."}
   - {loss_percent: 30, delay_ms: 50, direction: both, expected_profile: "426x240/2fps/120kbps"}

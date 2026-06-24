@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <optional>
 
 namespace {
 
@@ -47,12 +48,12 @@ void test_profile_ladder_and_loss_boundaries() {
     };
     const Expected cases[] = {
         {0.0, 0, 2000, 30, 1280, 720, 0.10, 0.30, false},
-        {3.0, 0, 2000, 30, 1280, 720, 0.10, 0.30, false},
-        {3.01, 1, 1200, 20, 960, 540, 0.15, 0.50, false},
-        {7.0, 1, 1200, 20, 960, 540, 0.15, 0.50, false},
-        {7.01, 2, 700, 15, 640, 360, 0.25, 0.75, false},
-        {15.0, 2, 700, 15, 640, 360, 0.25, 0.75, false},
-        {15.01, 3, 400, 10, 640, 360, 0.40, 1.00, false},
+        {5.0, 0, 2000, 30, 1280, 720, 0.10, 0.30, false},
+        {5.01, 1, 1200, 20, 960, 540, 0.15, 0.50, false},
+        {12.0, 1, 1200, 20, 960, 540, 0.15, 0.50, false},
+        {12.01, 2, 700, 15, 640, 360, 0.25, 0.75, false},
+        {20.0, 2, 700, 15, 640, 360, 0.25, 0.75, false},
+        {20.01, 3, 400, 10, 640, 360, 0.40, 1.00, false},
         {30.0, 3, 400, 10, 640, 360, 0.40, 1.00, false},
         {30.01, 4, 220, 5, 426, 240, 0.75, 2.00, false},
         {50.0, 4, 220, 5, 426, 240, 0.75, 2.00, false},
@@ -79,7 +80,7 @@ void test_profile_ladder_and_loss_boundaries() {
     }
 }
 
-void test_rtt_floor_and_fast_degradation() {
+void test_rtt_requires_sustained_confirmation() {
     struct Expected {
         double rtt;
         int level;
@@ -94,13 +95,53 @@ void test_rtt_floor_and_fast_degradation() {
 
     for (const auto &expected : cases) {
         AdaptationController controller(2000);
+        assert(controller.update(network(0.0, expected.rtt)).level == 0);
+        assert(controller.update(network(0.0, expected.rtt)).level == 0);
         assert(controller.update(network(0.0, expected.rtt)).level ==
                expected.level);
     }
+}
 
+void test_rtt_spike_does_not_degrade_profile() {
+    AdaptationController controller(2000);
+
+    assert(controller.update(network(0.0, 170.0)).level == 0);
+    assert(controller.update(network(0.0, 50.0)).level == 0);
+    assert(controller.update(network(0.0, 230.0)).level == 0);
+    assert(controller.update(network(0.0, 50.0)).level == 0);
+}
+
+void test_rtt_diagnostics_track_confirmation() {
+    AdaptationController controller(2000);
+
+    assert(controller.update(network(0.0, 230.0)).level == 0);
+    auto diagnostics = controller.diagnostics();
+    assert(diagnostics.loss_required_level == 0);
+    assert(diagnostics.raw_rtt_required_level == 5);
+    assert(diagnostics.confirmed_rtt_required_level == 0);
+    assert(diagnostics.rtt_high_windows == 1);
+
+    assert(controller.update(network(0.0, 230.0)).level == 0);
+    diagnostics = controller.diagnostics();
+    assert(diagnostics.rtt_high_windows == 2);
+    assert(diagnostics.confirmed_rtt_required_level == 0);
+
+    assert(controller.update(network(0.0, 230.0)).level == 5);
+    diagnostics = controller.diagnostics();
+    assert(diagnostics.rtt_high_windows == 3);
+    assert(diagnostics.confirmed_rtt_required_level == 5);
+}
+
+void test_loss_degradation_is_immediate() {
     AdaptationController emergency(2000);
-    expect_profile(emergency.update(network(100.0, 500.0)),
+    expect_profile(emergency.update(network(80.0, 50.0)),
                    8, 30, 2, 256, 144, 8.00, 12.00, false);
+
+    AdaptationController high_loss(2000);
+    expect_profile(high_loss.update(network(70.0, 500.0)),
+                   6, 80, 3, 320, 180, 2.50, 5.00, false);
+    assert(high_loss.update(network(70.0, 500.0)).level == 6);
+    assert(high_loss.update(network(70.0, 500.0)).level == 7);
 }
 
 void test_recovery_requires_five_healthy_windows() {
@@ -108,16 +149,16 @@ void test_recovery_requires_five_healthy_windows() {
     assert(controller.update(network(70.0)).level == 6);
 
     for (int sample = 0; sample < 4; ++sample) {
-        assert(controller.update(network(0.0, 50.0)).level == 6);
+        assert(controller.update(network(4.5, 50.0)).level == 6);
     }
-    assert(controller.update(network(0.0, 50.0)).level == 5);
+    assert(controller.update(network(4.5, 50.0)).level == 5);
 
     for (int sample = 0; sample < 4; ++sample) {
-        assert(controller.update(network(0.0, 50.0)).level == 5);
+        assert(controller.update(network(4.5, 50.0)).level == 5);
     }
-    assert(controller.update(network(0.0, 50.0)).level == 4);
+    assert(controller.update(network(4.5, 50.0)).level == 4);
 
-    assert(controller.update(network(4.0, 50.0)).level == 4);
+    assert(controller.update(network(5.0, 50.0)).level == 4);
     for (int sample = 0; sample < 4; ++sample) {
         assert(controller.update(network(0.0, 50.0)).level == 4);
     }
@@ -187,17 +228,38 @@ void test_reset_to_network_after_udp_recovery() {
         6, 80, 3, 320, 180, 2.50, 5.00, false);
 }
 
+void test_udp_recovery_ignores_stale_feedback_before_receiver_seen() {
+    assert(!udp_recovery_required(
+        false, true, false, std::optional<double>{}));
+    assert(udp_recovery_required(
+        true, true, false, std::optional<double>{}));
+    assert(udp_recovery_required(
+        true, false, true, std::optional<double>{}));
+    assert(udp_recovery_required(
+        true, false, false, std::optional<double>{86.0}));
+}
+
+void test_udp_send_failure_waits_for_receiver_before_recovery() {
+    assert(!udp_send_failure_requires_recovery(false));
+    assert(udp_send_failure_requires_recovery(true));
+}
+
 } // namespace
 
 int main() {
     test_profile_ladder_and_loss_boundaries();
-    test_rtt_floor_and_fast_degradation();
+    test_rtt_requires_sustained_confirmation();
+    test_rtt_spike_does_not_degrade_profile();
+    test_rtt_diagnostics_track_confirmation();
+    test_loss_degradation_is_immediate();
     test_recovery_requires_five_healthy_windows();
     test_emergency_recovers_to_current_network_level();
     test_max_video_bitrate_selects_supported_profile();
     test_invalid_snapshot_keeps_current_profile();
     test_udp_recovery_profile();
     test_reset_to_network_after_udp_recovery();
+    test_udp_recovery_ignores_stale_feedback_before_receiver_seen();
+    test_udp_send_failure_waits_for_receiver_before_recovery();
     std::cout << "adaptation_tests=passed" << std::endl;
     return 0;
 }
