@@ -121,21 +121,22 @@ current:
       maximum: 2000
       default: 2000
     healthy_window:
-      loss_below_percent: 3
+      loss_below_percent: 5
       rtt_below_ms: 130
       consecutive_windows: 5
-    degradation: "Immediately jump to the required lower-quality level."
+    degradation: "Immediately jump to the loss-required lower-quality level; RTT-only degradation requires sustained confirmation."
     normal_recovery: "Recover one level after five healthy windows."
     emergency_recovery: "Recover one level every five stable windows until the current network-required level."
     loss_thresholds:
-      - {greater_than_percent: 3, level: 1}
-      - {greater_than_percent: 7, level: 2}
-      - {greater_than_percent: 15, level: 3}
+      - {greater_than_percent: 5, level: 1}
+      - {greater_than_percent: 12, level: 2}
+      - {greater_than_percent: 20, level: 3}
       - {greater_than_percent: 30, level: 4}
       - {greater_than_percent: 50, level: 5}
       - {greater_than_percent: 65, level: 6}
       - {greater_than_percent: 72, level: 7}
       - {greater_than_percent: 77, level: 8}
+    rtt_confirmation_windows: 3
     rtt_minimum_levels:
       - {greater_than_ms: 150, minimum_level: 3}
       - {greater_than_ms: 220, minimum_level: 5}
@@ -462,6 +463,16 @@ development_history:
     previous: "UDP probes were sent by the sender media loop, so file EOF/reset or encoder reconfiguration could delay new probes and make the echoed probe timestamp look like high RTT."
     current: "UDP probes are sent by the feedback/control thread, independent of frame reading and encoder lifecycle."
     reason: "Keep RTT measurement on the control plane even when the media path stalls briefly on a healthy local link."
+
+  - parameter: adaptation_loss_thresholds
+    previous: "Loss thresholds used fine-grained low-loss cuts at 3, 7, and 15 percent before the unchanged high-loss thresholds."
+    current: "Low-loss thresholds are widened to 5, 12, and 20 percent while 30, 50, 65, 72, and 77 percent thresholds remain unchanged."
+    reason: "Avoid unnecessary profile churn below 20 percent loss while preserving strong protection for common 20 percent-plus weak-network cases."
+
+  - parameter: adaptation_rtt_only_degradation
+    previous: "A single RTT sample above 150, 220, 300, or 400 ms could immediately force the corresponding minimum profile level."
+    current: "RTT-only degradation requires three consecutive high-RTT feedback windows; loss-required levels still apply immediately."
+    reason: "Filter Windows scheduler and control-thread RTT spikes without removing sustained high-RTT protection."
 
   - parameter: protocol_version
     previous: 3

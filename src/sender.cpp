@@ -190,6 +190,8 @@ void SenderApp::run_udp() {
                           std::chrono::milliseconds>(
                           now - feedback.received_at).count()
                     : -1;
+                const auto adaptation_diagnostics =
+                    adaptation_.diagnostics();
                 std::cerr
                     << "profile_change=1 reason="
                     << profile_reason
@@ -217,6 +219,14 @@ void SenderApp::run_udp() {
                     << " rtt=" << feedback.rtt_ms
                     << " bandwidth="
                     << feedback.bandwidth_kbps
+                    << " loss_required_level="
+                    << adaptation_diagnostics.loss_required_level
+                    << " raw_rtt_required_level="
+                    << adaptation_diagnostics.raw_rtt_required_level
+                    << " confirmed_rtt_required_level="
+                    << adaptation_diagnostics.confirmed_rtt_required_level
+                    << " rtt_high_windows="
+                    << adaptation_diagnostics.rtt_high_windows
                     << " feedback_seq="
                     << feedback.sequence
                     << " complete_reports="
@@ -268,6 +278,8 @@ void SenderApp::run_udp() {
                                   std::chrono::milliseconds>(
                                   now - feedback.received_at).count()
                             : -1;
+                        const auto adaptation_diagnostics =
+                            adaptation_.diagnostics();
                         std::cerr
                             << "profile_change=1 "
                             << "reason=udp_send_congested"
@@ -302,6 +314,15 @@ void SenderApp::run_udp() {
                             << " rtt=" << feedback.rtt_ms
                             << " bandwidth="
                             << feedback.bandwidth_kbps
+                            << " loss_required_level="
+                            << adaptation_diagnostics.loss_required_level
+                            << " raw_rtt_required_level="
+                            << adaptation_diagnostics.raw_rtt_required_level
+                            << " confirmed_rtt_required_level="
+                            << adaptation_diagnostics
+                                   .confirmed_rtt_required_level
+                            << " rtt_high_windows="
+                            << adaptation_diagnostics.rtt_high_windows
                             << " feedback_seq="
                             << feedback.sequence
                             << " complete_reports="
