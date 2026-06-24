@@ -1,7 +1,7 @@
 metadata:
   purpose: "Record parameters tuned during weak-network video development."
   runtime_loaded: false
-  updated_at: "2026-06-23"
+  updated_at: "2026-06-24"
   units_note: "Bitrates are kbps unless a different unit is stated."
 
 current:
@@ -160,7 +160,7 @@ current:
     multiple_blocks_per_frame: true
 
   protocol:
-    version: 3
+    version: 4
     shard_header_bytes: 98
     encoded_timestamp: encoded_at_unix_us
     source_processing_duration: source_to_encoded_us
@@ -172,6 +172,11 @@ current:
       - block_index
       - block_count
       - block_original_size
+    udp_probe_fields:
+      - session_id
+      - session_started_unix_us
+      - probe_sequence
+      - sender_monotonic_us
     udp_feedback_fields:
       - highest_packet_sequence
       - unique_packets
@@ -180,7 +185,8 @@ current:
       - echoed_sender_monotonic_us
       - last_frame_age_ms
       - request_keyframe
-    clock_requirement: "Sender and receiver CLOCK_REALTIME synchronized by NTP or PTP."
+    rtt_source: "Independent UDP probe echo; media shard sent_monotonic_us is retained for diagnostics but not used for adaptation RTT."
+    clock_requirement: "RTT uses echoed sender monotonic timestamps and does not require synchronized sender/receiver clocks."
     backward_compatible: false
 
   latency_metrics:
@@ -447,6 +453,16 @@ development_history:
     current: "Feedback timeout starts recovery only after at least one receiver feedback has been observed; before that, the sender may send transient low-rate probe frames while preserving the normal adaptation state."
     reason: "Avoid sender-first startup being mistaken for severe loss while retaining low-rate probes for lossy cold-start paths."
 
+  - parameter: udp_rtt_measurement
+    previous: "UDP feedback echoed the most recent media shard sent_monotonic_us, so low frame rate, receiver scheduling, or media processing delay could inflate rtt_ms and affect adaptation."
+    current: "Sender emits independent UDP probe messages at the feedback interval; receiver echoes the latest probe sender_monotonic_us in UdpFeedback, and adaptation RTT is computed from that control-plane echo."
+    reason: "Prevent media cadence and receiver decode/render timing from making a healthy link look like high RTT."
+
+  - parameter: protocol_version
+    previous: 3
+    current: 4
+    reason: "Add UDP probe messages and change UdpFeedback echoed_sender_monotonic_us semantics without supporting mixed old/new endpoints."
+
 validation_scenarios:
   - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1066, dropped_frames: 72, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 1595, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
   - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1114, dropped_frames: 26, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 2104, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
@@ -468,7 +484,7 @@ validation_scenarios:
   - {transport: udp, transition: "0% to 70% bidirectional loss, 50ms delay", duration_seconds: 38, max_frame_gap_ms: 2067, decoder_errors: 0}
   - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 35, profile: "320x180/1fps/FEC8", max_frame_gap_ms: 1083, decoder_errors: 0}
   - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 35, profile: "160x90/1fps/FEC15", max_frame_gap_ms: 1092, decoder_errors: 0}
-  - {transport: srt, loss_percent: 0, result: "Protocol v3 and multi-block FEC regression passed with decoder_errors=0 and FFmpeg-valid H.264."}
+  - {transport: srt, loss_percent: 0, result: "Protocol v4 and multi-block FEC regression passed with decoder_errors=0 and FFmpeg-valid H.264."}
   - {encoded_resolution: "128x72", display_resolution: "640x360", result: "X11 reported a fixed 640x360 window with decoder_errors=0."}
   - {input: camera, device: /dev/video0, capture: "640x480/30fps YUYV", result: "Rendered continuously with decoder_errors=0 and FFmpeg-valid H.264 output."}
   - {loss_percent: 30, delay_ms: 50, direction: both, expected_profile: "426x240/2fps/120kbps"}

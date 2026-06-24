@@ -79,6 +79,7 @@ void SenderApp::run_udp() {
     const uint64_t session_id = random_session_id();
     const uint64_t session_started_unix_us = unix_time_us();
     uint64_t packet_sequence = 0;
+    uint64_t probe_sequence = 0;
     uint64_t frame_id = 1;
     uint32_t stream_epoch = 1;
     bool recovering = false;
@@ -89,6 +90,7 @@ void SenderApp::run_udp() {
     const auto udp_started_at = std::chrono::steady_clock::now();
     auto next_stats =
         std::chrono::steady_clock::now() + std::chrono::seconds(1);
+    auto next_probe = udp_started_at;
 
     reset_udp_feedback();
     udp_feedback_stopping_.store(false);
@@ -104,6 +106,19 @@ void SenderApp::run_udp() {
     try {
         while (!g_stop_requested.load()) {
             const auto now = std::chrono::steady_clock::now();
+            if (now >= next_probe) {
+                UdpProbe probe;
+                probe.session_id = session_id;
+                probe.session_started_unix_us =
+                    session_started_unix_us;
+                probe.sequence = ++probe_sequence;
+                probe.sender_monotonic_us =
+                    static_cast<uint64_t>(monotonic_us());
+                socket.send(encode_udp_probe(probe));
+                next_probe =
+                    now + std::chrono::milliseconds(
+                              transport_config_.feedback_interval_ms);
+            }
             const auto feedback = udp_feedback_snapshot();
             const bool have_feedback =
                 feedback.received_at.time_since_epoch().count() != 0;
@@ -560,63 +575,64 @@ void SenderApp::udp_feedback_loop(UdpSocket &socket,
             continue;
         }
 
-        if (!udp_feedback_baseline_valid_ ||
-            report.highest_packet_sequence <
-                udp_loss_baseline_highest_ ||
-            report.unique_packets < udp_loss_baseline_unique_) {
-            udp_loss_baseline_highest_ =
-                report.highest_packet_sequence;
-            udp_loss_baseline_unique_ = report.unique_packets;
-            udp_bandwidth_baseline_bytes_ =
-                report.received_bytes;
-            udp_bandwidth_baseline_at_ = now;
-            udp_feedback_baseline_valid_ = true;
-        } else {
-            const uint64_t sent =
-                report.highest_packet_sequence -
-                udp_loss_baseline_highest_;
-            if (sent >= 32) {
-                const uint64_t received = std::min(
-                    sent,
-                    report.unique_packets -
-                        udp_loss_baseline_unique_);
-                const double sample_loss =
-                    static_cast<double>(sent - received) *
-                    100.0 / static_cast<double>(sent);
-                if (udp_feedback_.loss_percent) {
-                    udp_feedback_.loss_percent =
-                        *udp_feedback_.loss_percent * 0.8 +
-                        sample_loss * 0.2;
-                } else {
-                    udp_feedback_.loss_percent = sample_loss;
-                }
+        if (!report.rtt_probe_response) {
+            if (!udp_feedback_baseline_valid_ ||
+                report.highest_packet_sequence <
+                    udp_loss_baseline_highest_ ||
+                report.unique_packets < udp_loss_baseline_unique_) {
                 udp_loss_baseline_highest_ =
                     report.highest_packet_sequence;
-                udp_loss_baseline_unique_ =
-                    report.unique_packets;
-            }
-
-            const double elapsed_seconds =
-                std::chrono::duration<double>(
-                    now - udp_bandwidth_baseline_at_).count();
-            if (elapsed_seconds >= 0.2 &&
-                report.received_bytes >=
-                    udp_bandwidth_baseline_bytes_ &&
-                report.received_bytes >
-                    udp_bandwidth_baseline_bytes_) {
-                udp_feedback_.bandwidth_kbps =
-                    static_cast<double>(
-                        report.received_bytes -
-                        udp_bandwidth_baseline_bytes_) *
-                    8.0 / 1000.0 / elapsed_seconds;
+                udp_loss_baseline_unique_ = report.unique_packets;
                 udp_bandwidth_baseline_bytes_ =
                     report.received_bytes;
                 udp_bandwidth_baseline_at_ = now;
+                udp_feedback_baseline_valid_ = true;
+            } else {
+                const uint64_t sent =
+                    report.highest_packet_sequence -
+                    udp_loss_baseline_highest_;
+                if (sent >= 32) {
+                    const uint64_t received = std::min(
+                        sent,
+                        report.unique_packets -
+                            udp_loss_baseline_unique_);
+                    const double sample_loss =
+                        static_cast<double>(sent - received) *
+                        100.0 / static_cast<double>(sent);
+                    if (udp_feedback_.loss_percent) {
+                        udp_feedback_.loss_percent =
+                            *udp_feedback_.loss_percent * 0.8 +
+                            sample_loss * 0.2;
+                    } else {
+                        udp_feedback_.loss_percent = sample_loss;
+                    }
+                    udp_loss_baseline_highest_ =
+                        report.highest_packet_sequence;
+                    udp_loss_baseline_unique_ =
+                        report.unique_packets;
+                }
+
+                const double elapsed_seconds =
+                    std::chrono::duration<double>(
+                        now - udp_bandwidth_baseline_at_).count();
+                if (elapsed_seconds >= 0.2 &&
+                    report.received_bytes >=
+                        udp_bandwidth_baseline_bytes_ &&
+                    report.received_bytes >
+                        udp_bandwidth_baseline_bytes_) {
+                    udp_feedback_.bandwidth_kbps =
+                        static_cast<double>(
+                            report.received_bytes -
+                            udp_bandwidth_baseline_bytes_) *
+                        8.0 / 1000.0 / elapsed_seconds;
+                    udp_bandwidth_baseline_bytes_ =
+                        report.received_bytes;
+                    udp_bandwidth_baseline_at_ = now;
+                }
             }
         }
 
-        if (report.highest_packet_sequence >
-                udp_rtt_highest_sequence_ &&
+        if (report.rtt_probe_response &&
             report.echoed_sender_monotonic_us != 0 &&
             now_us >= report.echoed_sender_monotonic_us) {
             udp_feedback_.rtt_ms =
@@ -624,19 +640,19 @@ void SenderApp::udp_feedback_loop(UdpSocket &socket,
                     now_us -
                     report.echoed_sender_monotonic_us) /
                 1000.0;
-            udp_rtt_highest_sequence_ =
-                report.highest_packet_sequence;
         }
         udp_feedback_.sequence = report.sequence;
-        udp_feedback_.last_complete_frame_id =
-            report.last_complete_frame_id;
-        if (report.last_complete_frame_id != 0) {
-            ++udp_feedback_.complete_report_count;
+        if (!report.rtt_probe_response) {
+            udp_feedback_.last_complete_frame_id =
+                report.last_complete_frame_id;
+            if (report.last_complete_frame_id != 0) {
+                ++udp_feedback_.complete_report_count;
+            }
+            udp_feedback_.last_frame_age_ms =
+                report.last_frame_age_ms;
+            udp_feedback_.request_keyframe =
+                report.request_keyframe;
         }
-        udp_feedback_.last_frame_age_ms =
-            report.last_frame_age_ms;
-        udp_feedback_.request_keyframe =
-            report.request_keyframe;
     }
 }
 
@@ -652,7 +668,6 @@ void SenderApp::reset_udp_feedback() {
     udp_loss_baseline_highest_ = 0;
     udp_loss_baseline_unique_ = 0;
     udp_bandwidth_baseline_bytes_ = 0;
-    udp_rtt_highest_sequence_ = 0;
     udp_bandwidth_baseline_at_ = {};
     udp_feedback_baseline_valid_ = false;
 }

@@ -233,7 +233,7 @@ void ReceiverApp::run_udp() {
     uint64_t highest_packet_sequence = 0;
     uint64_t unique_packets = 0;
     uint64_t received_bytes = 0;
-    uint64_t latest_sender_monotonic_us = 0;
+    uint64_t latest_probe_sender_monotonic_us = 0;
     std::unordered_set<uint64_t> recent_sequences;
     std::deque<uint64_t> sequence_order;
     constexpr std::size_t kSequenceHistory = 20'000;
@@ -252,40 +252,51 @@ void ReceiverApp::run_udp() {
     std::cerr << "udp_listening="
               << local_.host << ":" << local_.port << std::endl;
 
+    auto accept_session = [&](uint64_t session_id,
+                              uint64_t session_started_unix_us) {
+        const bool newer_session =
+            active_session_id_ == 0 ||
+            session_started_unix_us >
+                active_session_started_unix_us_ ||
+            (session_started_unix_us ==
+                 active_session_started_unix_us_ &&
+             session_id > active_session_id_);
+        if (session_id == active_session_id_) {
+            return true;
+        }
+        if (!newer_session) {
+            return false;
+        }
+        active_session_id_ = session_id;
+        active_session_started_unix_us_ =
+            session_started_unix_us;
+        reset_media_session();
+        highest_packet_sequence = 0;
+        unique_packets = 0;
+        received_bytes = 0;
+        latest_probe_sender_monotonic_us = 0;
+        recent_sequences.clear();
+        sequence_order.clear();
+        feedback_sequence = 0;
+        std::cerr
+            << "udp_session=1 session_id="
+            << active_session_id_ << std::endl;
+        return true;
+    };
+
     while (!g_stop_requested.load()) {
         std::vector<uint8_t> message;
         UdpPeer source;
+        bool force_feedback_report = false;
         const auto result = socket.receive(message, &source);
         if (result == UdpResult::Data) {
             const auto parsed =
                 parse_message(message.data(), message.size());
             if (parsed && parsed->shard) {
                 auto packet = std::move(*parsed->shard);
-                const bool newer_session =
-                    active_session_id_ == 0 ||
-                    packet.session_started_unix_us >
-                        active_session_started_unix_us_ ||
-                    (packet.session_started_unix_us ==
-                         active_session_started_unix_us_ &&
-                     packet.session_id > active_session_id_);
-                if (packet.session_id != active_session_id_) {
-                    if (!newer_session) {
-                        continue;
-                    }
-                    active_session_id_ = packet.session_id;
-                    active_session_started_unix_us_ =
-                        packet.session_started_unix_us;
-                    reset_media_session();
-                    highest_packet_sequence = 0;
-                    unique_packets = 0;
-                    received_bytes = 0;
-                    latest_sender_monotonic_us = 0;
-                    recent_sequences.clear();
-                    sequence_order.clear();
-                    feedback_sequence = 0;
-                    std::cerr
-                        << "udp_session=1 session_id="
-                        << active_session_id_ << std::endl;
+                if (!accept_session(packet.session_id,
+                                    packet.session_started_unix_us)) {
+                    continue;
                 }
 
                 feedback_peer = source;
@@ -299,8 +310,6 @@ void ReceiverApp::run_udp() {
                         highest_packet_sequence) {
                         highest_packet_sequence =
                             packet.packet_sequence;
-                        latest_sender_monotonic_us =
-                            packet.sent_monotonic_us;
                     }
                     while (sequence_order.size() >
                            kSequenceHistory) {
@@ -322,6 +331,16 @@ void ReceiverApp::run_udp() {
                     }
                     handle_frame(std::move(*frame));
                 }
+            } else if (parsed && parsed->udp_probe) {
+                const auto &probe = *parsed->udp_probe;
+                if (!accept_session(probe.session_id,
+                                    probe.session_started_unix_us)) {
+                    continue;
+                }
+                feedback_peer = source;
+                latest_probe_sender_monotonic_us =
+                    probe.sender_monotonic_us;
+                force_feedback_report = true;
             }
         } else if (result == UdpResult::WouldBlock) {
             std::this_thread::sleep_for(
@@ -340,7 +359,9 @@ void ReceiverApp::run_udp() {
         }
 
         const auto now = std::chrono::steady_clock::now();
-        if (now >= next_feedback_report &&
+        const bool periodic_feedback_due =
+            now >= next_feedback_report;
+        if ((force_feedback_report || periodic_feedback_due) &&
             feedback_peer.valid &&
             active_session_id_ != 0) {
             UdpFeedback feedback;
@@ -355,17 +376,21 @@ void ReceiverApp::run_udp() {
                     ? last_decoded_frame_id_
                     : 0;
             feedback.echoed_sender_monotonic_us =
-                latest_sender_monotonic_us;
+                latest_probe_sender_monotonic_us;
             feedback.last_frame_age_ms = last_frame_age_ms();
             feedback.request_keyframe =
                 feedback.last_frame_age_ms > 1500;
+            feedback.rtt_probe_response = force_feedback_report;
             pending_feedback = encode_udp_feedback(feedback);
-            pending_feedback_copies =
-                transport_config_.feedback_redundancy;
+            pending_feedback_copies = feedback.rtt_probe_response
+                ? 1
+                : transport_config_.feedback_redundancy;
             next_feedback_copy = now;
-            next_feedback_report =
-                now + std::chrono::milliseconds(
-                          transport_config_.feedback_interval_ms);
+            if (!feedback.rtt_probe_response) {
+                next_feedback_report =
+                    now + std::chrono::milliseconds(
+                              transport_config_.feedback_interval_ms);
+            }
         }
         if (pending_feedback_copies > 0 &&
             now >= next_feedback_copy &&
@@ -525,6 +550,8 @@ void ReceiverApp::reset_media_session() {
     synchronized_ = false;
     have_decoded_frame_id_ = false;
     stream_epoch_ = 0;
+    receiver_started_at_ = std::chrono::steady_clock::now();
+    last_complete_frame_at_ = {};
     decoder_.reset();
 }
 

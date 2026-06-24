@@ -11,6 +11,7 @@ enum class MessageType : uint8_t {
     KeyframeRequest = 3,
     NetworkReport = 4,
     UdpFeedback = 5,
+    UdpProbe = 6,
 };
 
 struct ShardPacket {
@@ -59,6 +60,14 @@ struct UdpFeedback {
     uint64_t echoed_sender_monotonic_us = 0;
     uint32_t last_frame_age_ms = 0;
     bool request_keyframe = false;
+    bool rtt_probe_response = false;
+};
+
+struct UdpProbe {
+    uint64_t session_id = 0;
+    uint64_t session_started_unix_us = 0;
+    uint64_t sequence = 0;
+    uint64_t sender_monotonic_us = 0;
 };
 
 struct ParsedMessage {
@@ -67,11 +76,13 @@ struct ParsedMessage {
     std::optional<ControlPacket> control;
     std::optional<NetworkReport> network_report;
     std::optional<UdpFeedback> udp_feedback;
+    std::optional<UdpProbe> udp_probe;
 };
 
 std::vector<uint8_t> encode_shard_packet(const ShardPacket &packet);
 std::vector<uint8_t> encode_control_packet(const ControlPacket &packet);
 std::vector<uint8_t> encode_network_report(const NetworkReport &report);
 std::vector<uint8_t> encode_udp_feedback(const UdpFeedback &feedback);
+std::vector<uint8_t> encode_udp_probe(const UdpProbe &probe);
 std::optional<ParsedMessage> parse_message(const uint8_t *data,
                                            std::size_t size);

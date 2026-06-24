@@ -88,7 +88,6 @@ private:
     uint64_t udp_loss_baseline_highest_ = 0;
     uint64_t udp_loss_baseline_unique_ = 0;
     uint64_t udp_bandwidth_baseline_bytes_ = 0;
-    uint64_t udp_rtt_highest_sequence_ = 0;
     std::chrono::steady_clock::time_point udp_bandwidth_baseline_at_{};
     bool udp_feedback_baseline_valid_ = false;
     std::atomic<bool> udp_feedback_stopping_{false};
