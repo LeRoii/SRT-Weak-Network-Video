@@ -6,10 +6,11 @@
 namespace {
 
 constexpr std::array<uint8_t, 4> kMagic{{'S', 'V', 'T', '1'}};
-constexpr uint8_t kProtocolVersion = 3;
+constexpr uint8_t kProtocolVersion = 4;
 constexpr std::size_t kShardHeaderSize = 98;
 constexpr std::size_t kControlSize = 22;
 constexpr std::size_t kUdpFeedbackSize = 70;
+constexpr std::size_t kUdpProbeSize = 38;
 
 void append_u16(std::vector<uint8_t> &output, uint16_t value) {
     output.push_back(static_cast<uint8_t>(value >> 8U));
@@ -152,7 +153,22 @@ std::vector<uint8_t> encode_udp_feedback(const UdpFeedback &feedback) {
     append_u64(output, feedback.last_complete_frame_id);
     append_u64(output, feedback.echoed_sender_monotonic_us);
     append_u32(output, feedback.last_frame_age_ms);
-    append_u32(output, feedback.request_keyframe ? 1U : 0U);
+    uint32_t flags = feedback.request_keyframe ? 1U : 0U;
+    if (feedback.rtt_probe_response) {
+        flags |= 2U;
+    }
+    append_u32(output, flags);
+    return output;
+}
+
+std::vector<uint8_t> encode_udp_probe(const UdpProbe &probe) {
+    std::vector<uint8_t> output;
+    output.reserve(kUdpProbeSize);
+    append_prefix(output, MessageType::UdpProbe);
+    append_u64(output, probe.session_id);
+    append_u64(output, probe.session_started_unix_us);
+    append_u64(output, probe.sequence);
+    append_u64(output, probe.sender_monotonic_us);
     return output;
 }
 
@@ -248,7 +264,22 @@ std::optional<ParsedMessage> parse_message(const uint8_t *data,
             return std::nullopt;
         }
         feedback.request_keyframe = (flags & 1U) != 0;
+        feedback.rtt_probe_response = (flags & 2U) != 0;
         parsed.udp_feedback = feedback;
+        return parsed;
+    }
+    if (type == MessageType::UdpProbe) {
+        UdpProbe probe;
+        if (!read_u64(data, size, offset, probe.session_id) ||
+            !read_u64(data, size, offset,
+                      probe.session_started_unix_us) ||
+            !read_u64(data, size, offset, probe.sequence) ||
+            !read_u64(data, size, offset,
+                      probe.sender_monotonic_us) ||
+            offset != size) {
+            return std::nullopt;
+        }
+        parsed.udp_probe = probe;
         return parsed;
     }
     return std::nullopt;

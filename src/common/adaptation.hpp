@@ -2,6 +2,8 @@
 
 #include "common/types.hpp"
 
+#include <optional>
+
 class AdaptationController {
 public:
     explicit AdaptationController(int max_video_kbps);
@@ -22,3 +24,8 @@ private:
 };
 
 VideoProfile udp_recovery_profile(int max_video_kbps);
+bool udp_recovery_required(bool have_feedback,
+                           bool feedback_stale,
+                           bool receiver_stalled,
+                           std::optional<double> loss_percent);
+bool udp_send_failure_requires_recovery(bool have_feedback);

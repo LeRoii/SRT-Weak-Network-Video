@@ -137,3 +137,16 @@ VideoProfile udp_recovery_profile(int max_video_kbps) {
         std::min(profile.bitrate_kbps, std::max(30, max_video_kbps));
     return profile;
 }
+
+bool udp_recovery_required(bool have_feedback,
+                           bool feedback_stale,
+                           bool receiver_stalled,
+                           std::optional<double> loss_percent) {
+    return (have_feedback && feedback_stale) ||
+           receiver_stalled ||
+           (loss_percent && *loss_percent > 85.0);
+}
+
+bool udp_send_failure_requires_recovery(bool have_feedback) {
+    return have_feedback;
+}

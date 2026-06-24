@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <optional>
 
 namespace {
 
@@ -187,6 +188,22 @@ void test_reset_to_network_after_udp_recovery() {
         6, 80, 3, 320, 180, 2.50, 5.00, false);
 }
 
+void test_udp_recovery_ignores_stale_feedback_before_receiver_seen() {
+    assert(!udp_recovery_required(
+        false, true, false, std::optional<double>{}));
+    assert(udp_recovery_required(
+        true, true, false, std::optional<double>{}));
+    assert(udp_recovery_required(
+        true, false, true, std::optional<double>{}));
+    assert(udp_recovery_required(
+        true, false, false, std::optional<double>{86.0}));
+}
+
+void test_udp_send_failure_waits_for_receiver_before_recovery() {
+    assert(!udp_send_failure_requires_recovery(false));
+    assert(udp_send_failure_requires_recovery(true));
+}
+
 } // namespace
 
 int main() {
@@ -198,6 +215,8 @@ int main() {
     test_invalid_snapshot_keeps_current_profile();
     test_udp_recovery_profile();
     test_reset_to_network_after_udp_recovery();
+    test_udp_recovery_ignores_stale_feedback_before_receiver_seen();
+    test_udp_send_failure_waits_for_receiver_before_recovery();
     std::cout << "adaptation_tests=passed" << std::endl;
     return 0;
 }

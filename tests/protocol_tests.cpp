@@ -71,10 +71,26 @@ int main() {
     assert(parsed->shard->payload == shard.payload);
     assert(parsed->shard->keyframe);
     auto old_version_wire = wire;
-    old_version_wire[4] = 1;
+    old_version_wire[4] = 3;
     assert(!parse_message(old_version_wire.data(),
                           old_version_wire.size()));
     assert(!parse_message(wire.data(), wire.size() - 1));
+
+    UdpProbe probe;
+    probe.session_id = shard.session_id;
+    probe.session_started_unix_us = shard.session_started_unix_us;
+    probe.sequence = 19;
+    probe.sender_monotonic_us = 1'234'567'890;
+    const auto probe_wire = encode_udp_probe(probe);
+    const auto parsed_probe =
+        parse_message(probe_wire.data(), probe_wire.size());
+    assert(parsed_probe && parsed_probe->udp_probe);
+    assert(parsed_probe->udp_probe->session_id == probe.session_id);
+    assert(parsed_probe->udp_probe->session_started_unix_us ==
+           probe.session_started_unix_us);
+    assert(parsed_probe->udp_probe->sequence == probe.sequence);
+    assert(parsed_probe->udp_probe->sender_monotonic_us ==
+           probe.sender_monotonic_us);
 
     UdpFeedback feedback;
     feedback.session_id = shard.session_id;
@@ -86,6 +102,7 @@ int main() {
     feedback.echoed_sender_monotonic_us = 999'000;
     feedback.last_frame_age_ms = 240;
     feedback.request_keyframe = true;
+    feedback.rtt_probe_response = true;
     const auto feedback_wire = encode_udp_feedback(feedback);
     const auto parsed_feedback =
         parse_message(feedback_wire.data(), feedback_wire.size());
@@ -94,7 +111,10 @@ int main() {
            feedback.session_id);
     assert(parsed_feedback->udp_feedback->unique_packets ==
            feedback.unique_packets);
+    assert(parsed_feedback->udp_feedback->echoed_sender_monotonic_us ==
+           feedback.echoed_sender_monotonic_us);
     assert(parsed_feedback->udp_feedback->request_keyframe);
+    assert(parsed_feedback->udp_feedback->rtt_probe_response);
 
     NetworkReport report;
     report.sequence = 17;
