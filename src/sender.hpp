@@ -68,7 +68,9 @@ private:
         uint64_t session_started_unix_us,
         uint64_t &packet_sequence);
     bool receive_srt_network_reports(SrtSocket &socket);
-    void udp_feedback_loop(UdpSocket &socket, uint64_t session_id);
+    void udp_feedback_loop(UdpSocket &socket,
+                           uint64_t session_id,
+                           uint64_t session_started_unix_us);
     UdpFeedbackSnapshot udp_feedback_snapshot();
     void reset_udp_feedback();
 

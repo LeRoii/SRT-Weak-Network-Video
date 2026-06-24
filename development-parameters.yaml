@@ -185,7 +185,7 @@ current:
       - echoed_sender_monotonic_us
       - last_frame_age_ms
       - request_keyframe
-    rtt_source: "Independent UDP probe echo; media shard sent_monotonic_us is retained for diagnostics but not used for adaptation RTT."
+    rtt_source: "Independent UDP probe echo sent from the UDP feedback/control thread; media shard sent_monotonic_us is retained for diagnostics but not used for adaptation RTT."
     clock_requirement: "RTT uses echoed sender monotonic timestamps and does not require synchronized sender/receiver clocks."
     backward_compatible: false
 
@@ -455,8 +455,13 @@ development_history:
 
   - parameter: udp_rtt_measurement
     previous: "UDP feedback echoed the most recent media shard sent_monotonic_us, so low frame rate, receiver scheduling, or media processing delay could inflate rtt_ms and affect adaptation."
-    current: "Sender emits independent UDP probe messages at the feedback interval; receiver echoes the latest probe sender_monotonic_us in UdpFeedback, and adaptation RTT is computed from that control-plane echo."
+    current: "Sender emits independent UDP probe messages from the UDP feedback/control thread at the feedback interval; receiver echoes the latest probe sender_monotonic_us in UdpFeedback, and adaptation RTT is computed from that control-plane echo."
     reason: "Prevent media cadence and receiver decode/render timing from making a healthy link look like high RTT."
+
+  - parameter: udp_probe_scheduler
+    previous: "UDP probes were sent by the sender media loop, so file EOF/reset or encoder reconfiguration could delay new probes and make the echoed probe timestamp look like high RTT."
+    current: "UDP probes are sent by the feedback/control thread, independent of frame reading and encoder lifecycle."
+    reason: "Keep RTT measurement on the control plane even when the media path stalls briefly on a healthy local link."
 
   - parameter: protocol_version
     previous: 3

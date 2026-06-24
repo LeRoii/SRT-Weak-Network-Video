@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include <random>
+#include <string>
 #include <thread>
 
 namespace {
@@ -79,7 +80,6 @@ void SenderApp::run_udp() {
     const uint64_t session_id = random_session_id();
     const uint64_t session_started_unix_us = unix_time_us();
     uint64_t packet_sequence = 0;
-    uint64_t probe_sequence = 0;
     uint64_t frame_id = 1;
     uint32_t stream_epoch = 1;
     bool recovering = false;
@@ -90,13 +90,13 @@ void SenderApp::run_udp() {
     const auto udp_started_at = std::chrono::steady_clock::now();
     auto next_stats =
         std::chrono::steady_clock::now() + std::chrono::seconds(1);
-    auto next_probe = udp_started_at;
 
     reset_udp_feedback();
     udp_feedback_stopping_.store(false);
     std::thread feedback_thread(
-        [this, &socket, session_id] {
-            udp_feedback_loop(socket, session_id);
+        [this, &socket, session_id, session_started_unix_us] {
+            udp_feedback_loop(
+                socket, session_id, session_started_unix_us);
         });
 
     std::cerr << "udp_ready=1 peer="
@@ -106,19 +106,6 @@ void SenderApp::run_udp() {
     try {
         while (!g_stop_requested.load()) {
             const auto now = std::chrono::steady_clock::now();
-            if (now >= next_probe) {
-                UdpProbe probe;
-                probe.session_id = session_id;
-                probe.session_started_unix_us =
-                    session_started_unix_us;
-                probe.sequence = ++probe_sequence;
-                probe.sender_monotonic_us =
-                    static_cast<uint64_t>(monotonic_us());
-                socket.send(encode_udp_probe(probe));
-                next_probe =
-                    now + std::chrono::milliseconds(
-                              transport_config_.feedback_interval_ms);
-            }
             const auto feedback = udp_feedback_snapshot();
             const bool have_feedback =
                 feedback.received_at.time_since_epoch().count() != 0;
@@ -142,8 +129,10 @@ void SenderApp::run_udp() {
                     feedback_stale,
                     receiver_stalled,
                     feedback.loss_percent);
+            bool recovery_entered = false;
             if (recovery_required && !recovering) {
                 recovering = true;
+                recovery_entered = true;
                 last_recovery_frame_id = 0;
                 recovery_report_baseline =
                     feedback.complete_report_count;
@@ -153,6 +142,9 @@ void SenderApp::run_udp() {
             VideoProfile desired = startup_probe
                 ? udp_recovery_profile(sender_config_.max_video_kbps)
                 : adaptation_.current();
+            std::string profile_reason = startup_probe
+                ? "startup_probe"
+                : (recovery_entered ? "recovery_enter" : "current");
             if (recovering && last_recovery_frame_id != 0 &&
                 !feedback_stale &&
                 !receiver_stalled &&
@@ -171,6 +163,7 @@ void SenderApp::run_udp() {
                     feedback.bandwidth_kbps;
                 network.valid = true;
                 desired = adaptation_.reset_to_network(network);
+                profile_reason = "recovery_exit_reset_to_network";
                 last_adaptation_feedback_sequence =
                     feedback.sequence;
             }
@@ -186,11 +179,51 @@ void SenderApp::run_udp() {
                     feedback.bandwidth_kbps;
                 network.valid = true;
                 desired = adaptation_.update(network);
+                profile_reason = "adaptation_update";
                 last_adaptation_feedback_sequence =
                     feedback.sequence;
             }
 
             if (desired != profile) {
+                const int64_t feedback_age_ms = have_feedback
+                    ? std::chrono::duration_cast<
+                          std::chrono::milliseconds>(
+                          now - feedback.received_at).count()
+                    : -1;
+                std::cerr
+                    << "profile_change=1 reason="
+                    << profile_reason
+                    << " old=" << profile.bitrate_kbps << "kbps/"
+                    << profile.fps << "fps/"
+                    << profile.width << "x" << profile.height
+                    << " new=" << desired.bitrate_kbps << "kbps/"
+                    << desired.fps << "fps/"
+                    << desired.width << "x" << desired.height
+                    << " have_feedback=" << (have_feedback ? 1 : 0)
+                    << " feedback_age_ms=" << feedback_age_ms
+                    << " feedback_stale="
+                    << (feedback_stale ? 1 : 0)
+                    << " receiver_stalled="
+                    << (receiver_stalled ? 1 : 0)
+                    << " request_keyframe="
+                    << (feedback.request_keyframe ? 1 : 0)
+                    << " last_frame_age_ms="
+                    << feedback.last_frame_age_ms
+                    << " recovery_required="
+                    << (recovery_required ? 1 : 0)
+                    << " recovering=" << (recovering ? 1 : 0)
+                    << " loss="
+                    << feedback.loss_percent.value_or(-1.0)
+                    << " rtt=" << feedback.rtt_ms
+                    << " bandwidth="
+                    << feedback.bandwidth_kbps
+                    << " feedback_seq="
+                    << feedback.sequence
+                    << " complete_reports="
+                    << feedback.complete_report_count
+                    << " last_complete_frame_id="
+                    << feedback.last_complete_frame_id
+                    << std::endl;
                 profile = desired;
                 keyframe_requested_.store(true);
             }
@@ -200,6 +233,12 @@ void SenderApp::run_udp() {
                 profile.all_intra;
             EncodedVideoFrame frame;
             if (!reader_.next_frame(frame, profile, force_keyframe)) {
+                std::cerr
+                    << "video_source_reset=1 reason=no_frame "
+                    << "profile=" << profile.bitrate_kbps << "kbps/"
+                    << profile.fps << "fps/"
+                    << profile.width << "x" << profile.height
+                    << std::endl;
                 reader_.reset();
                 keyframe_requested_.store(true);
                 continue;
@@ -221,7 +260,57 @@ void SenderApp::run_udp() {
                 }
                 if (!recovering) {
                     adaptation_.force_emergency();
-                    profile = adaptation_.current();
+                    const auto emergency_profile =
+                        adaptation_.current();
+                    if (emergency_profile != profile) {
+                        const int64_t feedback_age_ms = have_feedback
+                            ? std::chrono::duration_cast<
+                                  std::chrono::milliseconds>(
+                                  now - feedback.received_at).count()
+                            : -1;
+                        std::cerr
+                            << "profile_change=1 "
+                            << "reason=udp_send_congested"
+                            << " old="
+                            << profile.bitrate_kbps << "kbps/"
+                            << profile.fps << "fps/"
+                            << profile.width << "x"
+                            << profile.height
+                            << " new="
+                            << emergency_profile.bitrate_kbps
+                            << "kbps/"
+                            << emergency_profile.fps << "fps/"
+                            << emergency_profile.width << "x"
+                            << emergency_profile.height
+                            << " have_feedback="
+                            << (have_feedback ? 1 : 0)
+                            << " feedback_age_ms="
+                            << feedback_age_ms
+                            << " feedback_stale="
+                            << (feedback_stale ? 1 : 0)
+                            << " receiver_stalled="
+                            << (receiver_stalled ? 1 : 0)
+                            << " request_keyframe="
+                            << (feedback.request_keyframe ? 1 : 0)
+                            << " last_frame_age_ms="
+                            << feedback.last_frame_age_ms
+                            << " recovery_required="
+                            << (recovery_required ? 1 : 0)
+                            << " recovering=1"
+                            << " loss="
+                            << feedback.loss_percent.value_or(-1.0)
+                            << " rtt=" << feedback.rtt_ms
+                            << " bandwidth="
+                            << feedback.bandwidth_kbps
+                            << " feedback_seq="
+                            << feedback.sequence
+                            << " complete_reports="
+                            << feedback.complete_report_count
+                            << " last_complete_frame_id="
+                            << feedback.last_complete_frame_id
+                            << std::endl;
+                    }
+                    profile = emergency_profile;
                 }
                 recovering = true;
                 last_recovery_frame_id = 0;
@@ -538,10 +627,30 @@ bool SenderApp::receive_srt_network_reports(SrtSocket &socket) {
     }
 }
 
-void SenderApp::udp_feedback_loop(UdpSocket &socket,
-                                  uint64_t session_id) {
+void SenderApp::udp_feedback_loop(
+    UdpSocket &socket,
+    uint64_t session_id,
+    uint64_t session_started_unix_us) {
+    uint64_t probe_sequence = 0;
+    auto next_probe = std::chrono::steady_clock::now();
+    const auto probe_interval =
+        std::chrono::milliseconds(
+            transport_config_.feedback_interval_ms);
     while (!udp_feedback_stopping_.load() &&
            !g_stop_requested.load()) {
+        const auto loop_now = std::chrono::steady_clock::now();
+        if (loop_now >= next_probe) {
+            UdpProbe probe;
+            probe.session_id = session_id;
+            probe.session_started_unix_us =
+                session_started_unix_us;
+            probe.sequence = ++probe_sequence;
+            probe.sender_monotonic_us =
+                static_cast<uint64_t>(monotonic_us());
+            socket.send(encode_udp_probe(probe));
+            next_probe = loop_now + probe_interval;
+        }
+
         std::vector<uint8_t> message;
         const auto result = socket.receive(message);
         if (result == UdpResult::WouldBlock) {
