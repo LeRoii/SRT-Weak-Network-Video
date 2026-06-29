@@ -279,3 +279,61 @@ remained zero, and every saved H.264 stream passed FFmpeg's
 `-err_detect explode` check. Five repeated transitions from an unimpaired link
 to 80% and 85% loss also stayed below three seconds, with worst gaps of 2189
 and 2236 ms.
+
+## Automated Acceptance
+
+`scripts/weaknet_acceptance.py` runs the weak-network acceptance matrix and
+collects the evidence needed for TC-01 through TC-08. It creates the namespace
+topology, starts the receiver and sender inside `webrtc_rx` and `webrtc_tx`,
+applies `tc netem` loss, records logs, validates the saved H.264 stream with
+FFmpeg, and writes JSON plus Markdown reports.
+
+Run the quick regression suite:
+
+```bash
+python3 scripts/weaknet_acceptance.py --suite quick
+```
+
+The quick suite runs 0%, 20%, 45%, 80%, and 85% bidirectional loss with 50 ms
+delay for 60 seconds per steady scenario, followed by a short staircase from
+0% to 20%, 45%, 80%, and back to 0%. For a shorter smoke run, override the
+durations:
+
+```bash
+python3 scripts/weaknet_acceptance.py \
+  --suite quick \
+  --duration-seconds 15 \
+  --step-duration-seconds 10
+```
+
+The full suite is intended for formal acceptance:
+
+```bash
+python3 scripts/weaknet_acceptance.py --suite full
+```
+
+It runs 0%, 5%, 15%, 20%, 35%, 45%, 60%, 70%, 80%, and 85% bidirectional loss
+for 600 seconds per steady scenario, then runs the full staircase. The 90%
+case is separated as an extreme observation and does not fail the main
+acceptance suite:
+
+```bash
+python3 scripts/weaknet_acceptance.py --suite extreme
+```
+
+Results are written under `/tmp/weaknet-acceptance-YYYYmmdd-HHMMSS` unless
+`--output-dir` is provided. Each scenario directory contains:
+
+- `sender.log` and `receiver.log` with `elapsed=` timestamps added by the
+  runner.
+- `received.h264`, `ffmpeg_check.log`, and `ffprobe.log`.
+- `qdisc_step_N.txt` snapshots for each applied impairment.
+- `summary.json` and `report.md`.
+
+The suite-level `summary.json` and `report.md` summarize pass/fail status. The
+current acceptance scope treats TC-01 as a video-profile bitrate check only:
+FEC and UDP overhead are not counted against the 2 Mbps ceiling. TC-06 is not
+part of the automated acceptance result. TC-08 uses `latency_avg <= 500 ms` as
+the hard criterion; values below 180 ms are reported as better-than-target
+latency rather than failures. The report also includes `latency_p95` and
+`latency_max` for diagnosis.
