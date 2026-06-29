@@ -129,7 +129,7 @@ current:
     emergency_recovery: "Recover one level every five stable windows until the current network-required level."
     loss_thresholds:
       - {greater_than_percent: 5, level: 1}
-      - {greater_than_percent: 12, level: 2}
+      - {greater_than_percent: 15, level: 2}
       - {greater_than_percent: 20, level: 3}
       - {greater_than_percent: 30, level: 4}
       - {greater_than_percent: 50, level: 5}
@@ -143,16 +143,16 @@ current:
       - {greater_than_ms: 300, minimum_level: 6}
       - {greater_than_ms: 400, minimum_level: 7}
     profiles:
-      - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, p_frame_fec_ratio: 0.10, keyframe_fec_ratio: 0.30, all_intra: false}
-      - {level: 1, bitrate_kbps: 1200, fps: 20, width: 960, height: 540, p_frame_fec_ratio: 0.15, keyframe_fec_ratio: 0.50, all_intra: false}
-      - {level: 2, bitrate_kbps: 700, fps: 15, width: 640, height: 360, p_frame_fec_ratio: 0.25, keyframe_fec_ratio: 0.75, all_intra: false}
-      - {level: 3, bitrate_kbps: 400, fps: 10, width: 640, height: 360, p_frame_fec_ratio: 0.40, keyframe_fec_ratio: 1.00, all_intra: false}
-      - {level: 4, bitrate_kbps: 220, fps: 5, width: 426, height: 240, p_frame_fec_ratio: 0.75, keyframe_fec_ratio: 2.00, all_intra: false}
-      - {level: 5, bitrate_kbps: 140, fps: 3, width: 426, height: 240, p_frame_fec_ratio: 1.25, keyframe_fec_ratio: 3.00, all_intra: false}
-      - {level: 6, bitrate_kbps: 80, fps: 3, width: 320, height: 180, p_frame_fec_ratio: 2.50, keyframe_fec_ratio: 5.00, all_intra: false}
-      - {level: 7, bitrate_kbps: 50, fps: 2, width: 320, height: 180, p_frame_fec_ratio: 4.00, keyframe_fec_ratio: 7.00, all_intra: false}
-      - {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, p_frame_fec_ratio: 8.00, keyframe_fec_ratio: 12.00, all_intra: false}
-    gop_seconds: 1
+      - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, gop_frames: 30, p_frame_fec_ratio: 0.10, keyframe_fec_ratio: 0.30, all_intra: false}
+      - {level: 1, bitrate_kbps: 900, fps: 20, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75, all_intra: false}
+      - {level: 2, bitrate_kbps: 700, fps: 15, width: 640, height: 360, gop_frames: 8, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75, all_intra: false}
+      - {level: 3, bitrate_kbps: 400, fps: 10, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.40, keyframe_fec_ratio: 1.00, all_intra: false}
+      - {level: 4, bitrate_kbps: 220, fps: 5, width: 426, height: 240, gop_frames: 5, p_frame_fec_ratio: 0.75, keyframe_fec_ratio: 2.00, all_intra: false}
+      - {level: 5, bitrate_kbps: 140, fps: 3, width: 426, height: 240, gop_frames: 3, p_frame_fec_ratio: 1.25, keyframe_fec_ratio: 3.00, all_intra: false}
+      - {level: 6, bitrate_kbps: 80, fps: 3, width: 320, height: 180, gop_frames: 3, p_frame_fec_ratio: 2.50, keyframe_fec_ratio: 5.00, all_intra: false}
+      - {level: 7, bitrate_kbps: 50, fps: 2, width: 320, height: 180, gop_frames: 2, p_frame_fec_ratio: 4.00, keyframe_fec_ratio: 7.00, all_intra: false}
+      - {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, gop_frames: 2, p_frame_fec_ratio: 8.00, keyframe_fec_ratio: 12.00, all_intra: false}
+    gop_policy: "Levels 1 and 2 use about 0.5 seconds; other levels use about 1 second."
 
   fec:
     target_shard_bytes: 1000
@@ -466,8 +466,8 @@ development_history:
 
   - parameter: adaptation_loss_thresholds
     previous: "Loss thresholds used fine-grained low-loss cuts at 3, 7, and 15 percent before the unchanged high-loss thresholds."
-    current: "Low-loss thresholds are widened to 5, 12, and 20 percent while 30, 50, 65, 72, and 77 percent thresholds remain unchanged."
-    reason: "Avoid unnecessary profile churn below 20 percent loss while preserving strong protection for common 20 percent-plus weak-network cases."
+    current: "Low-loss thresholds are widened to 5, 15, and 20 percent while 30, 50, 65, 72, and 77 percent thresholds remain unchanged."
+    reason: "Keep 10 percent loss in a 20fps profile and avoid unnecessary drops to 15fps while preserving strong protection for common 20 percent-plus weak-network cases."
 
   - parameter: adaptation_rtt_only_degradation
     previous: "A single RTT sample above 150, 220, 300, or 400 ms could immediately force the corresponding minimum profile level."
@@ -479,7 +479,29 @@ development_history:
     current: 4
     reason: "Add UDP probe messages and change UdpFeedback echoed_sender_monotonic_us semantics without supporting mixed old/new endpoints."
 
+  - parameter: low_loss_realtime_profiles
+    previous:
+      level_1: {bitrate_kbps: 1200, fps: 20, width: 960, height: 540, gop_frames: 20, p_frame_fec_ratio: 0.15, keyframe_fec_ratio: 0.50}
+      level_2: {bitrate_kbps: 700, fps: 15, width: 640, height: 360, gop_frames: 15, p_frame_fec_ratio: 0.25, keyframe_fec_ratio: 0.75}
+    current:
+      level_1: {bitrate_kbps: 900, fps: 20, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75}
+      level_2: {bitrate_kbps: 700, fps: 15, width: 640, height: 360, gop_frames: 8, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75}
+    reason: "Improve true decoded frame continuity around 10-15 percent loss by protecting P frames and reducing keyframe wait time."
+
+  - parameter: receiver_keyframe_request
+    previous: "UDP feedback requested a keyframe only when last_frame_age_ms exceeded 1500."
+    current: "UDP feedback also requests a keyframe after frame assembly expiry, H.264 sync loss from a frame ID gap, decoder error, or dropping non-keyframes while unsynchronized."
+    reason: "Shorten recovery after a missing P frame without relaxing complete-frame and decoder-sync gates."
+
+  - parameter: sender_keyframe_request_handling
+    previous: "Any UDP feedback request_keyframe was treated as receiver_stalled and could force Level 8 recovery."
+    current: "request_keyframe triggers the next encoded frame to be an IDR; Level 8 recovery is reserved for stale feedback, last_frame_age_ms above 1500, send congestion, or very high loss."
+    reason: "Allow mid-loss H.264 resynchronization without unnecessary emergency-profile drops."
+
 validation_scenarios:
+  - {transport: udp, loss_percent: 10, delay_ms: 50, direction: both, duration_seconds: 31, profile: "Level 1 900kbps/20fps/640x360", decoded_fps_stable_range: "14-17 after recovery, short resync dips observed", max_frame_gap_ms: 1105, decoder_errors: 0, ffmpeg_strict: passed, implementation: low_loss_fps_v1}
+  - {transport: udp, loss_percent: 20, delay_ms: 50, direction: both, duration_seconds: 31, profile: "Level 2/3 boundary, mostly 400kbps/10fps/640x360 at sampled loss above 20 percent", level8_recovery_events_after_fix: 0, max_frame_gap_ms: 721, decoder_errors: 0, ffmpeg_strict: passed, implementation: low_loss_fps_v1}
+  - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 51, profile: "Level 8 30kbps/2fps/256x144", frames: 91, dropped_frames: 17, max_frame_gap_ms: 1336, decoder_errors: 0, ffmpeg_strict: passed, implementation: low_loss_fps_v1}
   - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1066, dropped_frames: 72, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 1595, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
   - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1114, dropped_frames: 26, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 2104, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
   - {transport: udp, loss_percent: 85, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1015, dropped_frames: 122, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 2103, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}

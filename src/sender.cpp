@@ -118,7 +118,6 @@ void SenderApp::run_udp() {
                           std::chrono::milliseconds(
                               transport_config_.feedback_timeout_ms);
             const bool receiver_stalled =
-                feedback.request_keyframe ||
                 feedback.last_frame_age_ms > 1500;
 
             const bool startup_probe =
@@ -182,6 +181,9 @@ void SenderApp::run_udp() {
                 profile_reason = "adaptation_update";
                 last_adaptation_feedback_sequence =
                     feedback.sequence;
+            }
+            if (!recovering && feedback.request_keyframe) {
+                keyframe_requested_.store(true);
             }
 
             if (desired != profile) {

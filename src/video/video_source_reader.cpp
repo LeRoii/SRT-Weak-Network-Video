@@ -413,7 +413,9 @@ void VideoSourceReader::configure_encoder(const VideoProfile &profile) {
         static_cast<int64_t>(profile.bitrate_kbps) * 1000;
     encoder_context_->rc_buffer_size =
         static_cast<int>(encoder_context_->bit_rate / 2);
-    encoder_context_->gop_size = profile.all_intra ? 1 : profile.fps;
+    const int keyint =
+        profile.all_intra ? 1 : std::max(1, profile.gop_frames);
+    encoder_context_->gop_size = keyint;
     encoder_context_->max_b_frames = 0;
     encoder_context_->refs = 1;
     encoder_context_->thread_count = 2;
@@ -424,8 +426,8 @@ void VideoSourceReader::configure_encoder(const VideoProfile &profile) {
 
     const std::string x264_params =
         "repeat-headers=1:scenecut=0:keyint=" +
-        std::to_string(profile.all_intra ? 1 : profile.fps) +
-        ":min-keyint=" + std::to_string(profile.all_intra ? 1 : profile.fps) +
+        std::to_string(keyint) +
+        ":min-keyint=" + std::to_string(keyint) +
         ":bframes=0:ref=1:force-cfr=1";
     av_opt_set(encoder_context_->priv_data, "x264-params",
                x264_params.c_str(), 0);

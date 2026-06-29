@@ -20,6 +20,7 @@ struct VideoProfile {
     int fps = 30;
     int width = 1280;
     int height = 720;
+    int gop_frames = 30;
     double parity_ratio = 0.15;
     double keyframe_parity_ratio = 0.30;
     bool all_intra = false;
@@ -30,6 +31,7 @@ struct VideoProfile {
                fps == other.fps &&
                width == other.width &&
                height == other.height &&
+               gop_frames == other.gop_frames &&
                parity_ratio == other.parity_ratio &&
                keyframe_parity_ratio == other.keyframe_parity_ratio &&
                all_intra == other.all_intra;

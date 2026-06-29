@@ -121,23 +121,24 @@ Level 8 at `256x144/2fps/30kbps` only after stale or missing feedback, send
 congestion, a receiver frame age above 1500 ms, or very high reported loss. A
 recovery frame keeps Level 8 until it is acknowledged, then the sender
 immediately selects the level implied by the fresh feedback. UDP and SRT use the
-same nine-level ladder after recovery. Every profile uses an approximately
-one-second GOP; keyframes receive stronger FEC than P-frames. Feedback is
-emitted every 200 ms, with 10 copies spread across the interval.
+same nine-level ladder after recovery. Levels 1 and 2 use about a half-second
+GOP to recover H.264 synchronization faster after a lost P-frame; the remaining
+levels use about a one-second GOP. Feedback is emitted every 200 ms, with 10
+copies spread across the interval.
 
-| Level | H.264 profile | P-frame FEC | keyframe FEC |
-|---:|---|---:|---:|
-| 0 | 1280x720 / 30 fps / 2000 kbps | 0.10 | 0.30 |
-| 1 | 960x540 / 20 fps / 1200 kbps | 0.15 | 0.50 |
-| 2 | 640x360 / 15 fps / 700 kbps | 0.25 | 0.75 |
-| 3 | 640x360 / 10 fps / 400 kbps | 0.40 | 1.00 |
-| 4 | 426x240 / 5 fps / 220 kbps | 0.75 | 2.00 |
-| 5 | 426x240 / 3 fps / 140 kbps | 1.25 | 3.00 |
-| 6 | 320x180 / 3 fps / 80 kbps | 2.50 | 5.00 |
-| 7 | 320x180 / 2 fps / 50 kbps | 4.00 | 7.00 |
-| 8 | 256x144 / 2 fps / 30 kbps | 8.00 | 12.00 |
+| Level | H.264 profile | GOP frames | P-frame FEC | keyframe FEC |
+|---:|---|---:|---:|---:|
+| 0 | 1280x720 / 30 fps / 2000 kbps | 30 | 0.10 | 0.30 |
+| 1 | 640x360 / 20 fps / 900 kbps | 10 | 0.50 | 0.75 |
+| 2 | 640x360 / 15 fps / 700 kbps | 8 | 0.50 | 0.75 |
+| 3 | 640x360 / 10 fps / 400 kbps | 10 | 0.40 | 1.00 |
+| 4 | 426x240 / 5 fps / 220 kbps | 5 | 0.75 | 2.00 |
+| 5 | 426x240 / 3 fps / 140 kbps | 3 | 1.25 | 3.00 |
+| 6 | 320x180 / 3 fps / 80 kbps | 3 | 2.50 | 5.00 |
+| 7 | 320x180 / 2 fps / 50 kbps | 2 | 4.00 | 7.00 |
+| 8 | 256x144 / 2 fps / 30 kbps | 2 | 8.00 | 12.00 |
 
-Loss thresholds above 3, 7, 15, 30, 50, 65, 72, and 77 percent select Levels
+Loss thresholds above 5, 15, 20, 30, 50, 65, 72, and 77 percent select Levels
 1 through 8. Degradation is immediate; recovery advances one level after five
 fresh healthy or emergency-recovery feedback windows.
 
