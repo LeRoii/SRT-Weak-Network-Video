@@ -1,5 +1,5 @@
 /build/
-/received.h264
+*.h264
 *.log
 
 PROJECT_GUIDE.md
