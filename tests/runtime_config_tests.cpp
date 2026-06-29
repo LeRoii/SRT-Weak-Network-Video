@@ -221,6 +221,24 @@ int main() {
     assert(alternate.receiver.interpolation_mode ==
            InterpolationMode::Repeat);
 
+    const auto partial = write_config(
+        "srt-runtime-config-partial.yaml",
+        "sender:\n"
+        "  input: file\n"
+        "  connect: 10.88.0.2:9000\n"
+        "receiver:\n"
+        "  listen: 10.88.0.2:9000\n"
+        "  display: false\n");
+    const auto partial_config = load_runtime_config(partial, false);
+    assert(partial_config.transport.mode == TransportMode::Udp);
+    assert(partial_config.sender.input == SenderInput::File);
+    assert(partial_config.sender.connect == "10.88.0.2:9000");
+    assert(partial_config.sender.max_video_kbps == 2000);
+    assert(partial_config.receiver.listen == "10.88.0.2:9000");
+    assert(!partial_config.receiver.display);
+    assert(partial_config.receiver.minimum_output_width == 640);
+    assert(partial_config.latency.metric == LatencyMetric::EncodeToDecode);
+
     const auto invalid_upscale = write_config(
         "srt-runtime-config-invalid-upscale.yaml",
         replace_once(complete_config(),
@@ -234,12 +252,6 @@ int main() {
                      "interpolation_mode: blend",
                      "interpolation_mode: optical_flow"));
     assert(load_fails(invalid_interpolation));
-
-    const auto missing_section = write_config(
-        "srt-runtime-config-missing-section.yaml",
-        "latency:\n"
-        "  metric: encode_to_decode\n");
-    assert(load_fails(missing_section));
 
     std::filesystem::remove(valid);
     std::filesystem::remove(display);
@@ -256,9 +268,9 @@ int main() {
     std::filesystem::remove(invalid_output_height);
     std::filesystem::remove(invalid_output_fps);
     std::filesystem::remove(bilinear_repeat);
+    std::filesystem::remove(partial);
     std::filesystem::remove(invalid_upscale);
     std::filesystem::remove(invalid_interpolation);
-    std::filesystem::remove(missing_section);
 
     std::cout << "runtime_config_tests=passed" << std::endl;
     return 0;

@@ -122,18 +122,11 @@ latency:
 
 On Windows, use the `.exe` path and Windows-style output paths, for example:
 
-```powershell
-.\build\Release\srt_weak_video.exe --role receiver --listen 0.0.0.0:9000 
-  --output-file .\srt-received.h264
-```
 
-```powershell
-.\build\Release\srt_weak_video.exe `
-  --role sender `
-  --connect 127.0.0.1:9000 `
-  --video-file C:\path\to\input.mp4 `
-  --max-video-kbps 2000
-```
+
+.\dist\srt_weak_video.exe --role sender 
+
+.\dist\srt_weak_video.exe --role receiver 
 
 Start the sender:
 

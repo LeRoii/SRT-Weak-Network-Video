@@ -23,6 +23,9 @@
 
 extern "C" {
 #include <libavcodec/avcodec.h>
+#ifdef _WIN32
+#include <libavdevice/avdevice.h>
+#endif
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 #include <libavutil/opt.h>
@@ -236,9 +239,78 @@ void VideoSourceReader::open_file() {
 
 void VideoSourceReader::open_camera() {
 #ifdef _WIN32
-    throw std::runtime_error(
-        "camera input is not supported on Windows by this build; "
-        "set sender.input to file in runtime-config.yaml");
+    avdevice_register_all();
+
+    const AVInputFormat *input_format = av_find_input_format("dshow");
+    if (!input_format) {
+        throw std::runtime_error("FFmpeg DirectShow input is not available");
+    }
+
+    const std::string device = "video=" + config_.camera_device;
+    AVDictionary *options = nullptr;
+    av_dict_set(&options, "video_size",
+                (std::to_string(config_.camera_width) + "x" +
+                 std::to_string(config_.camera_height)).c_str(),
+                0);
+    av_dict_set(&options, "framerate",
+                std::to_string(config_.camera_fps).c_str(), 0);
+
+    int result = avformat_open_input(&format_context_, device.c_str(),
+                                     input_format, &options);
+    av_dict_free(&options);
+    if (result < 0) {
+        throw std::runtime_error(
+            "cannot open DirectShow camera '" + config_.camera_device +
+            "': " + ffmpeg_error(result) +
+            ". List devices with: ffmpeg -list_devices true -f dshow -i dummy");
+    }
+
+    check_ffmpeg(avformat_find_stream_info(format_context_, nullptr),
+                 "avformat_find_stream_info camera");
+
+    video_stream_index_ =
+        av_find_best_stream(format_context_, AVMEDIA_TYPE_VIDEO,
+                            -1, -1, nullptr, 0);
+    if (video_stream_index_ < 0) {
+        throw std::runtime_error("DirectShow camera has no video stream");
+    }
+
+    AVStream *stream = format_context_->streams[video_stream_index_];
+    stream_time_base_num_ = stream->time_base.num;
+    stream_time_base_den_ = stream->time_base.den;
+
+    const AVCodec *decoder =
+        avcodec_find_decoder(stream->codecpar->codec_id);
+    if (!decoder) {
+        throw std::runtime_error("camera video decoder not found");
+    }
+    decoder_context_ = avcodec_alloc_context3(decoder);
+    if (!decoder_context_) {
+        throw std::runtime_error("avcodec_alloc_context3 camera decoder failed");
+    }
+    check_ffmpeg(avcodec_parameters_to_context(
+                     decoder_context_, stream->codecpar),
+                 "avcodec_parameters_to_context camera");
+    decoder_context_->thread_count = 2;
+    check_ffmpeg(avcodec_open2(decoder_context_, decoder, nullptr),
+                 "avcodec_open2 camera decoder");
+
+    decoded_frame_ = av_frame_alloc();
+    if (!decoded_frame_) {
+        throw std::runtime_error("av_frame_alloc camera failed");
+    }
+
+    input_eof_ = false;
+    decoder_flushed_ = false;
+    camera_streaming_ = true;
+    next_output_source_seconds_ = -1.0;
+    std::cerr << "video_input=camera backend=dshow device="
+              << config_.camera_device
+              << " requested_resolution="
+              << config_.camera_width << "x"
+              << config_.camera_height
+              << " requested_fps=" << config_.camera_fps
+              << std::endl;
 #else
     camera_fd_ = ::open(config_.camera_device.c_str(),
                         O_RDWR | O_NONBLOCK);
@@ -527,9 +599,7 @@ bool VideoSourceReader::next_file_frame() {
 
 bool VideoSourceReader::next_camera_frame() {
 #ifdef _WIN32
-    throw std::runtime_error(
-        "camera input is not supported on Windows by this build; "
-        "set sender.input to file in runtime-config.yaml");
+    return next_file_frame();
 #else
     while (!g_stop_requested.load()) {
         pollfd descriptor{};
