@@ -131,9 +131,9 @@ copies spread across the interval.
 | 0 | 1280x720 / 30 fps / 2000 kbps | 30 | 0.10 | 0.30 |
 | 1 | 640x360 / 20 fps / 900 kbps | 10 | 0.50 | 0.75 |
 | 2 | 640x360 / 15 fps / 700 kbps | 8 | 0.50 | 0.75 |
-| 3 | 640x360 / 10 fps / 400 kbps | 10 | 0.40 | 1.00 |
-| 4 | 426x240 / 5 fps / 220 kbps | 5 | 0.75 | 2.00 |
-| 5 | 426x240 / 3 fps / 140 kbps | 3 | 1.25 | 3.00 |
+| 3 | 640x360 / 10 fps / 400 kbps | 10 | 0.75 | 1.50 |
+| 4 | 426x240 / 5 fps / 220 kbps | 5 | 2.50 | 5.00 |
+| 5 | 426x240 / 3 fps / 140 kbps | 3 | 3.00 | 6.00 |
 | 6 | 320x180 / 3 fps / 80 kbps | 3 | 2.50 | 5.00 |
 | 7 | 320x180 / 2 fps / 50 kbps | 2 | 4.00 | 7.00 |
 | 8 | 256x144 / 2 fps / 30 kbps | 2 | 8.00 | 12.00 |
@@ -147,6 +147,10 @@ windows, with hysteresis below 12 percent for Level 2 to Level 1, below 3
 percent for Level 1 to Level 0, and below 50 percent for Level 5 to Level 4.
 RTT-only degradation starts above 160 ms and requires five consecutive high-RTT
 feedback windows.
+
+Levels 3 through 5 use stronger FEC to improve true decoded-frame throughput
+under mid-loss conditions; the sender does not lower profile solely because
+`decoded_fps` is below the profile fps.
 
 ### Sender Input
 

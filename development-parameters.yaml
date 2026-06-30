@@ -155,9 +155,9 @@ current:
       - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, gop_frames: 30, p_frame_fec_ratio: 0.10, keyframe_fec_ratio: 0.30, all_intra: false}
       - {level: 1, bitrate_kbps: 900, fps: 20, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75, all_intra: false}
       - {level: 2, bitrate_kbps: 700, fps: 15, width: 640, height: 360, gop_frames: 8, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75, all_intra: false}
-      - {level: 3, bitrate_kbps: 400, fps: 10, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.40, keyframe_fec_ratio: 1.00, all_intra: false}
-      - {level: 4, bitrate_kbps: 220, fps: 5, width: 426, height: 240, gop_frames: 5, p_frame_fec_ratio: 0.75, keyframe_fec_ratio: 2.00, all_intra: false}
-      - {level: 5, bitrate_kbps: 140, fps: 3, width: 426, height: 240, gop_frames: 3, p_frame_fec_ratio: 1.25, keyframe_fec_ratio: 3.00, all_intra: false}
+      - {level: 3, bitrate_kbps: 400, fps: 10, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.75, keyframe_fec_ratio: 1.50, all_intra: false}
+      - {level: 4, bitrate_kbps: 220, fps: 5, width: 426, height: 240, gop_frames: 5, p_frame_fec_ratio: 2.50, keyframe_fec_ratio: 5.00, all_intra: false}
+      - {level: 5, bitrate_kbps: 140, fps: 3, width: 426, height: 240, gop_frames: 3, p_frame_fec_ratio: 3.00, keyframe_fec_ratio: 6.00, all_intra: false}
       - {level: 6, bitrate_kbps: 80, fps: 3, width: 320, height: 180, gop_frames: 3, p_frame_fec_ratio: 2.50, keyframe_fec_ratio: 5.00, all_intra: false}
       - {level: 7, bitrate_kbps: 50, fps: 2, width: 320, height: 180, gop_frames: 2, p_frame_fec_ratio: 4.00, keyframe_fec_ratio: 7.00, all_intra: false}
       - {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, gop_frames: 2, p_frame_fec_ratio: 8.00, keyframe_fec_ratio: 12.00, all_intra: false}
@@ -276,6 +276,17 @@ current:
         optimization_required: false
 
 development_history:
+  - parameter: mid_loss_fec_ratios
+    previous:
+      level_3: {p_frame_fec_ratio: 0.40, keyframe_fec_ratio: 1.00}
+      level_4: {p_frame_fec_ratio: 0.75, keyframe_fec_ratio: 2.00}
+      level_5: {p_frame_fec_ratio: 1.25, keyframe_fec_ratio: 3.00}
+    current:
+      level_3: {p_frame_fec_ratio: 0.75, keyframe_fec_ratio: 1.50}
+      level_4: {p_frame_fec_ratio: 2.50, keyframe_fec_ratio: 5.00}
+      level_5: {p_frame_fec_ratio: 3.00, keyframe_fec_ratio: 6.00}
+    reason: "Improve decoded_fps under mid-loss conditions without lowering profile solely because decoded_fps is below the profile fps; the first FEC-only trial improved received frames but did not reach the 80 percent decoded_fps target at 50 percent loss, so Level 4/5 parity was strengthened further."
+
   - parameter: adaptation_level_5_loss_hysteresis
     previous: "Any smoothed loss above 50 percent immediately selected Level 5, so a 50 percent netem run could oscillate between Level 4 and Level 5 as measured loss jittered around the threshold."
     current: "Level 5 requires three consecutive feedback windows above 55 percent unless loss exceeds 60 percent; Level 5 recovers toward Level 4 only below 50 percent."
