@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <deque>
 #include <mutex>
@@ -7,6 +8,9 @@
 
 struct LatencySnapshot {
     std::optional<double> average_ms;
+    std::optional<double> p95_ms;
+    std::optional<double> max_ms;
+    std::size_t sample_count = 0;
     uint64_t invalid_samples = 0;
 };
 
