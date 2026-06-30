@@ -224,12 +224,15 @@ def scenarios_for_suite(suite: str, duration_seconds: int | None,
         steady_duration = duration_seconds or 60
         step_duration = step_duration_seconds or 30
         losses = [0, 20, 45, 80, 85]
-        staircase = [0, 20, 45, 80, 0]
+        staircase = [0, 10, 50, 85, 50, 10, 0]
     elif suite == "full":
         steady_duration = duration_seconds or 600
         step_duration = step_duration_seconds or 60
         losses = [0, 5, 15, 20, 35, 45, 60, 70, 80, 85]
-        staircase = [0, 5, 15, 20, 35, 45, 60, 70, 80, 85, 0]
+        staircase = [
+            0, 5, 10, 15, 20, 35, 45, 60, 70, 80, 85,
+            80, 70, 60, 45, 35, 20, 10, 5, 0,
+        ]
     else:
         steady_duration = duration_seconds or 600
         step_duration = step_duration_seconds or steady_duration
@@ -355,6 +358,19 @@ def downgrade_after(
     )
 
 
+def upgrade_after(
+    profile_changes: list[dict[str, object]],
+    applied_at: float,
+    window_seconds: float,
+) -> bool:
+    return any(
+        change["elapsed"] is not None and
+        0 <= float(change["elapsed"]) - applied_at <= window_seconds and
+        int(change["new_bitrate_kbps"]) > int(change["old_bitrate_kbps"])
+        for change in profile_changes
+    )
+
+
 def ffmpeg_check(root: Path, h264_path: Path, log_path: Path) -> dict[str, object]:
     if not h264_path.exists() or h264_path.stat().st_size == 0:
         log_path.write_text("missing or empty H.264 output\n", encoding="utf-8")
@@ -451,6 +467,13 @@ def summarize_scenario(scenario: Scenario, sender_log: Path,
             scenario.steps[index - 1].loss_percent and
             scenario.steps[index].loss_percent >= 20
         ]
+        decreasing_loss_step_indexes = [
+            index
+            for index in range(1, len(scenario.steps))
+            if scenario.steps[index].loss_percent <
+            scenario.steps[index - 1].loss_percent and
+            scenario.steps[index - 1].loss_percent >= 20
+        ]
         tc07 = (
             frames > 0 and decoder_errors == 0 and
             bool(ffmpeg_result["passed"]) and
@@ -461,6 +484,14 @@ def summarize_scenario(scenario: Scenario, sender_log: Path,
                     2.5,
                 )
                 for index in increasing_loss_step_indexes
+            ) and
+            all(
+                upgrade_after(
+                    profile_changes,
+                    float(step_events[index]["elapsed"]),
+                    15.0,
+                )
+                for index in decreasing_loss_step_indexes
             )
         )
 

@@ -163,7 +163,7 @@ void test_recovery_requires_five_healthy_windows() {
     assert(controller.update(network(4.5, 50.0)).level == 4);
 
     assert(controller.update(network(5.0, 50.0)).level == 4);
-    for (int sample = 0; sample < 4; ++sample) {
+    for (int sample = 0; sample < 3; ++sample) {
         assert(controller.update(network(0.0, 50.0)).level == 4);
     }
     assert(controller.update(network(0.0, 50.0)).level == 3);
@@ -184,6 +184,26 @@ void test_emergency_recovers_to_current_network_level() {
 
     for (int sample = 0; sample < 10; ++sample) {
         assert(controller.update(network(50.0, 50.0)).level == 4);
+    }
+}
+
+void test_high_loss_recovers_toward_lower_required_level() {
+    AdaptationController controller(2000);
+    assert(controller.update(network(10.0)).level == 1);
+    assert(controller.update(network(55.0)).level == 5);
+
+    for (int sample = 0; sample < 4; ++sample) {
+        assert(controller.update(network(10.0, 50.0)).level == 5);
+    }
+    assert(controller.update(network(10.0, 50.0)).level == 4);
+
+    for (int sample = 0; sample < 14; ++sample) {
+        controller.update(network(10.0, 50.0));
+    }
+    assert(controller.update(network(10.0, 50.0)).level == 1);
+
+    for (int sample = 0; sample < 5; ++sample) {
+        assert(controller.update(network(10.0, 50.0)).level == 1);
     }
 }
 
@@ -258,6 +278,7 @@ int main() {
     test_loss_degradation_is_immediate();
     test_recovery_requires_five_healthy_windows();
     test_emergency_recovers_to_current_network_level();
+    test_high_loss_recovers_toward_lower_required_level();
     test_max_video_bitrate_selects_supported_profile();
     test_invalid_snapshot_keeps_current_profile();
     test_udp_recovery_profile();

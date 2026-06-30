@@ -87,10 +87,7 @@ VideoProfile AdaptationController::update(const NetworkSnapshot &network) {
         level_ = required;
         healthy_windows_ = 0;
         emergency_recovery_active_ = required == 8;
-    } else if (required < level_ &&
-               ((network.loss_percent < 5.0 &&
-                 network.rtt_ms < 130.0) ||
-                emergency_recovery_active_)) {
+    } else if (required < level_) {
         if (++healthy_windows_ >= 5) {
             --level_;
             healthy_windows_ = 0;

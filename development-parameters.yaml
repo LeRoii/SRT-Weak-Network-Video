@@ -125,7 +125,7 @@ current:
       rtt_below_ms: 130
       consecutive_windows: 5
     degradation: "Immediately jump to the loss-required lower-quality level; RTT-only degradation requires sustained confirmation."
-    normal_recovery: "Recover one level after five healthy windows."
+    normal_recovery: "Recover one level after five stable feedback windows whenever the current network-required level is lower than the active level."
     emergency_recovery: "Recover one level every five stable windows until the current network-required level."
     loss_thresholds:
       - {greater_than_percent: 5, level: 1}
@@ -255,18 +255,32 @@ current:
       quick:
         steady_losses_percent: [0, 20, 45, 80, 85]
         steady_duration_seconds: 60
-        staircase_losses_percent: [0, 20, 45, 80, 0]
+        staircase_losses_percent: [0, 10, 50, 85, 50, 10, 0]
         staircase_step_seconds: 30
       full:
         steady_losses_percent: [0, 5, 15, 20, 35, 45, 60, 70, 80, 85]
         steady_duration_seconds: 600
-        staircase_losses_percent: [0, 5, 15, 20, 35, 45, 60, 70, 80, 85, 0]
+        staircase_losses_percent: [0, 5, 10, 15, 20, 35, 45, 60, 70, 80, 85, 80, 70, 60, 45, 35, 20, 10, 5, 0]
         staircase_step_seconds: 60
       extreme:
         steady_losses_percent: [90]
         optimization_required: false
 
 development_history:
+  - parameter: normal_profile_recovery
+    previous: "Normal recovery required loss below 5 percent and RTT below 130 ms; non-emergency high-loss profiles could stay stuck after loss improved to 10 percent."
+    current: "Normal recovery advances one level every five stable feedback windows whenever the current network-required level is lower than the active profile level."
+    reason: "Allow profile recovery on descending congestion stairs such as 0 -> 10 -> 50 -> 10 without waiting for an almost loss-free link."
+
+  - parameter: acceptance_staircase_shape
+    previous:
+      quick: [0, 20, 45, 80, 0]
+      full: [0, 5, 15, 20, 35, 45, 60, 70, 80, 85, 0]
+    current:
+      quick: [0, 10, 50, 85, 50, 10, 0]
+      full: [0, 5, 10, 15, 20, 35, 45, 60, 70, 80, 85, 80, 70, 60, 45, 35, 20, 10, 5, 0]
+    reason: "Validate both downshift on increasing loss and profile recovery on gradually decreasing loss instead of jumping directly from high loss to 0 percent."
+
   - parameter: primary_transport
     previous: "SRT caller/listener was the only media transport."
     current:

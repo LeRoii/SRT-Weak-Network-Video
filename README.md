@@ -296,8 +296,8 @@ python3 scripts/weaknet_acceptance.py --suite quick
 
 The quick suite runs 0%, 20%, 45%, 80%, and 85% bidirectional loss with 50 ms
 delay for 60 seconds per steady scenario, followed by a short staircase from
-0% to 20%, 45%, 80%, and back to 0%. For a shorter smoke run, override the
-durations:
+0% to 10%, 50%, 85%, then back down through 50%, 10%, and 0%. For a shorter
+smoke run, override the durations:
 
 ```bash
 python3 scripts/weaknet_acceptance.py \
@@ -313,8 +313,9 @@ python3 scripts/weaknet_acceptance.py --suite full
 ```
 
 It runs 0%, 5%, 15%, 20%, 35%, 45%, 60%, 70%, 80%, and 85% bidirectional loss
-for 600 seconds per steady scenario, then runs the full staircase. The 90%
-case is separated as an extreme observation and does not fail the main
+for 600 seconds per steady scenario, then runs the full staircase up to 85%
+and gradually back down to 0%. The 90% case is separated as an extreme
+observation and does not fail the main
 acceptance suite:
 
 ```bash
@@ -333,7 +334,8 @@ Results are written under `/tmp/weaknet-acceptance-YYYYmmdd-HHMMSS` unless
 The suite-level `summary.json` and `report.md` summarize pass/fail status. The
 current acceptance scope treats TC-01 as a video-profile bitrate check only:
 FEC and UDP overhead are not counted against the 2 Mbps ceiling. TC-06 is not
-part of the automated acceptance result. TC-08 uses `latency_avg <= 500 ms` as
-the hard criterion; values below 180 ms are reported as better-than-target
-latency rather than failures. The report also includes `latency_p95` and
-`latency_max` for diagnosis.
+part of the automated acceptance result. TC-07 checks both fast downshift on
+increasing loss and profile recovery on decreasing loss. TC-08 uses
+`latency_avg <= 500 ms` as the hard criterion; values below 180 ms are reported
+as better-than-target latency rather than failures. The report also includes
+`latency_p95` and `latency_max` for diagnosis.
