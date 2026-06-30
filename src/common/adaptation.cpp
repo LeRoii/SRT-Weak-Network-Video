@@ -17,7 +17,11 @@ constexpr std::array<VideoProfile, 9> kProfiles{{
     {8, 30, 2, 256, 144, 2, 8.00, 12.00, false},
 }};
 
-constexpr int kRttConfirmationWindows = 3;
+constexpr int kLossL2ConfirmationWindows = 3;
+constexpr int kProfileRecoveryWindows = 5;
+constexpr int kRttConfirmationWindows = 5;
+constexpr double kL2RecoveryLossPercent = 12.0;
+constexpr double kL0RecoveryLossPercent = 3.0;
 
 int loss_required_level(double loss_percent) {
     if (loss_percent > 77.0) {
@@ -57,7 +61,7 @@ int rtt_required_level(double rtt_ms) {
     if (rtt_ms > 220.0) {
         return 5;
     }
-    if (rtt_ms > 150.0) {
+    if (rtt_ms > 160.0) {
         return 3;
     }
     return 0;
@@ -88,7 +92,7 @@ VideoProfile AdaptationController::update(const NetworkSnapshot &network) {
         healthy_windows_ = 0;
         emergency_recovery_active_ = required == 8;
     } else if (required < level_) {
-        if (++healthy_windows_ >= 5) {
+        if (++healthy_windows_ >= kProfileRecoveryWindows) {
             --level_;
             healthy_windows_ = 0;
             if (level_ <= required) {
@@ -128,6 +132,7 @@ VideoProfile AdaptationController::reset_to_network(
         return current_;
     }
     reset_rtt_confirmation();
+    reset_loss_confirmation();
     level_ = required_level_for_network(network, false);
     while (level_ + 1 < static_cast<int>(kProfiles.size()) &&
            kProfiles[static_cast<std::size_t>(level_)].bitrate_kbps >
@@ -142,13 +147,14 @@ VideoProfile AdaptationController::reset_to_network(
 
 int AdaptationController::required_level_for_network(
     const NetworkSnapshot &network,
-    bool update_rtt_confirmation) {
+    bool update_confirmations) {
     const int loss_required =
-        loss_required_level(network.loss_percent);
+        loss_required_level_for_network(network.loss_percent,
+                                        update_confirmations);
     const int raw_rtt_required =
         rtt_required_level(network.rtt_ms);
 
-    if (update_rtt_confirmation) {
+    if (update_confirmations) {
         if (raw_rtt_required == 0) {
             reset_rtt_confirmation();
         } else {
@@ -183,6 +189,71 @@ void AdaptationController::reset_rtt_confirmation() {
     rtt_candidate_level_ = 0;
     rtt_high_windows_ = 0;
     confirmed_rtt_required_level_ = 0;
+}
+
+int AdaptationController::loss_required_level_for_network(
+    double loss_percent,
+    bool update_confirmation) {
+    const int raw_loss_required = loss_required_level(loss_percent);
+
+    if (raw_loss_required >= 3) {
+        if (update_confirmation) {
+            reset_loss_confirmation();
+        }
+        return raw_loss_required;
+    }
+
+    if (raw_loss_required == 2) {
+        if (level_ >= 2) {
+            if (update_confirmation) {
+                reset_loss_confirmation();
+            }
+            return 2;
+        }
+
+        if (update_confirmation) {
+            if (loss_candidate_level_ == 2) {
+                ++loss_candidate_windows_;
+            } else {
+                loss_candidate_level_ = 2;
+                loss_candidate_windows_ = 1;
+            }
+        }
+
+        return loss_candidate_windows_ >=
+                       kLossL2ConfirmationWindows
+                   ? 2
+                   : 1;
+    }
+
+    if (update_confirmation) {
+        reset_loss_confirmation();
+    }
+
+    if (raw_loss_required == 1) {
+        if (level_ >= 2 &&
+            loss_percent >= kL2RecoveryLossPercent) {
+            return 2;
+        }
+        return 1;
+    }
+
+    if (level_ >= 2 &&
+        loss_percent >= kL2RecoveryLossPercent) {
+        return 2;
+    }
+
+    if (level_ >= 1 &&
+        loss_percent >= kL0RecoveryLossPercent) {
+        return 1;
+    }
+
+    return 0;
+}
+
+void AdaptationController::reset_loss_confirmation() {
+    loss_candidate_level_ = 0;
+    loss_candidate_windows_ = 0;
 }
 
 VideoProfile AdaptationController::profile_for_level(int level) const {

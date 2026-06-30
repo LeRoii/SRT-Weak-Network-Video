@@ -124,9 +124,14 @@ current:
       loss_below_percent: 5
       rtt_below_ms: 130
       consecutive_windows: 5
-    degradation: "Immediately jump to the loss-required lower-quality level; RTT-only degradation requires sustained confirmation."
-    normal_recovery: "Recover one level after five stable feedback windows whenever the current network-required level is lower than the active level."
+    degradation: "Immediately jump for Level 1 loss and Level 3+ loss; Level 2 loss requires sustained confirmation; RTT-only degradation requires sustained confirmation."
+    normal_recovery: "Recover one level after five stable feedback windows whenever the hysteresis-adjusted network-required level is lower than the active level."
     emergency_recovery: "Recover one level every five stable windows until the current network-required level."
+    loss_confirmation:
+      level_2_windows: 3
+    loss_recovery_hysteresis:
+      level_2_to_1_below_percent: 12
+      level_1_to_0_below_percent: 3
     loss_thresholds:
       - {greater_than_percent: 5, level: 1}
       - {greater_than_percent: 15, level: 2}
@@ -136,9 +141,9 @@ current:
       - {greater_than_percent: 65, level: 6}
       - {greater_than_percent: 72, level: 7}
       - {greater_than_percent: 77, level: 8}
-    rtt_confirmation_windows: 3
+    rtt_confirmation_windows: 5
     rtt_minimum_levels:
-      - {greater_than_ms: 150, minimum_level: 3}
+      - {greater_than_ms: 160, minimum_level: 3}
       - {greater_than_ms: 220, minimum_level: 5}
       - {greater_than_ms: 300, minimum_level: 6}
       - {greater_than_ms: 400, minimum_level: 7}
@@ -267,6 +272,16 @@ current:
         optimization_required: false
 
 development_history:
+  - parameter: adaptation_low_mid_loss_hysteresis
+    previous: "Any smoothed loss above 15 percent immediately selected Level 2, and recovery followed the current required level without a lower recovery threshold."
+    current: "Level 2 loss requires three consecutive feedback windows above 15 percent unless loss exceeds 20 percent; Level 2 recovers toward Level 1 only below 12 percent, and Level 1 recovers to Level 0 only below 3 percent."
+    reason: "Reduce Windows profile churn around 10 percent configured loss where sampled loss can briefly cross the 15 percent boundary."
+
+  - parameter: adaptation_rtt_only_degradation
+    previous: "RTT-only degradation used a 150 ms Level 3 threshold and required three consecutive high-RTT feedback windows."
+    current: "RTT-only degradation uses a 160 ms Level 3 threshold and requires five consecutive high-RTT feedback windows."
+    reason: "Filter short Windows scheduling or probe-response spikes while preserving sustained high-RTT protection."
+
   - parameter: normal_profile_recovery
     previous: "Normal recovery required loss below 5 percent and RTT below 130 ms; non-emergency high-loss profiles could stay stuck after loss improved to 10 percent."
     current: "Normal recovery advances one level every five stable feedback windows whenever the current network-required level is lower than the active profile level."
