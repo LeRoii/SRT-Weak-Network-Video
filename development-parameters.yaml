@@ -124,13 +124,17 @@ current:
       loss_below_percent: 5
       rtt_below_ms: 130
       consecutive_windows: 5
-    degradation: "Immediately jump for Level 1 loss and Level 3+ loss; Level 2 loss requires sustained confirmation; RTT-only degradation requires sustained confirmation."
+    degradation: "Immediately jump for Level 1, Level 3, Level 4, and Level 6+ loss; Level 2 and Level 5 loss require sustained confirmation unless their immediate-entry thresholds are exceeded; RTT-only degradation requires sustained confirmation."
     normal_recovery: "Recover one level after five stable feedback windows whenever the hysteresis-adjusted network-required level is lower than the active level."
     emergency_recovery: "Recover one level every five stable windows until the current network-required level."
     loss_confirmation:
       level_2_windows: 3
+      level_5_windows: 3
+      level_5_confirmed_entry_above_percent: 55
+      level_5_immediate_entry_above_percent: 60
     loss_recovery_hysteresis:
       level_2_to_1_below_percent: 12
+      level_5_to_4_below_percent: 50
       level_1_to_0_below_percent: 3
     loss_thresholds:
       - {greater_than_percent: 5, level: 1}
@@ -272,6 +276,11 @@ current:
         optimization_required: false
 
 development_history:
+  - parameter: adaptation_level_5_loss_hysteresis
+    previous: "Any smoothed loss above 50 percent immediately selected Level 5, so a 50 percent netem run could oscillate between Level 4 and Level 5 as measured loss jittered around the threshold."
+    current: "Level 5 requires three consecutive feedback windows above 55 percent unless loss exceeds 60 percent; Level 5 recovers toward Level 4 only below 50 percent."
+    reason: "Keep 50ms/50 percent loss stable at Level 4 while still responding quickly to clearly worse loss."
+
   - parameter: adaptation_low_mid_loss_hysteresis
     previous: "Any smoothed loss above 15 percent immediately selected Level 2, and recovery followed the current required level without a lower recovery threshold."
     current: "Level 2 loss requires three consecutive feedback windows above 15 percent unless loss exceeds 20 percent; Level 2 recovers toward Level 1 only below 12 percent, and Level 1 recovers to Level 0 only below 3 percent."

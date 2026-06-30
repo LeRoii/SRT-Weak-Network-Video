@@ -138,13 +138,15 @@ copies spread across the interval.
 | 7 | 320x180 / 2 fps / 50 kbps | 2 | 4.00 | 7.00 |
 | 8 | 256x144 / 2 fps / 30 kbps | 2 | 8.00 | 12.00 |
 
-Loss thresholds above 5, 15, 20, 30, 50, 65, 72, and 77 percent select Levels
-1 through 8. Level 1 and Level 3+ loss degradation is immediate; Level 2 loss
-requires three consecutive feedback windows above 15 percent unless loss exceeds
-20 percent. Recovery advances one level after five stable feedback windows, with
-low-loss hysteresis below 12 percent for Level 2 to Level 1 and below 3 percent
-for Level 1 to Level 0. RTT-only degradation starts above 160 ms and requires
-five consecutive high-RTT feedback windows.
+Raw loss thresholds above 5, 15, 20, 30, 50, 65, 72, and 77 percent map to
+Levels 1 through 8. Effective selection adds hysteresis: Level 2 requires three
+consecutive feedback windows above 15 percent unless loss exceeds 20 percent,
+and Level 5 requires three consecutive windows above 55 percent unless loss
+exceeds 60 percent. Recovery advances one level after five stable feedback
+windows, with hysteresis below 12 percent for Level 2 to Level 1, below 3
+percent for Level 1 to Level 0, and below 50 percent for Level 5 to Level 4.
+RTT-only degradation starts above 160 ms and requires five consecutive high-RTT
+feedback windows.
 
 ### Sender Input
 

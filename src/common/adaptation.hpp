@@ -5,7 +5,10 @@
 #include <optional>
 
 struct AdaptationDiagnostics {
+    int raw_loss_required_level = 0;
     int loss_required_level = 0;
+    int loss_candidate_level = 0;
+    int loss_candidate_windows = 0;
     int raw_rtt_required_level = 0;
     int confirmed_rtt_required_level = 0;
     int rtt_high_windows = 0;

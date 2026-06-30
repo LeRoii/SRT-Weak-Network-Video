@@ -60,7 +60,10 @@ void test_profile_ladder_and_loss_boundaries() {
         {30.0, 3, 400, 10, 640, 360, 10, 0.40, 1.00, false},
         {30.01, 4, 220, 5, 426, 240, 5, 0.75, 2.00, false},
         {50.0, 4, 220, 5, 426, 240, 5, 0.75, 2.00, false},
-        {50.01, 5, 140, 3, 426, 240, 3, 1.25, 3.00, false},
+        {50.01, 4, 220, 5, 426, 240, 5, 0.75, 2.00, false},
+        {55.0, 4, 220, 5, 426, 240, 5, 0.75, 2.00, false},
+        {60.0, 4, 220, 5, 426, 240, 5, 0.75, 2.00, false},
+        {60.01, 5, 140, 3, 426, 240, 3, 1.25, 3.00, false},
         {65.0, 5, 140, 3, 426, 240, 3, 1.25, 3.00, false},
         {65.01, 6, 80, 3, 320, 180, 3, 2.50, 5.00, false},
         {72.0, 6, 80, 3, 320, 180, 3, 2.50, 5.00, false},
@@ -179,6 +182,44 @@ void test_loss_degradation_is_immediate_for_high_loss() {
     assert(high_loss.update(network(70.0, 500.0)).level == 7);
 }
 
+void test_fifty_percent_loss_boundary_stays_at_level_four() {
+    AdaptationController controller(2000);
+    assert(controller.update(network(45.0, 50.0)).level == 4);
+
+    const double jitter_losses[] = {
+        49.0, 52.0, 48.0, 51.0, 50.5, 49.5, 54.5, 50.1,
+    };
+    for (const double loss : jitter_losses) {
+        assert(controller.update(network(loss, 50.0)).level == 4);
+    }
+}
+
+void test_level_five_requires_sustained_or_clear_loss() {
+    AdaptationController sustained(2000);
+    assert(sustained.update(network(45.0, 50.0)).level == 4);
+    assert(sustained.update(network(56.0, 50.0)).level == 4);
+    assert(sustained.update(network(56.0, 50.0)).level == 4);
+    assert(sustained.update(network(56.0, 50.0)).level == 5);
+
+    AdaptationController clear_loss(2000);
+    assert(clear_loss.update(network(45.0, 50.0)).level == 4);
+    assert(clear_loss.update(network(61.0, 50.0)).level == 5);
+}
+
+void test_level_five_recovery_requires_below_fifty_percent() {
+    AdaptationController controller(2000);
+    assert(controller.update(network(61.0, 50.0)).level == 5);
+
+    for (int sample = 0; sample < 10; ++sample) {
+        assert(controller.update(network(50.0, 50.0)).level == 5);
+    }
+
+    for (int sample = 0; sample < 4; ++sample) {
+        assert(controller.update(network(49.9, 50.0)).level == 5);
+    }
+    assert(controller.update(network(49.9, 50.0)).level == 4);
+}
+
 void test_l1_recovers_to_l0_below_hysteresis_threshold() {
     AdaptationController controller(2000);
     assert(controller.update(network(10.0, 50.0)).level == 1);
@@ -218,7 +259,7 @@ void test_emergency_recovers_to_current_network_level() {
     AdaptationController controller(2000);
     assert(controller.update(network(100.0, 500.0)).level == 8);
 
-    for (int target_level = 7; target_level >= 4; --target_level) {
+    for (int target_level = 7; target_level >= 5; --target_level) {
         for (int sample = 0; sample < 4; ++sample) {
             assert(controller.update(network(50.0, 50.0)).level ==
                    target_level + 1);
@@ -228,14 +269,14 @@ void test_emergency_recovers_to_current_network_level() {
     }
 
     for (int sample = 0; sample < 10; ++sample) {
-        assert(controller.update(network(50.0, 50.0)).level == 4);
+        assert(controller.update(network(50.0, 50.0)).level == 5);
     }
 }
 
 void test_high_loss_recovers_toward_lower_required_level() {
     AdaptationController controller(2000);
     assert(controller.update(network(10.0)).level == 1);
-    assert(controller.update(network(55.0)).level == 5);
+    assert(controller.update(network(61.0)).level == 5);
 
     for (int sample = 0; sample < 4; ++sample) {
         assert(controller.update(network(10.0, 50.0)).level == 5);
@@ -266,7 +307,7 @@ void test_max_video_bitrate_selects_supported_profile() {
 
 void test_invalid_snapshot_keeps_current_profile() {
     AdaptationController controller(2000);
-    assert(controller.update(network(55.0)).level == 5);
+    assert(controller.update(network(61.0)).level == 5);
 
     NetworkSnapshot invalid;
     assert(controller.update(invalid).level == 5);
@@ -322,6 +363,9 @@ int main() {
     test_rtt_diagnostics_track_confirmation();
     test_low_loss_l2_requires_confirmation();
     test_loss_degradation_is_immediate_for_high_loss();
+    test_fifty_percent_loss_boundary_stays_at_level_four();
+    test_level_five_requires_sustained_or_clear_loss();
+    test_level_five_recovery_requires_below_fifty_percent();
     test_l1_recovers_to_l0_below_hysteresis_threshold();
     test_recovery_requires_five_healthy_windows();
     test_emergency_recovers_to_current_network_level();

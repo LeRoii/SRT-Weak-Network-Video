@@ -18,10 +18,14 @@ constexpr std::array<VideoProfile, 9> kProfiles{{
 }};
 
 constexpr int kLossL2ConfirmationWindows = 3;
+constexpr int kLossL5ConfirmationWindows = 3;
 constexpr int kProfileRecoveryWindows = 5;
 constexpr int kRttConfirmationWindows = 5;
 constexpr double kL2RecoveryLossPercent = 12.0;
 constexpr double kL0RecoveryLossPercent = 3.0;
+constexpr double kL5ConfirmedEntryLossPercent = 55.0;
+constexpr double kL5ImmediateEntryLossPercent = 60.0;
+constexpr double kL5RecoveryLossPercent = 50.0;
 
 int loss_required_level(double loss_percent) {
     if (loss_percent > 77.0) {
@@ -148,6 +152,8 @@ VideoProfile AdaptationController::reset_to_network(
 int AdaptationController::required_level_for_network(
     const NetworkSnapshot &network,
     bool update_confirmations) {
+    const int raw_loss_required =
+        loss_required_level(network.loss_percent);
     const int loss_required =
         loss_required_level_for_network(network.loss_percent,
                                         update_confirmations);
@@ -176,7 +182,10 @@ int AdaptationController::required_level_for_network(
         }
     }
 
+    diagnostics_.raw_loss_required_level = raw_loss_required;
     diagnostics_.loss_required_level = loss_required;
+    diagnostics_.loss_candidate_level = loss_candidate_level_;
+    diagnostics_.loss_candidate_windows = loss_candidate_windows_;
     diagnostics_.raw_rtt_required_level = raw_rtt_required;
     diagnostics_.confirmed_rtt_required_level =
         confirmed_rtt_required_level_;
@@ -195,6 +204,50 @@ int AdaptationController::loss_required_level_for_network(
     double loss_percent,
     bool update_confirmation) {
     const int raw_loss_required = loss_required_level(loss_percent);
+
+    if (raw_loss_required >= 6) {
+        if (update_confirmation) {
+            reset_loss_confirmation();
+        }
+        return raw_loss_required;
+    }
+
+    if (level_ >= 5 && loss_percent >= kL5RecoveryLossPercent) {
+        if (update_confirmation) {
+            reset_loss_confirmation();
+        }
+        return 5;
+    }
+
+    if (raw_loss_required == 5) {
+        if (loss_percent > kL5ImmediateEntryLossPercent) {
+            if (update_confirmation) {
+                reset_loss_confirmation();
+            }
+            return 5;
+        }
+
+        if (loss_percent > kL5ConfirmedEntryLossPercent) {
+            if (update_confirmation) {
+                if (loss_candidate_level_ == 5) {
+                    ++loss_candidate_windows_;
+                } else {
+                    loss_candidate_level_ = 5;
+                    loss_candidate_windows_ = 1;
+                }
+            }
+
+            return loss_candidate_windows_ >=
+                           kLossL5ConfirmationWindows
+                       ? 5
+                       : 4;
+        }
+
+        if (update_confirmation) {
+            reset_loss_confirmation();
+        }
+        return 4;
+    }
 
     if (raw_loss_required >= 3) {
         if (update_confirmation) {
