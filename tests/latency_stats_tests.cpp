@@ -24,6 +24,11 @@ int main() {
     auto snapshot = stats.snapshot(20'000);
     assert(snapshot.average_ms);
     assert(near(*snapshot.average_ms, 10.5));
+    assert(snapshot.p95_ms);
+    assert(near(*snapshot.p95_ms, 19.0));
+    assert(snapshot.max_ms);
+    assert(near(*snapshot.max_ms, 20.0));
+    assert(snapshot.sample_count == 20);
     assert(snapshot.invalid_samples == 0);
 
     stats.record(generation, 2'000'000, 1'999'999, 21'000);
@@ -35,11 +40,17 @@ int main() {
     stats.record(generation, 1'000'000, 1'002'000, 23'000);
     snapshot = stats.snapshot(23'000);
     assert(!snapshot.average_ms);
+    assert(!snapshot.p95_ms);
+    assert(!snapshot.max_ms);
+    assert(snapshot.sample_count == 0);
     assert(snapshot.invalid_samples == 2);
 
     stats.record(next_generation, 2'000'000, 2'005'000, 24'000);
     snapshot = stats.snapshot(10'024'001);
     assert(!snapshot.average_ms);
+    assert(!snapshot.p95_ms);
+    assert(!snapshot.max_ms);
+    assert(snapshot.sample_count == 0);
 
     std::cout << "latency_stats_tests=passed" << std::endl;
     return 0;

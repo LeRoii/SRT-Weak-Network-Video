@@ -118,7 +118,6 @@ void SenderApp::run_udp() {
                           std::chrono::milliseconds(
                               transport_config_.feedback_timeout_ms);
             const bool receiver_stalled =
-                feedback.request_keyframe ||
                 feedback.last_frame_age_ms > 1500;
 
             const bool startup_probe =
@@ -183,6 +182,9 @@ void SenderApp::run_udp() {
                 last_adaptation_feedback_sequence =
                     feedback.sequence;
             }
+            if (!recovering && feedback.request_keyframe) {
+                keyframe_requested_.store(true);
+            }
 
             if (desired != profile) {
                 const int64_t feedback_age_ms = have_feedback
@@ -190,6 +192,8 @@ void SenderApp::run_udp() {
                           std::chrono::milliseconds>(
                           now - feedback.received_at).count()
                     : -1;
+                const auto adaptation_diagnostics =
+                    adaptation_.diagnostics();
                 std::cerr
                     << "profile_change=1 reason="
                     << profile_reason
@@ -217,6 +221,14 @@ void SenderApp::run_udp() {
                     << " rtt=" << feedback.rtt_ms
                     << " bandwidth="
                     << feedback.bandwidth_kbps
+                    << " loss_required_level="
+                    << adaptation_diagnostics.loss_required_level
+                    << " raw_rtt_required_level="
+                    << adaptation_diagnostics.raw_rtt_required_level
+                    << " confirmed_rtt_required_level="
+                    << adaptation_diagnostics.confirmed_rtt_required_level
+                    << " rtt_high_windows="
+                    << adaptation_diagnostics.rtt_high_windows
                     << " feedback_seq="
                     << feedback.sequence
                     << " complete_reports="
@@ -268,6 +280,8 @@ void SenderApp::run_udp() {
                                   std::chrono::milliseconds>(
                                   now - feedback.received_at).count()
                             : -1;
+                        const auto adaptation_diagnostics =
+                            adaptation_.diagnostics();
                         std::cerr
                             << "profile_change=1 "
                             << "reason=udp_send_congested"
@@ -302,6 +316,15 @@ void SenderApp::run_udp() {
                             << " rtt=" << feedback.rtt_ms
                             << " bandwidth="
                             << feedback.bandwidth_kbps
+                            << " loss_required_level="
+                            << adaptation_diagnostics.loss_required_level
+                            << " raw_rtt_required_level="
+                            << adaptation_diagnostics.raw_rtt_required_level
+                            << " confirmed_rtt_required_level="
+                            << adaptation_diagnostics
+                                   .confirmed_rtt_required_level
+                            << " rtt_high_windows="
+                            << adaptation_diagnostics.rtt_high_windows
                             << " feedback_seq="
                             << feedback.sequence
                             << " complete_reports="

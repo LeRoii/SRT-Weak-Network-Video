@@ -53,6 +53,7 @@ private:
     bool synchronized_ = false;
     bool output_started_ = false;
     bool have_decoded_frame_id_ = false;
+    bool keyframe_request_pending_ = true;
     uint32_t stream_epoch_ = 0;
     uint64_t last_decoded_frame_id_ = 0;
     uint64_t completed_frames_ = 0;

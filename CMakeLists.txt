@@ -96,7 +96,7 @@ if(WIN32)
         set(FFMPEG_TARGETS_FOUND TRUE)
     else()
         set(FFMPEG_TARGETS_FOUND TRUE)
-        foreach(component IN ITEMS avcodec avformat avutil swscale)
+        foreach(component IN ITEMS avcodec avformat avutil swscale avdevice)
             first_existing_target(ffmpeg_component_target
                 "FFmpeg::${component}"
                 "FFMPEG::${component}"
@@ -118,6 +118,7 @@ if(WIN32)
                 libavformat
                 libavutil
                 libswscale
+                libavdevice
             )
         endif()
         if(TARGET PkgConfig::FFMPEG)
@@ -132,11 +133,13 @@ if(WIN32)
         find_library(FFMPEG_AVFORMAT_LIBRARY NAMES avformat libavformat)
         find_library(FFMPEG_AVUTIL_LIBRARY NAMES avutil libavutil)
         find_library(FFMPEG_SWSCALE_LIBRARY NAMES swscale libswscale)
+        find_library(FFMPEG_AVDEVICE_LIBRARY NAMES avdevice libavdevice)
         if(NOT FFMPEG_INCLUDE_DIR OR
            NOT FFMPEG_AVCODEC_LIBRARY OR
            NOT FFMPEG_AVFORMAT_LIBRARY OR
            NOT FFMPEG_AVUTIL_LIBRARY OR
-           NOT FFMPEG_SWSCALE_LIBRARY)
+           NOT FFMPEG_SWSCALE_LIBRARY OR
+           NOT FFMPEG_AVDEVICE_LIBRARY)
             message(FATAL_ERROR
                 "FFmpeg was not found. On Windows, install FFmpeg development "
                 "libraries with vcpkg and configure CMake with the vcpkg "
@@ -151,11 +154,14 @@ if(WIN32)
             "${FFMPEG_INCLUDE_DIR}" "${FFMPEG_AVUTIL_LIBRARY}")
         add_imported_library(local::ffmpeg_swscale
             "${FFMPEG_INCLUDE_DIR}" "${FFMPEG_SWSCALE_LIBRARY}")
+        add_imported_library(local::ffmpeg_avdevice
+            "${FFMPEG_INCLUDE_DIR}" "${FFMPEG_AVDEVICE_LIBRARY}")
         set(FFMPEG_TARGETS
             local::ffmpeg_avcodec
             local::ffmpeg_avformat
             local::ffmpeg_avutil
             local::ffmpeg_swscale
+            local::ffmpeg_avdevice
         )
     endif()
 

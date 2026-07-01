@@ -152,6 +152,7 @@ void ReceiverApp::run_srt_connection(SrtSocket &socket) {
         if (cleanup.expired_frames > 0) {
             dropped_frames_ += cleanup.expired_frames;
             synchronized_ = false;
+            keyframe_request_pending_ = true;
         }
 
         const auto now = std::chrono::steady_clock::now();
@@ -207,6 +208,12 @@ void ReceiverApp::run_srt_connection(SrtSocket &socket) {
                 << "rtt=" << network.rtt_ms << "ms "
                 << "latency_avg="
                 << format_latency(latency.average_ms) << " "
+                << "latency_p95="
+                << format_latency(latency.p95_ms) << " "
+                << "latency_max="
+                << format_latency(latency.max_ms) << " "
+                << "latency_samples="
+                << latency.sample_count << " "
                 << "latency_invalid="
                 << latency.invalid_samples << " "
                 << "frames=" << completed_frames_ << " "
@@ -356,6 +363,7 @@ void ReceiverApp::run_udp() {
         if (cleanup.expired_frames > 0) {
             dropped_frames_ += cleanup.expired_frames;
             synchronized_ = false;
+            keyframe_request_pending_ = true;
         }
 
         const auto now = std::chrono::steady_clock::now();
@@ -379,6 +387,7 @@ void ReceiverApp::run_udp() {
                 latest_probe_sender_monotonic_us;
             feedback.last_frame_age_ms = last_frame_age_ms();
             feedback.request_keyframe =
+                keyframe_request_pending_ ||
                 feedback.last_frame_age_ms > 1500;
             feedback.rtt_probe_response = force_feedback_report;
             pending_feedback = encode_udp_feedback(feedback);
@@ -438,6 +447,12 @@ void ReceiverApp::run_udp() {
                 << "loss=" << loss_percent << "% "
                 << "latency_avg="
                 << format_latency(latency.average_ms) << " "
+                << "latency_p95="
+                << format_latency(latency.p95_ms) << " "
+                << "latency_max="
+                << format_latency(latency.max_ms) << " "
+                << "latency_samples="
+                << latency.sample_count << " "
                 << "latency_invalid="
                 << latency.invalid_samples << " "
                 << "frames=" << completed_frames_ << " "
@@ -471,6 +486,7 @@ void ReceiverApp::handle_frame(RecoveredFrame frame) {
     if (frame.stream_epoch != stream_epoch_) {
         stream_epoch_ = frame.stream_epoch;
         synchronized_ = false;
+        keyframe_request_pending_ = true;
         have_decoded_frame_id_ = false;
         decoder_.reset();
     }
@@ -483,10 +499,12 @@ void ReceiverApp::handle_frame(RecoveredFrame frame) {
     if (synchronized_ && have_decoded_frame_id_ &&
         frame.frame_id != last_decoded_frame_id_ + 1) {
         synchronized_ = false;
+        keyframe_request_pending_ = true;
     }
 
     if (!synchronized_ && !frame.keyframe) {
         ++dropped_frames_;
+        keyframe_request_pending_ = true;
         return;
     }
 
@@ -505,6 +523,7 @@ void ReceiverApp::handle_frame(RecoveredFrame frame) {
             &decoded_at_unix_us)) {
         ++decoder_errors_;
         synchronized_ = false;
+        keyframe_request_pending_ = true;
         return;
     }
     if (latency_config_.metric ==
@@ -517,6 +536,7 @@ void ReceiverApp::handle_frame(RecoveredFrame frame) {
     }
 
     synchronized_ = true;
+    keyframe_request_pending_ = false;
     have_decoded_frame_id_ = true;
     last_decoded_frame_id_ = frame.frame_id;
     ++completed_frames_;
@@ -548,6 +568,7 @@ void ReceiverApp::reset_media_session() {
     renderer_.discard_pending();
     latency_generation_ = latency_stats_.reset();
     synchronized_ = false;
+    keyframe_request_pending_ = true;
     have_decoded_frame_id_ = false;
     stream_epoch_ = 0;
     receiver_started_at_ = std::chrono::steady_clock::now();

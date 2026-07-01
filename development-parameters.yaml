@@ -121,37 +121,38 @@ current:
       maximum: 2000
       default: 2000
     healthy_window:
-      loss_below_percent: 3
+      loss_below_percent: 5
       rtt_below_ms: 130
       consecutive_windows: 5
-    degradation: "Immediately jump to the required lower-quality level."
+    degradation: "Immediately jump to the loss-required lower-quality level; RTT-only degradation requires sustained confirmation."
     normal_recovery: "Recover one level after five healthy windows."
     emergency_recovery: "Recover one level every five stable windows until the current network-required level."
     loss_thresholds:
-      - {greater_than_percent: 3, level: 1}
-      - {greater_than_percent: 7, level: 2}
-      - {greater_than_percent: 15, level: 3}
+      - {greater_than_percent: 5, level: 1}
+      - {greater_than_percent: 15, level: 2}
+      - {greater_than_percent: 20, level: 3}
       - {greater_than_percent: 30, level: 4}
       - {greater_than_percent: 50, level: 5}
       - {greater_than_percent: 65, level: 6}
       - {greater_than_percent: 72, level: 7}
       - {greater_than_percent: 77, level: 8}
+    rtt_confirmation_windows: 3
     rtt_minimum_levels:
       - {greater_than_ms: 150, minimum_level: 3}
       - {greater_than_ms: 220, minimum_level: 5}
       - {greater_than_ms: 300, minimum_level: 6}
       - {greater_than_ms: 400, minimum_level: 7}
     profiles:
-      - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, p_frame_fec_ratio: 0.10, keyframe_fec_ratio: 0.30, all_intra: false}
-      - {level: 1, bitrate_kbps: 1200, fps: 20, width: 960, height: 540, p_frame_fec_ratio: 0.15, keyframe_fec_ratio: 0.50, all_intra: false}
-      - {level: 2, bitrate_kbps: 700, fps: 15, width: 640, height: 360, p_frame_fec_ratio: 0.25, keyframe_fec_ratio: 0.75, all_intra: false}
-      - {level: 3, bitrate_kbps: 400, fps: 10, width: 640, height: 360, p_frame_fec_ratio: 0.40, keyframe_fec_ratio: 1.00, all_intra: false}
-      - {level: 4, bitrate_kbps: 220, fps: 5, width: 426, height: 240, p_frame_fec_ratio: 0.75, keyframe_fec_ratio: 2.00, all_intra: false}
-      - {level: 5, bitrate_kbps: 140, fps: 3, width: 426, height: 240, p_frame_fec_ratio: 1.25, keyframe_fec_ratio: 3.00, all_intra: false}
-      - {level: 6, bitrate_kbps: 80, fps: 3, width: 320, height: 180, p_frame_fec_ratio: 2.50, keyframe_fec_ratio: 5.00, all_intra: false}
-      - {level: 7, bitrate_kbps: 50, fps: 2, width: 320, height: 180, p_frame_fec_ratio: 4.00, keyframe_fec_ratio: 7.00, all_intra: false}
-      - {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, p_frame_fec_ratio: 8.00, keyframe_fec_ratio: 12.00, all_intra: false}
-    gop_seconds: 1
+      - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, gop_frames: 30, p_frame_fec_ratio: 0.10, keyframe_fec_ratio: 0.30, all_intra: false}
+      - {level: 1, bitrate_kbps: 900, fps: 20, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75, all_intra: false}
+      - {level: 2, bitrate_kbps: 700, fps: 15, width: 640, height: 360, gop_frames: 8, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75, all_intra: false}
+      - {level: 3, bitrate_kbps: 400, fps: 10, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.40, keyframe_fec_ratio: 1.00, all_intra: false}
+      - {level: 4, bitrate_kbps: 220, fps: 5, width: 426, height: 240, gop_frames: 5, p_frame_fec_ratio: 0.75, keyframe_fec_ratio: 2.00, all_intra: false}
+      - {level: 5, bitrate_kbps: 140, fps: 3, width: 426, height: 240, gop_frames: 3, p_frame_fec_ratio: 1.25, keyframe_fec_ratio: 3.00, all_intra: false}
+      - {level: 6, bitrate_kbps: 80, fps: 3, width: 320, height: 180, gop_frames: 3, p_frame_fec_ratio: 2.50, keyframe_fec_ratio: 5.00, all_intra: false}
+      - {level: 7, bitrate_kbps: 50, fps: 2, width: 320, height: 180, gop_frames: 2, p_frame_fec_ratio: 4.00, keyframe_fec_ratio: 7.00, all_intra: false}
+      - {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, gop_frames: 2, p_frame_fec_ratio: 8.00, keyframe_fec_ratio: 12.00, all_intra: false}
+    gop_policy: "Levels 1 and 2 use about 0.5 seconds; other levels use about 1 second."
 
   fec:
     target_shard_bytes: 1000
@@ -199,6 +200,8 @@ current:
     simultaneously_reported_metrics: 1
     rolling_window_seconds: 10
     statistics_interval_ms: 1000
+    receiver_log_fields: [latency_avg, latency_p95, latency_max, latency_samples, latency_invalid]
+    p95_calculation: nearest_rank
     maximum_valid_sample_ms: 60000
     invalid_negative_samples: discard
     source_to_display_headless_value: "n/a"
@@ -232,6 +235,36 @@ current:
     default_loss_direction: tx
     bandwidth_units_examples: [500kbit, 2mbit, 1gbit]
     permanent_neighbor_entries: true
+
+  acceptance:
+    runner: scripts/weaknet_acceptance.py
+    output_root_default: "/tmp/weaknet-acceptance-YYYYmmdd-HHMMSS"
+    video_file: "/home/u20/code/jetson-2k.mp4"
+    receiver_output_file: "scenario directory / received.h264"
+    transport: udp
+    direction: both
+    delay_ms: 50
+    startup_seconds: 5
+    tc01_video_profile_bitrate_only: true
+    tc06_excluded: true
+    tc08_hard_metric: "latency_avg <= 500ms"
+    tc08_below_180ms: "reported as better-than-target latency, not a failure"
+    tc08_report_only_metrics: [latency_p95, latency_max]
+    ffmpeg_strict_command: "ffmpeg -v error -err_detect explode -i received.h264 -f null -"
+    suites:
+      quick:
+        steady_losses_percent: [0, 20, 45, 80, 85]
+        steady_duration_seconds: 60
+        staircase_losses_percent: [0, 20, 45, 80, 0]
+        staircase_step_seconds: 30
+      full:
+        steady_losses_percent: [0, 5, 15, 20, 35, 45, 60, 70, 80, 85]
+        steady_duration_seconds: 600
+        staircase_losses_percent: [0, 5, 15, 20, 35, 45, 60, 70, 80, 85, 0]
+        staircase_step_seconds: 60
+      extreme:
+        steady_losses_percent: [90]
+        optimization_required: false
 
 development_history:
   - parameter: primary_transport
@@ -424,9 +457,24 @@ development_history:
       receiver: [transport, latency_type, latency_p95, output_fps, synthetic_fps, output_resolution]
     current:
       sender_removed: [transport]
-      receiver_removed: [transport, latency_type, latency_p95, output_fps, synthetic_fps, output_resolution]
-      retained_debug: [srt_events, udp_events, decoded_fps, last_frame_age_ms, max_frame_gap_ms, decoder_errors]
-    reason: "Reduce repetitive output while retaining connection and frame-stall diagnostics."
+      receiver_removed: [transport, latency_type, output_fps, synthetic_fps, output_resolution]
+      retained_debug: [srt_events, udp_events, decoded_fps, last_frame_age_ms, max_frame_gap_ms, decoder_errors, latency_avg, latency_p95, latency_max, latency_samples]
+    reason: "Reduce repetitive output while retaining connection, latency distribution, and frame-stall diagnostics."
+
+  - parameter: receiver_latency_log_fields
+    previous: "Receiver periodic logs printed latency_avg and latency_invalid only."
+    current: "Receiver periodic logs print latency_avg, latency_p95, latency_max, latency_samples, and latency_invalid."
+    reason: "Allow automated acceptance to report latency distribution while preserving latency_avg for the TC-08 hard criterion."
+
+  - parameter: automated_acceptance_runner
+    previous: "Weak-network acceptance was run manually with scripts/netem_loss.sh, ad hoc logs, and manual FFmpeg checks."
+    current: "scripts/weaknet_acceptance.py automates namespace setup, sender/receiver launch, netem scenarios, log capture, FFmpeg/ffprobe checks, and JSON/Markdown reporting."
+    reason: "Make TC-01 through TC-08 validation repeatable and preserve evidence for each scenario."
+
+  - parameter: tc08_acceptance_threshold
+    previous: "The plan treated 180-500 ms as a closed interval for latency_avg."
+    current: "Automated acceptance fails only when latency_avg exceeds 500 ms; latency below 180 ms is reported as better-than-target latency."
+    reason: "Local namespace encode-to-decode latency can be well below 180 ms, and lower latency should not fail weak-network acceptance."
 
   - parameter: sender_last_frame_age_log
     previous: "Sender UDP statistics printed the receiver-reported last_frame_age_ms."
@@ -463,12 +511,44 @@ development_history:
     current: "UDP probes are sent by the feedback/control thread, independent of frame reading and encoder lifecycle."
     reason: "Keep RTT measurement on the control plane even when the media path stalls briefly on a healthy local link."
 
+  - parameter: adaptation_loss_thresholds
+    previous: "Loss thresholds used fine-grained low-loss cuts at 3, 7, and 15 percent before the unchanged high-loss thresholds."
+    current: "Low-loss thresholds are widened to 5, 15, and 20 percent while 30, 50, 65, 72, and 77 percent thresholds remain unchanged."
+    reason: "Keep 10 percent loss in a 20fps profile and avoid unnecessary drops to 15fps while preserving strong protection for common 20 percent-plus weak-network cases."
+
+  - parameter: adaptation_rtt_only_degradation
+    previous: "A single RTT sample above 150, 220, 300, or 400 ms could immediately force the corresponding minimum profile level."
+    current: "RTT-only degradation requires three consecutive high-RTT feedback windows; loss-required levels still apply immediately."
+    reason: "Filter Windows scheduler and control-thread RTT spikes without removing sustained high-RTT protection."
+
   - parameter: protocol_version
     previous: 3
     current: 4
     reason: "Add UDP probe messages and change UdpFeedback echoed_sender_monotonic_us semantics without supporting mixed old/new endpoints."
 
+  - parameter: low_loss_realtime_profiles
+    previous:
+      level_1: {bitrate_kbps: 1200, fps: 20, width: 960, height: 540, gop_frames: 20, p_frame_fec_ratio: 0.15, keyframe_fec_ratio: 0.50}
+      level_2: {bitrate_kbps: 700, fps: 15, width: 640, height: 360, gop_frames: 15, p_frame_fec_ratio: 0.25, keyframe_fec_ratio: 0.75}
+    current:
+      level_1: {bitrate_kbps: 900, fps: 20, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75}
+      level_2: {bitrate_kbps: 700, fps: 15, width: 640, height: 360, gop_frames: 8, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75}
+    reason: "Improve true decoded frame continuity around 10-15 percent loss by protecting P frames and reducing keyframe wait time."
+
+  - parameter: receiver_keyframe_request
+    previous: "UDP feedback requested a keyframe only when last_frame_age_ms exceeded 1500."
+    current: "UDP feedback also requests a keyframe after frame assembly expiry, H.264 sync loss from a frame ID gap, decoder error, or dropping non-keyframes while unsynchronized."
+    reason: "Shorten recovery after a missing P frame without relaxing complete-frame and decoder-sync gates."
+
+  - parameter: sender_keyframe_request_handling
+    previous: "Any UDP feedback request_keyframe was treated as receiver_stalled and could force Level 8 recovery."
+    current: "request_keyframe triggers the next encoded frame to be an IDR; Level 8 recovery is reserved for stale feedback, last_frame_age_ms above 1500, send congestion, or very high loss."
+    reason: "Allow mid-loss H.264 resynchronization without unnecessary emergency-profile drops."
+
 validation_scenarios:
+  - {transport: udp, loss_percent: 10, delay_ms: 50, direction: both, duration_seconds: 31, profile: "Level 1 900kbps/20fps/640x360", decoded_fps_stable_range: "14-17 after recovery, short resync dips observed", max_frame_gap_ms: 1105, decoder_errors: 0, ffmpeg_strict: passed, implementation: low_loss_fps_v1}
+  - {transport: udp, loss_percent: 20, delay_ms: 50, direction: both, duration_seconds: 31, profile: "Level 2/3 boundary, mostly 400kbps/10fps/640x360 at sampled loss above 20 percent", level8_recovery_events_after_fix: 0, max_frame_gap_ms: 721, decoder_errors: 0, ffmpeg_strict: passed, implementation: low_loss_fps_v1}
+  - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 51, profile: "Level 8 30kbps/2fps/256x144", frames: 91, dropped_frames: 17, max_frame_gap_ms: 1336, decoder_errors: 0, ffmpeg_strict: passed, implementation: low_loss_fps_v1}
   - {transport: udp, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1066, dropped_frames: 72, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 1595, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
   - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1114, dropped_frames: 26, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 2104, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
   - {transport: udp, loss_percent: 85, delay_ms: 50, direction: both, duration_seconds: 600, frames: 1015, dropped_frames: 122, rendered_frames: 2998, output_resolution: "640x360", max_frame_gap_ms: 2103, decoder_errors: 0, ffmpeg_strict: passed, implementation: minimum_output_v2}
