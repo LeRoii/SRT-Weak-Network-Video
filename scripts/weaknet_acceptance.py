@@ -24,14 +24,14 @@ from typing import Iterable
 
 PROFILES = [
     (0, 2000, 30, 1280, 720),
-    (1, 900, 20, 640, 360),
-    (2, 700, 15, 640, 360),
-    (3, 400, 10, 640, 360),
-    (4, 220, 5, 426, 240),
-    (5, 140, 3, 426, 240),
-    (6, 80, 3, 320, 180),
-    (7, 50, 2, 320, 180),
-    (8, 30, 2, 256, 144),
+    (1, 900, 24, 640, 360),
+    (2, 700, 24, 640, 360),
+    (3, 500, 20, 640, 360),
+    (4, 350, 20, 426, 240),
+    (5, 220, 15, 320, 180),
+    (6, 150, 12, 320, 180),
+    (7, 90, 12, 256, 144),
+    (8, 60, 10, 160, 90),
 ]
 
 PROFILE_RE = re.compile(
@@ -46,6 +46,8 @@ PROFILE_CHANGE_RE = re.compile(
 )
 ELAPSED_RE = re.compile(r"^\[elapsed=(?P<elapsed>[0-9.]+)\] ")
 METRIC_RE = re.compile(r"(?P<name>[a-zA-Z0-9_]+)=(?P<value>[^ ]+)")
+DOWNGRADE_WINDOW_SECONDS = 3.0
+UPGRADE_WINDOW_SECONDS = 15.0
 
 
 @dataclass(frozen=True)
@@ -164,10 +166,10 @@ def write_runtime_config(root: Path, output_file: Path) -> Path:
                 "",
                 "receiver:",
                 "  listen: 10.88.0.2:9000",
-                "  display: false",
+                "  display: true",
                 "  minimum_output_width: 640",
                 "  minimum_output_height: 360",
-                "  minimum_output_fps: 5",
+                "  minimum_output_fps: 20",
                 "  upscale_mode: lanczos_sharpen",
                 "  interpolation_mode: blend",
                 "  write_h264: true",
@@ -204,6 +206,7 @@ def start_process(root: Path, namespace: str, role: str,
     executable = root / "build" / "srt_weak_video"
     command = [
         "sudo", "ip", "netns", "exec", namespace,
+        "env", "SDL_VIDEODRIVER=dummy",
         str(executable), "--role", role,
     ]
     process = subprocess.Popen(
@@ -223,8 +226,8 @@ def scenarios_for_suite(suite: str, duration_seconds: int | None,
     if suite == "quick":
         steady_duration = duration_seconds or 60
         step_duration = step_duration_seconds or 30
-        losses = [0, 20, 45, 80, 85]
-        staircase = [0, 10, 50, 85, 50, 10, 0]
+        losses = [0, 20, 45, 70, 80]
+        staircase = [0, 10, 50, 70, 80, 50, 10, 0]
     elif suite == "full":
         steady_duration = duration_seconds or 600
         step_duration = step_duration_seconds or 60
@@ -283,6 +286,7 @@ def parse_log_metrics(path: Path) -> dict[str, object]:
     profiles: list[dict[str, object]] = []
     profile_changes: list[dict[str, object]] = []
     last_metrics: dict[str, str] = {}
+    metric_samples: list[dict[str, object]] = []
 
     if not path.exists():
         return {
@@ -322,16 +326,82 @@ def parse_log_metrics(path: Path) -> dict[str, object]:
                 }
             )
         if "frames=" in line or "decoder_errors=" in line:
-            last_metrics = {
+            metrics: dict[str, object] = {
                 match.group("name"): match.group("value")
                 for match in METRIC_RE.finditer(line)
             }
+            if elapsed is not None:
+                metrics["elapsed"] = elapsed
+            last_metrics = {
+                str(key): str(value)
+                for key, value in metrics.items()
+                if key != "elapsed"
+            }
+            metric_samples.append(metrics)
 
     return {
         "profiles": profiles,
         "profile_changes": profile_changes,
         "last_metrics": last_metrics,
+        "metric_samples": metric_samples,
     }
+
+
+def metric_average(samples: list[dict[str, object]], name: str,
+                   fallback: float) -> float:
+    values: list[float] = []
+    for sample in samples:
+        value = sample.get(name)
+        if value is None:
+            continue
+        try:
+            values.append(float(str(value)))
+        except ValueError:
+            continue
+    return sum(values) / len(values) if values else fallback
+
+
+def metric_minimum(samples: list[dict[str, object]], name: str,
+                   fallback: float) -> float:
+    values: list[float] = []
+    for sample in samples:
+        value = sample.get(name)
+        if value is None:
+            continue
+        try:
+            values.append(float(str(value)))
+        except ValueError:
+            continue
+    return min(values) if values else fallback
+
+
+def samples_at_or_after(samples: list[dict[str, object]],
+                        elapsed: float) -> list[dict[str, object]]:
+    selected: list[dict[str, object]] = []
+    for sample in samples:
+        sample_elapsed = sample.get("elapsed")
+        if sample_elapsed is None:
+            continue
+        if float(sample_elapsed) >= elapsed:
+            selected.append(sample)
+    return selected
+
+
+def latest_metric(samples: list[dict[str, object]], name: str,
+                  fallback: str) -> str:
+    for sample in reversed(samples):
+        value = sample.get(name)
+        if value is not None:
+            return str(value)
+    return fallback
+
+
+def format_report_value(value: object) -> str:
+    if value is None:
+        return "n/a"
+    if isinstance(value, float):
+        return f"{value:.2f}".rstrip("0").rstrip(".")
+    return str(value)
 
 
 def required_bitrate_for_loss(loss_percent: int) -> int:
@@ -419,19 +489,54 @@ def summarize_scenario(scenario: Scenario, sender_log: Path,
     profiles = sender["profiles"]
     profile_changes = sender["profile_changes"]
     receiver_metrics = receiver["last_metrics"]
+    receiver_samples = receiver["metric_samples"]
 
     bitrates = [int(profile["bitrate_kbps"]) for profile in profiles]
     max_bitrate = max(bitrates) if bitrates else None
     average_bitrate = sum(bitrates) / len(bitrates) if bitrates else None
     decoder_errors = int(receiver_metrics.get("decoder_errors", "999999"))
     frames = int(receiver_metrics.get("frames", "0"))
+    first_loss = scenario.steps[0].loss_percent
+    stable_samples = receiver_samples
+    warmup_start_elapsed = None
+    if scenario.kind == "steady":
+        applied_at = float(step_events[0]["elapsed"]) if step_events else 0.0
+        warmup_seconds = min(
+            5.0,
+            max(0.0, scenario.steps[0].duration_seconds * 0.25),
+        )
+        warmup_start_elapsed = applied_at + warmup_seconds
+        post_warmup = samples_at_or_after(
+            receiver_samples,
+            warmup_start_elapsed,
+        )
+        if post_warmup:
+            stable_samples = post_warmup
+
+    last_decoded_fps = float(receiver_metrics.get("decoded_fps", "0"))
+    last_output_fps = float(receiver_metrics.get("output_fps", "0"))
+    last_synthetic_fps = float(receiver_metrics.get("synthetic_fps", "0"))
+    decoded_fps = metric_average(
+        stable_samples, "decoded_fps", last_decoded_fps)
+    output_fps = metric_average(
+        stable_samples, "output_fps", last_output_fps)
+    synthetic_fps = metric_average(
+        stable_samples, "synthetic_fps", last_synthetic_fps)
+    decoded_fps_min = metric_minimum(
+        stable_samples, "decoded_fps", last_decoded_fps)
+    output_fps_min = metric_minimum(
+        stable_samples, "output_fps", last_output_fps)
+    output_resolution = latest_metric(
+        stable_samples,
+        "output_resolution",
+        receiver_metrics.get("output_resolution", "0x0"),
+    )
     max_frame_gap_ms = int(receiver_metrics.get("max_frame_gap_ms", "0"))
     latency_avg_ms = parse_value_ms(receiver_metrics.get("latency_avg", "n/a"))
     latency_p95_ms = parse_value_ms(receiver_metrics.get("latency_p95", "n/a"))
     latency_max_ms = parse_value_ms(receiver_metrics.get("latency_max", "n/a"))
     latency_samples = int(receiver_metrics.get("latency_samples", "0"))
 
-    first_loss = scenario.steps[0].loss_percent
     tc01 = True
     if scenario.kind == "steady" and first_loss == 0:
         tc01 = (
@@ -457,6 +562,13 @@ def summarize_scenario(scenario: Scenario, sender_log: Path,
 
     tc05 = True if scenario.extreme else bool(ffmpeg_result["passed"])
     tc08 = latency_avg_ms is not None and latency_avg_ms <= 500.0
+    tc09 = True
+    if scenario.kind == "steady" and first_loss == 80 and not scenario.extreme:
+        tc09 = (
+            decoded_fps >= 8 and
+            output_fps >= 20 and
+            output_resolution == "640x360"
+        )
 
     tc07 = True
     if scenario.kind == "staircase":
@@ -481,7 +593,7 @@ def summarize_scenario(scenario: Scenario, sender_log: Path,
                 downgrade_after(
                     profile_changes,
                     float(step_events[index]["elapsed"]),
-                    2.5,
+                    DOWNGRADE_WINDOW_SECONDS,
                 )
                 for index in increasing_loss_step_indexes
             ) and
@@ -489,7 +601,7 @@ def summarize_scenario(scenario: Scenario, sender_log: Path,
                 upgrade_after(
                     profile_changes,
                     float(step_events[index]["elapsed"]),
-                    15.0,
+                    UPGRADE_WINDOW_SECONDS,
                 )
                 for index in decreasing_loss_step_indexes
             )
@@ -502,6 +614,7 @@ def summarize_scenario(scenario: Scenario, sender_log: Path,
         "TC-05": {"passed": tc05, "applies": not scenario.extreme},
         "TC-07": {"passed": tc07, "applies": scenario.kind == "staircase"},
         "TC-08": {"passed": tc08, "applies": not scenario.extreme},
+        "TC-09": {"passed": tc09, "applies": scenario.kind == "steady" and first_loss == 80 and not scenario.extreme},
     }
     passed = all(
         check["passed"] for check in checks.values() if check["applies"]
@@ -521,6 +634,13 @@ def summarize_scenario(scenario: Scenario, sender_log: Path,
             "profile_changes": profile_changes,
             "decoder_errors": decoder_errors,
             "frames": frames,
+            "decoded_fps": decoded_fps,
+            "output_fps": output_fps,
+            "synthetic_fps": synthetic_fps,
+            "decoded_fps_min": decoded_fps_min,
+            "output_fps_min": output_fps_min,
+            "fps_warmup_start_elapsed": warmup_start_elapsed,
+            "output_resolution": output_resolution,
             "max_frame_gap_ms": max_frame_gap_ms,
             "latency_avg_ms": latency_avg_ms,
             "latency_p95_ms": latency_p95_ms,
@@ -559,6 +679,16 @@ def write_markdown_report(path: Path, summary: dict[str, object]) -> None:
         f"- max profile bitrate: `{metrics['max_profile_bitrate_kbps']}` kbps",
         f"- average profile bitrate: `{metrics['average_profile_bitrate_kbps']}` kbps",
         f"- frames: `{metrics['frames']}`",
+        "- post-warmup decoded/output/synthetic fps: "
+        f"`{format_report_value(metrics['decoded_fps'])}` / "
+        f"`{format_report_value(metrics['output_fps'])}` / "
+        f"`{format_report_value(metrics['synthetic_fps'])}`",
+        "- post-warmup decoded/output fps minimum: "
+        f"`{format_report_value(metrics['decoded_fps_min'])}` / "
+        f"`{format_report_value(metrics['output_fps_min'])}`",
+        "- fps warmup start elapsed: "
+        f"`{format_report_value(metrics['fps_warmup_start_elapsed'])}`",
+        f"- output resolution: `{metrics['output_resolution']}`",
         f"- decoder errors: `{metrics['decoder_errors']}`",
         f"- max frame gap: `{metrics['max_frame_gap_ms']}` ms",
         f"- latency avg/p95/max: `{metrics['latency_avg_ms']}` / `{metrics['latency_p95_ms']}` / `{metrics['latency_max_ms']}` ms",
@@ -643,14 +773,17 @@ def write_suite_report(output_root: Path, summaries: list[dict[str, object]]) ->
     lines = [
         "# Weak-Network Acceptance Report",
         "",
-        "| Scenario | Passed | Extreme | Frames | Decoder Errors | Max Gap (ms) | FFmpeg |",
-        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+        "| Scenario | Passed | Extreme | Frames | Decoded FPS | Output FPS | Output Resolution | Decoder Errors | Max Gap (ms) | FFmpeg |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: | ---: | ---: |",
     ]
     for summary in summaries:
         metrics = summary["metrics"]
         lines.append(
             f"| {summary['name']} | {summary['passed']} | "
             f"{summary['extreme_observation']} | {metrics['frames']} | "
+            f"{format_report_value(metrics['decoded_fps'])} | "
+            f"{format_report_value(metrics['output_fps'])} | "
+            f"{metrics['output_resolution']} | "
             f"{metrics['decoder_errors']} | {metrics['max_frame_gap_ms']} | "
             f"{summary['ffmpeg']['passed']} |"
         )

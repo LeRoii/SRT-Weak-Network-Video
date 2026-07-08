@@ -27,6 +27,7 @@ FetchContent_MakeAvailable(srt)
 
 find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(Python3 REQUIRED COMPONENTS Interpreter)
 pkg_check_modules(FFMPEG REQUIRED IMPORTED_TARGET
     libavcodec
     libavformat
@@ -38,6 +39,7 @@ pkg_check_modules(ISAL REQUIRED IMPORTED_TARGET libisal)
 
 set(COMMON_SOURCES
     src/common/adaptation.cpp
+    src/common/frame_pacer.cpp
     src/common/latency_stats.cpp
     src/common/network_quality.cpp
     src/common/runtime_config.cpp
@@ -101,6 +103,19 @@ target_compile_options(protocol_tests PRIVATE
     -Wpedantic
 )
 add_test(NAME protocol_tests COMMAND protocol_tests)
+
+add_executable(frame_pacer_tests
+    src/common/frame_pacer.cpp
+    tests/frame_pacer_tests.cpp
+)
+target_include_directories(frame_pacer_tests PRIVATE src)
+target_compile_options(frame_pacer_tests PRIVATE
+    -UNDEBUG
+    -Wall
+    -Wextra
+    -Wpedantic
+)
+add_test(NAME frame_pacer_tests COMMAND frame_pacer_tests)
 
 add_executable(adaptation_tests
     src/common/adaptation.cpp
@@ -167,3 +182,7 @@ target_compile_options(output_processing_tests PRIVATE
     -Wpedantic
 )
 add_test(NAME output_processing_tests COMMAND output_processing_tests)
+
+add_test(NAME weaknet_acceptance_tests
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/weaknet_acceptance_tests.py
+)

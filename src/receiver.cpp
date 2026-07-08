@@ -224,6 +224,13 @@ void ReceiverApp::run_srt_connection(SrtSocket &socket) {
                 << " "
                 << "decoded_fps="
                 << renderer_stats.decoded_frames << " "
+                << "output_fps="
+                << renderer_stats.output_frames << " "
+                << "synthetic_fps="
+                << renderer_stats.synthetic_frames << " "
+                << "output_resolution="
+                << renderer_stats.output_width << "x"
+                << renderer_stats.output_height << " "
                 << "last_frame_age_ms=" << last_frame_age_ms()
                 << " "
                 << "max_frame_gap_ms=" << maximum_frame_gap_ms()
@@ -463,6 +470,13 @@ void ReceiverApp::run_udp() {
                 << " "
                 << "decoded_fps="
                 << renderer_stats.decoded_frames << " "
+                << "output_fps="
+                << renderer_stats.output_frames << " "
+                << "synthetic_fps="
+                << renderer_stats.synthetic_frames << " "
+                << "output_resolution="
+                << renderer_stats.output_width << "x"
+                << renderer_stats.output_height << " "
                 << "last_frame_age_ms=" << last_frame_age_ms()
                 << " "
                 << "max_frame_gap_ms=" << maximum_frame_gap_ms()

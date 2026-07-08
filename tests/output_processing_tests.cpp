@@ -1,5 +1,6 @@
 #include "video/output_processor.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <iostream>
@@ -32,6 +33,36 @@ AVFrame *make_frame(int width, int height, uint8_t value) {
         }
     }
     return frame;
+}
+
+int luma_range(const AVFrame *frame) {
+    uint8_t minimum = 255;
+    uint8_t maximum = 0;
+    for (int y = 0; y < frame->height; ++y) {
+        for (int x = 0; x < frame->width; ++x) {
+            const uint8_t value =
+                frame->data[0][y * frame->linesize[0] + x];
+            minimum = std::min(minimum, value);
+            maximum = std::max(maximum, value);
+        }
+    }
+    return static_cast<int>(maximum) - static_cast<int>(minimum);
+}
+
+int count_outputs_for_input_interval(int input_interval_ms) {
+    OutputCadenceController cadence(
+        20, InterpolationMode::Blend);
+    int outputs = 0;
+    int next_real_ms = 0;
+    for (int now_ms = 0; now_ms < 1000; ++now_ms) {
+        if (now_ms == next_real_ms) {
+            outputs += cadence.on_real_frame(now_ms, true) !=
+                       OutputAction::None;
+            next_real_ms += input_interval_ms;
+        }
+        outputs += cadence.on_tick(now_ms) != OutputAction::None;
+    }
+    return outputs;
 }
 
 void test_dimensions_and_scaling() {
@@ -72,6 +103,20 @@ void test_dimensions_and_scaling() {
     av_frame_free(&small);
     av_frame_free(&bilinear_output);
     av_frame_free(&lanczos_output);
+}
+
+void test_lanczos_enhances_low_contrast_upscaled_frames() {
+    OutputProcessor lanczos(
+        640, 360, UpscaleMode::LanczosSharpen);
+    AVFrame *small = make_frame(160, 90, 100);
+    AVFrame *enhanced = lanczos.process(small);
+    assert(enhanced);
+    assert(enhanced->width == 640);
+    assert(enhanced->height == 360);
+    assert(luma_range(enhanced) >= 32);
+
+    av_frame_free(&small);
+    av_frame_free(&enhanced);
 }
 
 void test_blend() {
@@ -182,15 +227,35 @@ void test_two_and_three_fps_reach_minimum_output() {
     assert(three_fps_outputs >= 5);
 }
 
+void test_eight_ten_and_twelve_fps_reach_twenty_output() {
+    assert(count_outputs_for_input_interval(125) >= 20);
+    assert(count_outputs_for_input_interval(100) >= 20);
+    assert(count_outputs_for_input_interval(83) >= 20);
+}
+
+void test_twenty_fps_cadence_has_scheduler_headroom() {
+    OutputCadenceController cadence(
+        20, InterpolationMode::Repeat);
+    int outputs = 0;
+    outputs += cadence.on_real_frame(0, false) != OutputAction::None;
+    for (int now_ms = 0; now_ms < 1000; ++now_ms) {
+        outputs += cadence.on_tick(now_ms) != OutputAction::None;
+    }
+    assert(outputs >= 21);
+}
+
 } // namespace
 
 int main() {
     test_dimensions_and_scaling();
+    test_lanczos_enhances_low_contrast_upscaled_frames();
     test_blend();
     test_repeat_cadence();
     test_blend_cadence();
     test_high_rate_passthrough();
     test_two_and_three_fps_reach_minimum_output();
+    test_eight_ten_and_twelve_fps_reach_twenty_output();
+    test_twenty_fps_cadence_has_scheduler_headroom();
     std::cout << "output_processing_tests=passed" << std::endl;
     return 0;
 }

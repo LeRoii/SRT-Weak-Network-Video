@@ -320,7 +320,7 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
                     value, "sender.camera_fps", 1, 240);
             } else if (key == "max_video_kbps") {
                 config.sender.max_video_kbps = parse_integer(
-                    value, "sender.max_video_kbps", 30, 2000);
+                    value, "sender.max_video_kbps", 60, 2000);
             } else {
                 throw std::runtime_error(
                     "unknown sender config key '" + key + "'");

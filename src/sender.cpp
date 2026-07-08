@@ -1,5 +1,6 @@
 #include "sender.hpp"
 
+#include "common/frame_pacer.hpp"
 #include "common/utils.hpp"
 #include "protocol/messages.hpp"
 
@@ -19,6 +20,19 @@ uint64_t random_session_id() {
     const uint64_t low = static_cast<uint64_t>(device());
     const uint64_t result = high | low;
     return result == 0 ? 1 : result;
+}
+
+void sleep_until_next_file_frame(FramePacer &pacer,
+                                 const EncodedVideoFrame &frame) {
+    const int64_t interval_us =
+        static_cast<int64_t>(frame.duration_90khz) * 1'000'000LL /
+        90000LL;
+    const int64_t delay_us = pacer.delay_after_frame(
+        monotonic_us(), interval_us);
+    if (delay_us > 0) {
+        std::this_thread::sleep_for(
+            std::chrono::microseconds(delay_us));
+    }
 }
 
 } // namespace
@@ -90,6 +104,8 @@ void SenderApp::run_udp() {
     const auto udp_started_at = std::chrono::steady_clock::now();
     auto next_stats =
         std::chrono::steady_clock::now() + std::chrono::seconds(1);
+    FramePacer file_pacer;
+    file_pacer.reset(monotonic_us());
 
     reset_udp_feedback();
     udp_feedback_stopping_.store(false);
@@ -258,6 +274,7 @@ void SenderApp::run_udp() {
                     << profile.width << "x" << profile.height
                     << std::endl;
                 reader_.reset();
+                file_pacer.reset(monotonic_us());
                 keyframe_requested_.store(true);
                 continue;
             }
@@ -385,11 +402,7 @@ void SenderApp::run_udp() {
             }
 
             if (!reader_.is_live()) {
-                const auto frame_interval =
-                    std::chrono::microseconds(
-                        frame.duration_90khz * 1'000'000ULL /
-                        90000ULL);
-                std::this_thread::sleep_for(frame_interval);
+                sleep_until_next_file_frame(file_pacer, frame);
             }
         }
     } catch (...) {
@@ -412,6 +425,8 @@ bool SenderApp::run_srt_connection(
     auto profile = adaptation_.current();
     auto next_stats = std::chrono::steady_clock::now() +
                       std::chrono::seconds(1);
+    FramePacer file_pacer;
+    file_pacer.reset(monotonic_us());
     bool send_ok = true;
     network_report_sequence_ = 0;
     if (receiver_loss_percent_) {
@@ -429,6 +444,7 @@ bool SenderApp::run_srt_connection(
         EncodedVideoFrame frame;
         if (!reader_.next_frame(frame, profile, force_keyframe)) {
             reader_.reset();
+            file_pacer.reset(monotonic_us());
             keyframe_requested_.store(true);
             continue;
         }
@@ -487,10 +503,7 @@ bool SenderApp::run_srt_connection(
         }
 
         if (!reader_.is_live()) {
-            const auto frame_interval =
-                std::chrono::microseconds(
-                    frame.duration_90khz * 1'000'000ULL / 90000ULL);
-            std::this_thread::sleep_for(frame_interval);
+            sleep_until_next_file_frame(file_pacer, frame);
         }
     }
 
@@ -511,7 +524,9 @@ std::vector<std::vector<uint8_t>> SenderApp::encode_frame_packets(
             ? profile.keyframe_parity_ratio
             : profile.parity_ratio;
     const auto blocks =
-        fec_.encode_blocks(frame.data, parity_ratio, 4);
+        fec_.encode_blocks(frame.data,
+                           parity_ratio,
+                           profile.min_data_shards);
     if (blocks.size() > 64) {
         throw std::runtime_error("encoded frame has too many FEC blocks");
     }
