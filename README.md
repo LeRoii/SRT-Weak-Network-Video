@@ -174,21 +174,31 @@ same nine-level ladder after recovery. Every profile uses an approximately
 one-second GOP; keyframes receive stronger FEC than P-frames. Feedback is
 emitted every 200 ms, with 10 copies spread across the interval.
 
-| Level | H.264 profile | P-frame FEC | keyframe FEC |
-|---:|---|---:|---:|
-| 0 | 1280x720 / 30 fps / 2000 kbps | 0.10 | 0.30 |
-| 1 | 960x540 / 20 fps / 1200 kbps | 0.15 | 0.50 |
-| 2 | 640x360 / 15 fps / 700 kbps | 0.25 | 0.75 |
-| 3 | 640x360 / 10 fps / 400 kbps | 0.40 | 1.00 |
-| 4 | 426x240 / 5 fps / 220 kbps | 0.75 | 2.00 |
-| 5 | 426x240 / 3 fps / 140 kbps | 1.25 | 3.00 |
-| 6 | 320x180 / 3 fps / 80 kbps | 2.50 | 5.00 |
-| 7 | 320x180 / 2 fps / 50 kbps | 4.00 | 7.00 |
-| 8 | 256x144 / 2 fps / 30 kbps | 8.00 | 12.00 |
+| Level | H.264 profile | GOP frames | P-frame FEC | keyframe FEC |
+|---:|---|---:|---:|---:|
+| 0 | 1280x720 / 30 fps / 2000 kbps | 30 | 0.10 | 0.30 |
+| 1 | 640x360 / 20 fps / 900 kbps | 10 | 0.50 | 0.75 |
+| 2 | 640x360 / 15 fps / 700 kbps | 8 | 0.50 | 0.75 |
+| 3 | 640x360 / 10 fps / 400 kbps | 10 | 0.75 | 1.50 |
+| 4 | 426x240 / 5 fps / 220 kbps | 5 | 2.50 | 5.00 |
+| 5 | 426x240 / 3 fps / 140 kbps | 3 | 3.00 | 6.00 |
+| 6 | 320x180 / 3 fps / 80 kbps | 3 | 2.50 | 5.00 |
+| 7 | 320x180 / 2 fps / 50 kbps | 2 | 4.00 | 7.00 |
+| 8 | 256x144 / 2 fps / 30 kbps | 2 | 8.00 | 12.00 |
 
-Loss thresholds above 3, 7, 15, 30, 50, 65, 72, and 77 percent select Levels
-1 through 8. Degradation is immediate; recovery advances one level after five
-fresh healthy or emergency-recovery feedback windows.
+Raw loss thresholds above 5, 15, 20, 30, 50, 65, 72, and 77 percent map to
+Levels 1 through 8. Effective selection adds hysteresis: Level 2 requires three
+consecutive feedback windows above 15 percent unless loss exceeds 20 percent,
+and Level 5 requires three consecutive windows above 55 percent unless loss
+exceeds 60 percent. Recovery advances one level after five stable feedback
+windows, with hysteresis below 12 percent for Level 2 to Level 1, below 3
+percent for Level 1 to Level 0, and below 50 percent for Level 5 to Level 4.
+RTT-only degradation starts above 160 ms and requires five consecutive high-RTT
+feedback windows.
+
+Levels 3 through 5 use stronger FEC to improve true decoded-frame throughput
+under mid-loss conditions; the sender does not lower profile solely because
+`decoded_fps` is below the profile fps.
 
 ### Sender Input
 
@@ -327,3 +337,63 @@ remained zero, and every saved H.264 stream passed FFmpeg's
 `-err_detect explode` check. Five repeated transitions from an unimpaired link
 to 80% and 85% loss also stayed below three seconds, with worst gaps of 2189
 and 2236 ms.
+
+## Automated Acceptance
+
+`scripts/weaknet_acceptance.py` runs the weak-network acceptance matrix and
+collects the evidence needed for TC-01 through TC-08. It creates the namespace
+topology, starts the receiver and sender inside `webrtc_rx` and `webrtc_tx`,
+applies `tc netem` loss, records logs, validates the saved H.264 stream with
+FFmpeg, and writes JSON plus Markdown reports.
+
+Run the quick regression suite:
+
+```bash
+python3 scripts/weaknet_acceptance.py --suite quick
+```
+
+The quick suite runs 0%, 20%, 45%, 80%, and 85% bidirectional loss with 50 ms
+delay for 60 seconds per steady scenario, followed by a short staircase from
+0% to 10%, 50%, 85%, then back down through 50%, 10%, and 0%. For a shorter
+smoke run, override the durations:
+
+```bash
+python3 scripts/weaknet_acceptance.py \
+  --suite quick \
+  --duration-seconds 15 \
+  --step-duration-seconds 10
+```
+
+The full suite is intended for formal acceptance:
+
+```bash
+python3 scripts/weaknet_acceptance.py --suite full
+```
+
+It runs 0%, 5%, 15%, 20%, 35%, 45%, 60%, 70%, 80%, and 85% bidirectional loss
+for 600 seconds per steady scenario, then runs the full staircase up to 85%
+and gradually back down to 0%. The 90% case is separated as an extreme
+observation and does not fail the main
+acceptance suite:
+
+```bash
+python3 scripts/weaknet_acceptance.py --suite extreme
+```
+
+Results are written under `/tmp/weaknet-acceptance-YYYYmmdd-HHMMSS` unless
+`--output-dir` is provided. Each scenario directory contains:
+
+- `sender.log` and `receiver.log` with `elapsed=` timestamps added by the
+  runner.
+- `received.h264`, `ffmpeg_check.log`, and `ffprobe.log`.
+- `qdisc_step_N.txt` snapshots for each applied impairment.
+- `summary.json` and `report.md`.
+
+The suite-level `summary.json` and `report.md` summarize pass/fail status. The
+current acceptance scope treats TC-01 as a video-profile bitrate check only:
+FEC and UDP overhead are not counted against the 2 Mbps ceiling. TC-06 is not
+part of the automated acceptance result. TC-07 checks both fast downshift on
+increasing loss and profile recovery on decreasing loss. TC-08 uses
+`latency_avg <= 500 ms` as the hard criterion; values below 180 ms are reported
+as better-than-target latency rather than failures. The report also includes
+`latency_p95` and `latency_max` for diagnosis.

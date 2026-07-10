@@ -5,7 +5,10 @@
 #include <optional>
 
 struct AdaptationDiagnostics {
+    int raw_loss_required_level = 0;
     int loss_required_level = 0;
+    int loss_candidate_level = 0;
+    int loss_candidate_windows = 0;
     int raw_rtt_required_level = 0;
     int confirmed_rtt_required_level = 0;
     int rtt_high_windows = 0;
@@ -23,13 +26,18 @@ public:
 
 private:
     int required_level_for_network(const NetworkSnapshot &network,
-                                   bool update_rtt_confirmation);
+                                   bool update_confirmations);
+    int loss_required_level_for_network(double loss_percent,
+                                        bool update_confirmation);
     void reset_rtt_confirmation();
+    void reset_loss_confirmation();
     VideoProfile profile_for_level(int level) const;
 
     int max_video_kbps_ = 2000;
     int level_ = 0;
     int healthy_windows_ = 0;
+    int loss_candidate_level_ = 0;
+    int loss_candidate_windows_ = 0;
     int rtt_candidate_level_ = 0;
     int rtt_high_windows_ = 0;
     int confirmed_rtt_required_level_ = 0;

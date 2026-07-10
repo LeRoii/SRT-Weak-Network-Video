@@ -54,14 +54,17 @@ void test_profile_ladder_and_loss_boundaries() {
         {5.0, 0, 2000, 30, 1280, 720, 30, 0.10, 0.30, false},
         {5.01, 1, 900, 20, 640, 360, 10, 0.50, 0.75, false},
         {15.0, 1, 900, 20, 640, 360, 10, 0.50, 0.75, false},
-        {15.01, 2, 700, 15, 640, 360, 8, 0.50, 0.75, false},
-        {20.0, 2, 700, 15, 640, 360, 8, 0.50, 0.75, false},
-        {20.01, 3, 400, 10, 640, 360, 10, 0.40, 1.00, false},
-        {30.0, 3, 400, 10, 640, 360, 10, 0.40, 1.00, false},
-        {30.01, 4, 220, 5, 426, 240, 5, 0.75, 2.00, false},
-        {50.0, 4, 220, 5, 426, 240, 5, 0.75, 2.00, false},
-        {50.01, 5, 140, 3, 426, 240, 3, 1.25, 3.00, false},
-        {65.0, 5, 140, 3, 426, 240, 3, 1.25, 3.00, false},
+        {15.01, 1, 900, 20, 640, 360, 10, 0.50, 0.75, false},
+        {20.0, 1, 900, 20, 640, 360, 10, 0.50, 0.75, false},
+        {20.01, 3, 400, 10, 640, 360, 10, 0.75, 1.50, false},
+        {30.0, 3, 400, 10, 640, 360, 10, 0.75, 1.50, false},
+        {30.01, 4, 220, 5, 426, 240, 5, 2.50, 5.00, false},
+        {50.0, 4, 220, 5, 426, 240, 5, 2.50, 5.00, false},
+        {50.01, 4, 220, 5, 426, 240, 5, 2.50, 5.00, false},
+        {55.0, 4, 220, 5, 426, 240, 5, 2.50, 5.00, false},
+        {60.0, 4, 220, 5, 426, 240, 5, 2.50, 5.00, false},
+        {60.01, 5, 140, 3, 426, 240, 3, 3.00, 6.00, false},
+        {65.0, 5, 140, 3, 426, 240, 3, 3.00, 6.00, false},
         {65.01, 6, 80, 3, 320, 180, 3, 2.50, 5.00, false},
         {72.0, 6, 80, 3, 320, 180, 3, 2.50, 5.00, false},
         {72.01, 7, 50, 2, 320, 180, 2, 4.00, 7.00, false},
@@ -90,8 +93,9 @@ void test_rtt_requires_sustained_confirmation() {
         int level;
     };
     const Expected cases[] = {
-        {150.0, 0},
-        {150.01, 3},
+        {150.01, 0},
+        {160.0, 0},
+        {160.01, 3},
         {220.01, 5},
         {300.01, 6},
         {400.01, 7},
@@ -99,8 +103,9 @@ void test_rtt_requires_sustained_confirmation() {
 
     for (const auto &expected : cases) {
         AdaptationController controller(2000);
-        assert(controller.update(network(0.0, expected.rtt)).level == 0);
-        assert(controller.update(network(0.0, expected.rtt)).level == 0);
+        for (int sample = 0; sample < 4; ++sample) {
+            assert(controller.update(network(0.0, expected.rtt)).level == 0);
+        }
         assert(controller.update(network(0.0, expected.rtt)).level ==
                expected.level);
     }
@@ -130,13 +135,41 @@ void test_rtt_diagnostics_track_confirmation() {
     assert(diagnostics.rtt_high_windows == 2);
     assert(diagnostics.confirmed_rtt_required_level == 0);
 
-    assert(controller.update(network(0.0, 230.0)).level == 5);
+    assert(controller.update(network(0.0, 230.0)).level == 0);
     diagnostics = controller.diagnostics();
     assert(diagnostics.rtt_high_windows == 3);
+    assert(diagnostics.confirmed_rtt_required_level == 0);
+
+    assert(controller.update(network(0.0, 230.0)).level == 0);
+    diagnostics = controller.diagnostics();
+    assert(diagnostics.rtt_high_windows == 4);
+    assert(diagnostics.confirmed_rtt_required_level == 0);
+
+    assert(controller.update(network(0.0, 230.0)).level == 5);
+    diagnostics = controller.diagnostics();
+    assert(diagnostics.rtt_high_windows == 5);
     assert(diagnostics.confirmed_rtt_required_level == 5);
 }
 
-void test_loss_degradation_is_immediate() {
+void test_low_loss_l2_requires_confirmation() {
+    AdaptationController controller(2000);
+
+    assert(controller.update(network(15.01, 50.0)).level == 1);
+    assert(controller.update(network(15.01, 50.0)).level == 1);
+    expect_profile(controller.update(network(15.01, 50.0)),
+                   2, 700, 15, 640, 360, 8, 0.50, 0.75, false);
+
+    for (int sample = 0; sample < 10; ++sample) {
+        assert(controller.update(network(14.5, 50.0)).level == 2);
+    }
+
+    for (int sample = 0; sample < 4; ++sample) {
+        assert(controller.update(network(11.9, 50.0)).level == 2);
+    }
+    assert(controller.update(network(11.9, 50.0)).level == 1);
+}
+
+void test_loss_degradation_is_immediate_for_high_loss() {
     AdaptationController emergency(2000);
     expect_profile(emergency.update(network(80.0, 50.0)),
                    8, 30, 2, 256, 144, 2, 8.00, 12.00, false);
@@ -144,8 +177,62 @@ void test_loss_degradation_is_immediate() {
     AdaptationController high_loss(2000);
     expect_profile(high_loss.update(network(70.0, 500.0)),
                    6, 80, 3, 320, 180, 3, 2.50, 5.00, false);
-    assert(high_loss.update(network(70.0, 500.0)).level == 6);
+    for (int sample = 0; sample < 3; ++sample) {
+        assert(high_loss.update(network(70.0, 500.0)).level == 6);
+    }
     assert(high_loss.update(network(70.0, 500.0)).level == 7);
+}
+
+void test_fifty_percent_loss_boundary_stays_at_level_four() {
+    AdaptationController controller(2000);
+    assert(controller.update(network(45.0, 50.0)).level == 4);
+
+    const double jitter_losses[] = {
+        49.0, 52.0, 48.0, 51.0, 50.5, 49.5, 54.5, 50.1,
+    };
+    for (const double loss : jitter_losses) {
+        assert(controller.update(network(loss, 50.0)).level == 4);
+    }
+}
+
+void test_level_five_requires_sustained_or_clear_loss() {
+    AdaptationController sustained(2000);
+    assert(sustained.update(network(45.0, 50.0)).level == 4);
+    assert(sustained.update(network(56.0, 50.0)).level == 4);
+    assert(sustained.update(network(56.0, 50.0)).level == 4);
+    assert(sustained.update(network(56.0, 50.0)).level == 5);
+
+    AdaptationController clear_loss(2000);
+    assert(clear_loss.update(network(45.0, 50.0)).level == 4);
+    assert(clear_loss.update(network(61.0, 50.0)).level == 5);
+}
+
+void test_level_five_recovery_requires_below_fifty_percent() {
+    AdaptationController controller(2000);
+    assert(controller.update(network(61.0, 50.0)).level == 5);
+
+    for (int sample = 0; sample < 10; ++sample) {
+        assert(controller.update(network(50.0, 50.0)).level == 5);
+    }
+
+    for (int sample = 0; sample < 4; ++sample) {
+        assert(controller.update(network(49.9, 50.0)).level == 5);
+    }
+    assert(controller.update(network(49.9, 50.0)).level == 4);
+}
+
+void test_l1_recovers_to_l0_below_hysteresis_threshold() {
+    AdaptationController controller(2000);
+    assert(controller.update(network(10.0, 50.0)).level == 1);
+
+    for (int sample = 0; sample < 10; ++sample) {
+        assert(controller.update(network(3.0, 50.0)).level == 1);
+    }
+
+    for (int sample = 0; sample < 4; ++sample) {
+        assert(controller.update(network(2.9, 50.0)).level == 1);
+    }
+    assert(controller.update(network(2.9, 50.0)).level == 0);
 }
 
 void test_recovery_requires_five_healthy_windows() {
@@ -163,7 +250,7 @@ void test_recovery_requires_five_healthy_windows() {
     assert(controller.update(network(4.5, 50.0)).level == 4);
 
     assert(controller.update(network(5.0, 50.0)).level == 4);
-    for (int sample = 0; sample < 4; ++sample) {
+    for (int sample = 0; sample < 3; ++sample) {
         assert(controller.update(network(0.0, 50.0)).level == 4);
     }
     assert(controller.update(network(0.0, 50.0)).level == 3);
@@ -173,7 +260,7 @@ void test_emergency_recovers_to_current_network_level() {
     AdaptationController controller(2000);
     assert(controller.update(network(100.0, 500.0)).level == 8);
 
-    for (int target_level = 7; target_level >= 4; --target_level) {
+    for (int target_level = 7; target_level >= 5; --target_level) {
         for (int sample = 0; sample < 4; ++sample) {
             assert(controller.update(network(50.0, 50.0)).level ==
                    target_level + 1);
@@ -183,7 +270,27 @@ void test_emergency_recovers_to_current_network_level() {
     }
 
     for (int sample = 0; sample < 10; ++sample) {
-        assert(controller.update(network(50.0, 50.0)).level == 4);
+        assert(controller.update(network(50.0, 50.0)).level == 5);
+    }
+}
+
+void test_high_loss_recovers_toward_lower_required_level() {
+    AdaptationController controller(2000);
+    assert(controller.update(network(10.0)).level == 1);
+    assert(controller.update(network(61.0)).level == 5);
+
+    for (int sample = 0; sample < 4; ++sample) {
+        assert(controller.update(network(10.0, 50.0)).level == 5);
+    }
+    assert(controller.update(network(10.0, 50.0)).level == 4);
+
+    for (int sample = 0; sample < 14; ++sample) {
+        controller.update(network(10.0, 50.0));
+    }
+    assert(controller.update(network(10.0, 50.0)).level == 1);
+
+    for (int sample = 0; sample < 5; ++sample) {
+        assert(controller.update(network(10.0, 50.0)).level == 1);
     }
 }
 
@@ -201,7 +308,7 @@ void test_max_video_bitrate_selects_supported_profile() {
 
 void test_invalid_snapshot_keeps_current_profile() {
     AdaptationController controller(2000);
-    assert(controller.update(network(55.0)).level == 5);
+    assert(controller.update(network(61.0)).level == 5);
 
     NetworkSnapshot invalid;
     assert(controller.update(invalid).level == 5);
@@ -255,9 +362,15 @@ int main() {
     test_rtt_requires_sustained_confirmation();
     test_rtt_spike_does_not_degrade_profile();
     test_rtt_diagnostics_track_confirmation();
-    test_loss_degradation_is_immediate();
+    test_low_loss_l2_requires_confirmation();
+    test_loss_degradation_is_immediate_for_high_loss();
+    test_fifty_percent_loss_boundary_stays_at_level_four();
+    test_level_five_requires_sustained_or_clear_loss();
+    test_level_five_recovery_requires_below_fifty_percent();
+    test_l1_recovers_to_l0_below_hysteresis_threshold();
     test_recovery_requires_five_healthy_windows();
     test_emergency_recovers_to_current_network_level();
+    test_high_loss_recovers_toward_lower_required_level();
     test_max_video_bitrate_selects_supported_profile();
     test_invalid_snapshot_keeps_current_profile();
     test_udp_recovery_profile();

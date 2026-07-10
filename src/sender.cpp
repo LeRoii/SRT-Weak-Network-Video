@@ -221,8 +221,14 @@ void SenderApp::run_udp() {
                     << " rtt=" << feedback.rtt_ms
                     << " bandwidth="
                     << feedback.bandwidth_kbps
+                    << " raw_loss_required_level="
+                    << adaptation_diagnostics.raw_loss_required_level
                     << " loss_required_level="
                     << adaptation_diagnostics.loss_required_level
+                    << " loss_candidate_level="
+                    << adaptation_diagnostics.loss_candidate_level
+                    << " loss_candidate_windows="
+                    << adaptation_diagnostics.loss_candidate_windows
                     << " raw_rtt_required_level="
                     << adaptation_diagnostics.raw_rtt_required_level
                     << " confirmed_rtt_required_level="
@@ -316,8 +322,17 @@ void SenderApp::run_udp() {
                             << " rtt=" << feedback.rtt_ms
                             << " bandwidth="
                             << feedback.bandwidth_kbps
+                            << " raw_loss_required_level="
+                            << adaptation_diagnostics
+                                   .raw_loss_required_level
                             << " loss_required_level="
                             << adaptation_diagnostics.loss_required_level
+                            << " loss_candidate_level="
+                            << adaptation_diagnostics
+                                   .loss_candidate_level
+                            << " loss_candidate_windows="
+                            << adaptation_diagnostics
+                                   .loss_candidate_windows
                             << " raw_rtt_required_level="
                             << adaptation_diagnostics.raw_rtt_required_level
                             << " confirmed_rtt_required_level="
