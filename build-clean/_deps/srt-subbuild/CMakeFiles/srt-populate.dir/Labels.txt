@@ -1,0 +1,14 @@
+# Target labels
+ srt-populate
+# Source files and their labels
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/srt-populate
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/dc09bfe24206cf1a9574bd7d682bac59/srt-populate.rule
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/3d8423d9c83cea0b6902435c1a9e2770/srt-populate-complete.rule
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/ee6ac24bc89bfdbf02f0acd8dd66235f/srt-populate-build.rule
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/ee6ac24bc89bfdbf02f0acd8dd66235f/srt-populate-configure.rule
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/ee6ac24bc89bfdbf02f0acd8dd66235f/srt-populate-download.rule
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/ee6ac24bc89bfdbf02f0acd8dd66235f/srt-populate-install.rule
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/ee6ac24bc89bfdbf02f0acd8dd66235f/srt-populate-mkdir.rule
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/ee6ac24bc89bfdbf02f0acd8dd66235f/srt-populate-patch.rule
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/ee6ac24bc89bfdbf02f0acd8dd66235f/srt-populate-test.rule
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/ee6ac24bc89bfdbf02f0acd8dd66235f/srt-populate-update.rule

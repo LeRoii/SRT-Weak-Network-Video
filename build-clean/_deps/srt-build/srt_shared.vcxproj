@@ -1,0 +1,420 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{62CBDB68-868D-3800-9170-04E2F36941BB}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <VcpkgEnabled>false</VcpkgEnabled>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>srt_shared</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="do_not_import_user.props" Condition="exists('do_not_import_user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">srt_shared.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">srt</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">srt_shared.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">srt</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">srt_shared.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">srt</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">srt_shared.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">srt</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.dll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;ENABLE_LOGGING=1;SRT_ENABLE_APP_READER;SRT_ENABLE_CLOSE_SYNCH;HAVE_INET_PTON=1;HAVE_CXX_STD_PUT_TIME=1;ENABLE_STDCXX_SYNC=1;ENABLE_SOCK_CLOEXEC=1;WIN32=1;PTW32_STATIC_LIB=1;_GNU_SOURCE;HAI_PATCH=1;HAI_ENABLE_SRT=1;SRT_VERSION="1.5.5";CMAKE_INTDIR="Debug";srt_shared_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;ENABLE_LOGGING=1;SRT_ENABLE_APP_READER;SRT_ENABLE_CLOSE_SYNCH;HAVE_INET_PTON=1;HAVE_CXX_STD_PUT_TIME=1;ENABLE_STDCXX_SYNC=1;ENABLE_SOCK_CLOEXEC=1;WIN32=1;PTW32_STATIC_LIB=1;_GNU_SOURCE;HAI_PATCH=1;HAI_ENABLE_SRT=1;SRT_VERSION=\"1.5.5\";CMAKE_INTDIR=\"Debug\";srt_shared_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files (x86)\PowerShell\7\pwsh.exe" -noprofile -executionpolicy Bypass -file D:/SoftWare/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary D:/Code/C++/SRT-Weak-Network-Video/build-clean/Debug/srt.dll -installedDir D:/SoftWare/vcpkg/installed/x64-windows/debug/bin -OutVariable out
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DelayLoadDLLs>libeay32.dll</DelayLoadDLLs>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>D:/Code/C++/SRT-Weak-Network-Video/build-clean/Debug/srt.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/Code/C++/SRT-Weak-Network-Video/build-clean/Debug/srt.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;ENABLE_LOGGING=1;NDEBUG;SRT_ENABLE_APP_READER;SRT_ENABLE_CLOSE_SYNCH;HAVE_INET_PTON=1;HAVE_CXX_STD_PUT_TIME=1;ENABLE_STDCXX_SYNC=1;ENABLE_SOCK_CLOEXEC=1;WIN32=1;PTW32_STATIC_LIB=1;_GNU_SOURCE;HAI_PATCH=1;HAI_ENABLE_SRT=1;SRT_VERSION="1.5.5";CMAKE_INTDIR="Release";srt_shared_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;ENABLE_LOGGING=1;NDEBUG;SRT_ENABLE_APP_READER;SRT_ENABLE_CLOSE_SYNCH;HAVE_INET_PTON=1;HAVE_CXX_STD_PUT_TIME=1;ENABLE_STDCXX_SYNC=1;ENABLE_SOCK_CLOEXEC=1;WIN32=1;PTW32_STATIC_LIB=1;_GNU_SOURCE;HAI_PATCH=1;HAI_ENABLE_SRT=1;SRT_VERSION=\"1.5.5\";CMAKE_INTDIR=\"Release\";srt_shared_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files (x86)\PowerShell\7\pwsh.exe" -noprofile -executionpolicy Bypass -file D:/SoftWare/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary D:/Code/C++/SRT-Weak-Network-Video/build-clean/Release/srt.dll -installedDir D:/SoftWare/vcpkg/installed/x64-windows/bin -OutVariable out
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DelayLoadDLLs>libeay32.dll</DelayLoadDLLs>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>D:/Code/C++/SRT-Weak-Network-Video/build-clean/Release/srt.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/Code/C++/SRT-Weak-Network-Video/build-clean/Release/srt.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;ENABLE_LOGGING=1;NDEBUG;SRT_ENABLE_APP_READER;SRT_ENABLE_CLOSE_SYNCH;HAVE_INET_PTON=1;HAVE_CXX_STD_PUT_TIME=1;ENABLE_STDCXX_SYNC=1;ENABLE_SOCK_CLOEXEC=1;WIN32=1;PTW32_STATIC_LIB=1;_GNU_SOURCE;HAI_PATCH=1;HAI_ENABLE_SRT=1;SRT_VERSION="1.5.5";CMAKE_INTDIR="MinSizeRel";srt_shared_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;ENABLE_LOGGING=1;NDEBUG;SRT_ENABLE_APP_READER;SRT_ENABLE_CLOSE_SYNCH;HAVE_INET_PTON=1;HAVE_CXX_STD_PUT_TIME=1;ENABLE_STDCXX_SYNC=1;ENABLE_SOCK_CLOEXEC=1;WIN32=1;PTW32_STATIC_LIB=1;_GNU_SOURCE;HAI_PATCH=1;HAI_ENABLE_SRT=1;SRT_VERSION=\"1.5.5\";CMAKE_INTDIR=\"MinSizeRel\";srt_shared_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files (x86)\PowerShell\7\pwsh.exe" -noprofile -executionpolicy Bypass -file D:/SoftWare/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary D:/Code/C++/SRT-Weak-Network-Video/build-clean/MinSizeRel/srt.dll -installedDir D:/SoftWare/vcpkg/installed/x64-windows/bin -OutVariable out
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DelayLoadDLLs>libeay32.dll</DelayLoadDLLs>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>D:/Code/C++/SRT-Weak-Network-Video/build-clean/MinSizeRel/srt.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/Code/C++/SRT-Weak-Network-Video/build-clean/MinSizeRel/srt.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard_C>stdc11</LanguageStandard_C>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;ENABLE_LOGGING=1;NDEBUG;SRT_ENABLE_APP_READER;SRT_ENABLE_CLOSE_SYNCH;HAVE_INET_PTON=1;HAVE_CXX_STD_PUT_TIME=1;ENABLE_STDCXX_SYNC=1;ENABLE_SOCK_CLOEXEC=1;WIN32=1;PTW32_STATIC_LIB=1;_GNU_SOURCE;HAI_PATCH=1;HAI_ENABLE_SRT=1;SRT_VERSION="1.5.5";CMAKE_INTDIR="RelWithDebInfo";srt_shared_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;ENABLE_LOGGING=1;NDEBUG;SRT_ENABLE_APP_READER;SRT_ENABLE_CLOSE_SYNCH;HAVE_INET_PTON=1;HAVE_CXX_STD_PUT_TIME=1;ENABLE_STDCXX_SYNC=1;ENABLE_SOCK_CLOEXEC=1;WIN32=1;PTW32_STATIC_LIB=1;_GNU_SOURCE;HAI_PATCH=1;HAI_ENABLE_SRT=1;SRT_VERSION=\"1.5.5\";CMAKE_INTDIR=\"RelWithDebInfo\";srt_shared_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\haicrypt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <PostBuildEvent>
+      <Message></Message>
+      <Command>setlocal
+"C:\Program Files (x86)\PowerShell\7\pwsh.exe" -noprofile -executionpolicy Bypass -file D:/SoftWare/vcpkg/scripts/buildsystems/msbuild/applocal.ps1 -targetBinary D:/Code/C++/SRT-Weak-Network-Video/build-clean/RelWithDebInfo/srt.dll -installedDir D:/SoftWare/vcpkg/installed/x64-windows/bin -OutVariable out
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+    </PostBuildEvent>
+    <Link>
+      <AdditionalDependencies>ws2_32.lib;Ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DelayLoadDLLs>libeay32.dll</DelayLoadDLLs>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>D:/Code/C++/SRT-Weak-Network-Video/build-clean/RelWithDebInfo/srt.lib</ImportLibrary>
+      <ProgramDataBaseFile>D:/Code/C++/SRT-Weak-Network-Video/build-clean/RelWithDebInfo/srt.pdb</ProgramDataBaseFile>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+D:\cmake\bin\cmake.exe -SD:/Code/C++/SRT-Weak-Network-Video -BD:/Code/C++/SRT-Weak-Network-Video/build-clean --check-stamp-file D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common\filelist_win32.maf;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckCXXAtomic.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckCXXStdPutTime.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckGCCAtomicIntrinsics.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\FindPThreadGetSetName.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\haiUtil.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\srt.pc.in;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\test_vista.c;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\filelist.maf;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\version.h.in;D:\cmake\share\cmake-3.29\Modules\CheckCSourceCompiles.cmake;D:\cmake\share\cmake-3.29\Modules\CheckCXXSourceCompiles.cmake;D:\cmake\share\cmake-3.29\Modules\CheckFunctionExists.cmake;D:\cmake\share\cmake-3.29\Modules\CheckIncludeFile.cmake;D:\cmake\share\cmake-3.29\Modules\CheckLibraryExists.cmake;D:\cmake\share\cmake-3.29\Modules\CheckSymbolExists.cmake;D:\cmake\share\cmake-3.29\Modules\FindPackageHandleStandardArgs.cmake;D:\cmake\share\cmake-3.29\Modules\FindPackageMessage.cmake;D:\cmake\share\cmake-3.29\Modules\FindPkgConfig.cmake;D:\cmake\share\cmake-3.29\Modules\FindThreads.cmake;D:\cmake\share\cmake-3.29\Modules\GNUInstallDirs.cmake;D:\cmake\share\cmake-3.29\Modules\Internal\CheckSourceCompiles.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+D:\cmake\bin\cmake.exe -SD:/Code/C++/SRT-Weak-Network-Video -BD:/Code/C++/SRT-Weak-Network-Video/build-clean --check-stamp-file D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common\filelist_win32.maf;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckCXXAtomic.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckCXXStdPutTime.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckGCCAtomicIntrinsics.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\FindPThreadGetSetName.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\haiUtil.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\srt.pc.in;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\test_vista.c;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\filelist.maf;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\version.h.in;D:\cmake\share\cmake-3.29\Modules\CheckCSourceCompiles.cmake;D:\cmake\share\cmake-3.29\Modules\CheckCXXSourceCompiles.cmake;D:\cmake\share\cmake-3.29\Modules\CheckFunctionExists.cmake;D:\cmake\share\cmake-3.29\Modules\CheckIncludeFile.cmake;D:\cmake\share\cmake-3.29\Modules\CheckLibraryExists.cmake;D:\cmake\share\cmake-3.29\Modules\CheckSymbolExists.cmake;D:\cmake\share\cmake-3.29\Modules\FindPackageHandleStandardArgs.cmake;D:\cmake\share\cmake-3.29\Modules\FindPackageMessage.cmake;D:\cmake\share\cmake-3.29\Modules\FindPkgConfig.cmake;D:\cmake\share\cmake-3.29\Modules\FindThreads.cmake;D:\cmake\share\cmake-3.29\Modules\GNUInstallDirs.cmake;D:\cmake\share\cmake-3.29\Modules\Internal\CheckSourceCompiles.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+D:\cmake\bin\cmake.exe -SD:/Code/C++/SRT-Weak-Network-Video -BD:/Code/C++/SRT-Weak-Network-Video/build-clean --check-stamp-file D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common\filelist_win32.maf;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckCXXAtomic.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckCXXStdPutTime.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckGCCAtomicIntrinsics.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\FindPThreadGetSetName.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\haiUtil.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\srt.pc.in;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\test_vista.c;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\filelist.maf;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\version.h.in;D:\cmake\share\cmake-3.29\Modules\CheckCSourceCompiles.cmake;D:\cmake\share\cmake-3.29\Modules\CheckCXXSourceCompiles.cmake;D:\cmake\share\cmake-3.29\Modules\CheckFunctionExists.cmake;D:\cmake\share\cmake-3.29\Modules\CheckIncludeFile.cmake;D:\cmake\share\cmake-3.29\Modules\CheckLibraryExists.cmake;D:\cmake\share\cmake-3.29\Modules\CheckSymbolExists.cmake;D:\cmake\share\cmake-3.29\Modules\FindPackageHandleStandardArgs.cmake;D:\cmake\share\cmake-3.29\Modules\FindPackageMessage.cmake;D:\cmake\share\cmake-3.29\Modules\FindPkgConfig.cmake;D:\cmake\share\cmake-3.29\Modules\FindThreads.cmake;D:\cmake\share\cmake-3.29\Modules\GNUInstallDirs.cmake;D:\cmake\share\cmake-3.29\Modules\Internal\CheckSourceCompiles.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+D:\cmake\bin\cmake.exe -SD:/Code/C++/SRT-Weak-Network-Video -BD:/Code/C++/SRT-Weak-Network-Video/build-clean --check-stamp-file D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common\filelist_win32.maf;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckCXXAtomic.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckCXXStdPutTime.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\CheckGCCAtomicIntrinsics.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\FindPThreadGetSetName.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\haiUtil.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\srt.pc.in;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\scripts\test_vista.c;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\filelist.maf;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\version.h.in;D:\cmake\share\cmake-3.29\Modules\CheckCSourceCompiles.cmake;D:\cmake\share\cmake-3.29\Modules\CheckCXXSourceCompiles.cmake;D:\cmake\share\cmake-3.29\Modules\CheckFunctionExists.cmake;D:\cmake\share\cmake-3.29\Modules\CheckIncludeFile.cmake;D:\cmake\share\cmake-3.29\Modules\CheckLibraryExists.cmake;D:\cmake\share\cmake-3.29\Modules\CheckSymbolExists.cmake;D:\cmake\share\cmake-3.29\Modules\FindPackageHandleStandardArgs.cmake;D:\cmake\share\cmake-3.29\Modules\FindPackageMessage.cmake;D:\cmake\share\cmake-3.29\Modules\FindPkgConfig.cmake;D:\cmake\share\cmake-3.29\Modules\FindThreads.cmake;D:\cmake\share\cmake-3.29\Modules\GNUInstallDirs.cmake;D:\cmake\share\cmake-3.29\Modules\Internal\CheckSourceCompiles.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\cmake_object_lib_support.c" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\api.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\buffer_snd.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\buffer_rcv.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\buffer_tools.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\cache.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\channel.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\common.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\core.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\crypto.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\epoll.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\fec.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\handshake.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\list.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\logger_default.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\logger_defs.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\logging.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\md5.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\packet.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\packetfilter.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\queue.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\congctl.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\socketconfig.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\srt_c_api.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\srt_compat.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\strerror_defs.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\sync.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\tsbpd_time.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\window.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\sync_cxx11.obj" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\srt_shared.res" />
+    <Object Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\$(Configuration)\win_time.obj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\ZERO_CHECK.vcxproj">
+      <Project>{9DD72943-BA94-3CE1-98BE-628DCAB8604D}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.vcxproj">
+      <Project>{897A4B6A-C8D5-3A5C-B1CD-BB8DAAC9F895}</Project>
+      <Name>srt_virtual</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

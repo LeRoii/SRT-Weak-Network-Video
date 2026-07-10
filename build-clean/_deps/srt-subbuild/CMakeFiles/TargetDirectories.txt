@@ -1,0 +1,3 @@
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/srt-populate.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/ALL_BUILD.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/ZERO_CHECK.dir

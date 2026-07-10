@@ -1,0 +1,10 @@
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\CMAKEFILES\5FABF3314D85F1F2A92A8B0F857512CB\GENERATE.STAMP.RULE
+setlocal
+D:\cmake\bin\cmake.exe -SD:/Code/C++/SRT-Weak-Network-Video -BD:/Code/C++/SRT-Weak-Network-Video/build-clean --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file D:/Code/C++/SRT-Weak-Network-Video/build-clean/srt_weak_network_video.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

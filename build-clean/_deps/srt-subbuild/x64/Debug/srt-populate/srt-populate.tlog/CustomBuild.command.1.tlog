@@ -1,0 +1,154 @@
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKEFILES\EE6AC24BC89BFDBF02F0ACD8DD66235F\SRT-POPULATE-MKDIR.RULE
+setlocal
+D:\cmake\bin\cmake.exe -Dcfgdir=/Debug -P D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/tmp/srt-populate-mkdirs.cmake
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-mkdir
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKEFILES\EE6AC24BC89BFDBF02F0ACD8DD66235F\SRT-POPULATE-DOWNLOAD.RULE
+setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -P D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/tmp/srt-populate-gitclone.cmake
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-download
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKEFILES\EE6AC24BC89BFDBF02F0ACD8DD66235F\SRT-POPULATE-UPDATE.RULE
+setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -Dcan_fetch=YES -P D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/tmp/srt-populate-gitupdate.cmake
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKEFILES\EE6AC24BC89BFDBF02F0ACD8DD66235F\SRT-POPULATE-PATCH.RULE
+setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -DSRT_SOURCE_DIR=D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src -P D:/Code/C++/SRT-Weak-Network-Video/cmake/patch_srt.cmake
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-patch
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKEFILES\EE6AC24BC89BFDBF02F0ACD8DD66235F\SRT-POPULATE-CONFIGURE.RULE
+setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-configure
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKEFILES\EE6AC24BC89BFDBF02F0ACD8DD66235F\SRT-POPULATE-BUILD.RULE
+setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-build
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKEFILES\EE6AC24BC89BFDBF02F0ACD8DD66235F\SRT-POPULATE-INSTALL.RULE
+setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-install
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKEFILES\EE6AC24BC89BFDBF02F0ACD8DD66235F\SRT-POPULATE-TEST.RULE
+setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-test
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKEFILES\3D8423D9C83CEA0B6902435C1A9E2770\SRT-POPULATE-COMPLETE.RULE
+setlocal
+D:\cmake\bin\cmake.exe -E make_directory D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/Debug
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/Debug/srt-populate-complete
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-done
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKEFILES\DC09BFE24206CF1A9574BD7D682BAC59\SRT-POPULATE.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^D:\CODE\C++\SRT-WEAK-NETWORK-VIDEO\BUILD-CLEAN\_DEPS\SRT-SUBBUILD\CMAKELISTS.TXT
+setlocal
+D:\cmake\bin\cmake.exe -SD:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild -BD:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild --check-stamp-file D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

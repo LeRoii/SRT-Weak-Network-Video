@@ -1,0 +1,22 @@
+# CMake generation dependency list for this directory.
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/3.29.0-rc2/CMakeSystem.cmake
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeLists.txt
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/tmp/srt-populate-mkdirs.cmake
+D:/cmake/share/cmake-3.29/Modules/CMakeDetermineSystem.cmake
+D:/cmake/share/cmake-3.29/Modules/CMakeGenericSystem.cmake
+D:/cmake/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake
+D:/cmake/share/cmake-3.29/Modules/CMakeSystem.cmake.in
+D:/cmake/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake
+D:/cmake/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake
+D:/cmake/share/cmake-3.29/Modules/ExternalProject.cmake
+D:/cmake/share/cmake-3.29/Modules/ExternalProject/PatchInfo.txt.in
+D:/cmake/share/cmake-3.29/Modules/ExternalProject/RepositoryInfo.txt.in
+D:/cmake/share/cmake-3.29/Modules/ExternalProject/UpdateInfo.txt.in
+D:/cmake/share/cmake-3.29/Modules/ExternalProject/cfgcmd.txt.in
+D:/cmake/share/cmake-3.29/Modules/ExternalProject/gitclone.cmake.in
+D:/cmake/share/cmake-3.29/Modules/ExternalProject/gitupdate.cmake.in
+D:/cmake/share/cmake-3.29/Modules/ExternalProject/mkdirs.cmake.in
+D:/cmake/share/cmake-3.29/Modules/ExternalProject/shared_internal_commands.cmake
+D:/cmake/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake
+D:/cmake/share/cmake-3.29/Modules/Platform/Windows.cmake
+D:/cmake/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake

@@ -6,7 +6,7 @@ loss. The transport combines:
 - connectionless UDP as the default high-loss media transport
 - optional SRT live transport for compatibility and comparison
 - per-frame Reed-Solomon erasure coding through Intel ISA-L
-- nine adaptive H.264 profiles from 2000 kbps down to 30 kbps
+- nine adaptive H.264 profiles from 2000 kbps down to 60 kbps
 - CRC validation and strict complete-frame/keyframe gating
 - CPU display upscaling and frame synthesis with a minimum output specification
 - a receiver display that keeps the last good frame across disconnects
@@ -109,7 +109,7 @@ receiver:
   display: true
   minimum_output_width: 640
   minimum_output_height: 360
-  minimum_output_fps: 5
+  minimum_output_fps: 20
   upscale_mode: lanczos_sharpen
   interpolation_mode: blend
   write_h264: true
@@ -146,14 +146,15 @@ frame rate, the display generates CPU-processed frames at that cadence. The
 decoded data and optional H.264 output file are not modified.
 
 `upscale_mode` selects `bilinear` or `lanczos_sharpen`; the latter is the
-default and applies light luma sharpening only after an upscale.
+default and applies luma contrast stretch plus light luma sharpening only after
+an upscale.
 `interpolation_mode` selects `repeat` or `blend`; the default `blend` emits one
 50/50 transition frame before displaying a newly received low-rate frame.
 Both modes retain the last complete frame during a prolonged gap.
 
-Receiver statistics keep `decoded_fps` for input-rate diagnosis. Generated
-output rate, synthetic-frame rate, output resolution, and the configured
-latency metric name are not repeated in every log line.
+Receiver statistics include `decoded_fps`, `output_fps`, `synthetic_fps`, and
+`output_resolution` so reports can separate true decoded throughput from the
+20 fps display cadence.
 
 ### Transport Mode
 
@@ -166,25 +167,25 @@ latency metric name are not repeated in every log line.
   comparison. SRT still uses its 350 ms latency budget and ARQ.
 
 UDP starts with the normal Level 0 profile (`1280x720/30fps`) and switches to
-Level 8 at `256x144/2fps/30kbps` only after stale or missing feedback, send
+Level 8 at `160x90/10fps/60kbps` only after stale or missing feedback, send
 congestion, a receiver frame age above 1500 ms, or very high reported loss. A
 recovery frame keeps Level 8 until it is acknowledged, then the sender
 immediately selects the level implied by the fresh feedback. UDP and SRT use the
-same nine-level ladder after recovery. Every profile uses an approximately
-one-second GOP; keyframes receive stronger FEC than P-frames. Feedback is
-emitted every 200 ms, with 10 copies spread across the interval.
+same nine-level ladder after recovery. Low transport resolutions are allowed
+below the display minimum; the receiver upscales complete decoded frames to at
+least `640x360` and fills the display cadence to at least `20fps`.
 
-| Level | H.264 profile | GOP frames | P-frame FEC | keyframe FEC |
-|---:|---|---:|---:|---:|
-| 0 | 1280x720 / 30 fps / 2000 kbps | 30 | 0.10 | 0.30 |
-| 1 | 640x360 / 20 fps / 900 kbps | 10 | 0.50 | 0.75 |
-| 2 | 640x360 / 15 fps / 700 kbps | 8 | 0.50 | 0.75 |
-| 3 | 640x360 / 10 fps / 400 kbps | 10 | 0.75 | 1.50 |
-| 4 | 426x240 / 5 fps / 220 kbps | 5 | 2.50 | 5.00 |
-| 5 | 426x240 / 3 fps / 140 kbps | 3 | 3.00 | 6.00 |
-| 6 | 320x180 / 3 fps / 80 kbps | 3 | 2.50 | 5.00 |
-| 7 | 320x180 / 2 fps / 50 kbps | 2 | 4.00 | 7.00 |
-| 8 | 256x144 / 2 fps / 30 kbps | 2 | 8.00 | 12.00 |
+| Level | H.264 profile | GOP frames | min data shards | P-frame FEC | keyframe FEC | all-intra |
+|---:|---|---:|---:|---:|---:|---|
+| 0 | 1280x720 / 30 fps / 2000 kbps | 30 | 4 | 0.10 | 0.30 | no |
+| 1 | 640x360 / 24 fps / 900 kbps | 12 | 4 | 0.50 | 0.75 | no |
+| 2 | 640x360 / 24 fps / 700 kbps | 12 | 4 | 0.50 | 0.75 | no |
+| 3 | 640x360 / 20 fps / 500 kbps | 10 | 4 | 1.00 | 2.00 | no |
+| 4 | 426x240 / 20 fps / 350 kbps | 10 | 2 | 2.00 | 4.00 | no |
+| 5 | 320x180 / 15 fps / 220 kbps | 3 | 2 | 3.00 | 6.00 | no |
+| 6 | 320x180 / 12 fps / 150 kbps | 2 | 2 | 5.00 | 8.00 | no |
+| 7 | 256x144 / 12 fps / 90 kbps | 1 | 1 | 8.00 | 10.00 | yes |
+| 8 | 160x90 / 10 fps / 60 kbps | 1 | 1 | 12.00 | 12.00 | yes |
 
 Raw loss thresholds above 5, 15, 20, 30, 50, 65, 72, and 77 percent map to
 Levels 1 through 8. Effective selection adds hysteresis: Level 2 requires three
@@ -196,9 +197,11 @@ percent for Level 1 to Level 0, and below 50 percent for Level 5 to Level 4.
 RTT-only degradation starts above 160 ms and requires five consecutive high-RTT
 feedback windows.
 
-Levels 3 through 5 use stronger FEC to improve true decoded-frame throughput
-under mid-loss conditions; the sender does not lower profile solely because
-`decoded_fps` is below the profile fps.
+Levels 3 through 8 use stronger FEC, lower transport resolution, smaller
+per-block data shard counts, and short GOP or all-intra coding to improve true
+decoded-frame throughput under high loss. At 80% bidirectional loss the target
+is 8-12 true decoded fps plus 20 fps display output, not 20 distinct decoded
+frames.
 
 ### Sender Input
 
@@ -209,11 +212,16 @@ under mid-loss conditions; the sender does not lower profile solely because
 - `file` loops the local file configured by `sender.video_file`.
 
 The checked-in namespace-test configuration above currently selects `file`.
+File input is paced against the source frame deadline: decode, scale, x264,
+FEC, and socket-send time are subtracted from the following sleep. If a frame
+is already late, the sender does not burst-send catch-up frames; it restarts the
+next deadline from the current time.
 
 Camera mode currently requests YUYV 4:2:2 using `camera_device`,
 `camera_width`, `camera_height`, and `camera_fps`. The driver may adjust the
 requested camera mode; the negotiated values are printed as
-`video_input=camera ...` when the sender starts.
+`video_input=camera ...` when the sender starts. Camera pacing comes from the
+V4L2 capture cadence; the sender does not add the file-mode post-send sleep.
 
 To use the local file instead:
 
@@ -329,19 +337,19 @@ recovered. It never forwards incomplete or CRC-invalid frames to the decoder.
 The SDL window and its last decoded frame stay alive. In UDP mode there is no
 SRT connection or reconnect state.
 
-The current reference validation used `/home/u20/code/jetson-2k.mp4` and
-50 ms delay with 70%, 80%, and 85% loss in both directions. Each scenario ran
-for 600 seconds. Maximum complete-frame gaps were 1595, 2104, and 2103 ms;
-the display produced 2998 frames in each run at `640x360`, decoder errors
-remained zero, and every saved H.264 stream passed FFmpeg's
-`-err_detect explode` check. Five repeated transitions from an unimpaired link
-to 80% and 85% loss also stayed below three seconds, with worst gaps of 2189
-and 2236 ms.
+The previous 5 fps display reference validation used
+`/home/u20/code/jetson-2k.mp4` and 50 ms delay with 70%, 80%, and 85% loss in
+both directions. Each scenario ran for 600 seconds. Maximum complete-frame gaps
+were 1595, 2104, and 2103 ms; the display produced 2998 frames in each run at
+`640x360`, decoder errors remained zero, and every saved H.264 stream passed
+FFmpeg's `-err_detect explode` check. The current 20 fps display acceptance
+path is `scripts/weaknet_acceptance.py`; it reports true decoded fps separately
+from generated display cadence.
 
 ## Automated Acceptance
 
 `scripts/weaknet_acceptance.py` runs the weak-network acceptance matrix and
-collects the evidence needed for TC-01 through TC-08. It creates the namespace
+collects the evidence needed for TC-01 through TC-09. It creates the namespace
 topology, starts the receiver and sender inside `webrtc_rx` and `webrtc_tx`,
 applies `tc netem` loss, records logs, validates the saved H.264 stream with
 FFmpeg, and writes JSON plus Markdown reports.
@@ -352,10 +360,10 @@ Run the quick regression suite:
 python3 scripts/weaknet_acceptance.py --suite quick
 ```
 
-The quick suite runs 0%, 20%, 45%, 80%, and 85% bidirectional loss with 50 ms
+The quick suite runs 0%, 20%, 45%, 70%, and 80% bidirectional loss with 50 ms
 delay for 60 seconds per steady scenario, followed by a short staircase from
-0% to 10%, 50%, 85%, then back down through 50%, 10%, and 0%. For a shorter
-smoke run, override the durations:
+0% to 10%, 50%, 70%, 80%, then back down through 50%, 10%, and 0%. For a
+shorter smoke run, override the durations:
 
 ```bash
 python3 scripts/weaknet_acceptance.py \
@@ -393,7 +401,10 @@ The suite-level `summary.json` and `report.md` summarize pass/fail status. The
 current acceptance scope treats TC-01 as a video-profile bitrate check only:
 FEC and UDP overhead are not counted against the 2 Mbps ceiling. TC-06 is not
 part of the automated acceptance result. TC-07 checks both fast downshift on
-increasing loss and profile recovery on decreasing loss. TC-08 uses
+increasing loss and profile recovery on decreasing loss, using a 3 second
+downshift window and a 15 second recovery window. TC-08 uses
 `latency_avg <= 500 ms` as the hard criterion; values below 180 ms are reported
-as better-than-target latency rather than failures. The report also includes
-`latency_p95` and `latency_max` for diagnosis.
+as better-than-target latency rather than failures. TC-09 checks the 80% loss
+target after warmup: average `decoded_fps >= 8`, average `output_fps >= 20`,
+and `output_resolution == 640x360`. The report also includes `synthetic_fps`,
+post-warmup fps minimums, `latency_p95`, and `latency_max` for diagnosis.

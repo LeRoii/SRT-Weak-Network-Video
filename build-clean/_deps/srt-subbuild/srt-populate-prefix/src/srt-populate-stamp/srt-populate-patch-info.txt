@@ -1,0 +1,6 @@
+# This is a generated file and its contents are an internal implementation detail.
+# The update step will be re-executed if anything in this file changes.
+# No other meaning or use of this file is supported.
+
+command=D:/cmake/bin/cmake.exe;-DSRT_SOURCE_DIR=<SOURCE_DIR>;-P;D:/Code/C++/SRT-Weak-Network-Video/cmake/patch_srt.cmake
+work_dir=D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src

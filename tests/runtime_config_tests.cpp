@@ -42,7 +42,7 @@ std::string complete_config(const std::string &metric = "encode_to_decode",
         "  display: false\n"
         "  minimum_output_width: 800\n"
         "  minimum_output_height: 450\n"
-        "  minimum_output_fps: 5\n"
+        "  minimum_output_fps: 20\n"
         "  upscale_mode: lanczos_sharpen\n"
         "  interpolation_mode: blend\n"
         "  write_h264: " + write_h264 + "\n"
@@ -93,7 +93,7 @@ int main() {
     assert(defaults.receiver.display);
     assert(defaults.receiver.minimum_output_width == 640);
     assert(defaults.receiver.minimum_output_height == 360);
-    assert(defaults.receiver.minimum_output_fps == 5);
+    assert(defaults.receiver.minimum_output_fps == 20);
     assert(defaults.receiver.upscale_mode ==
            UpscaleMode::LanczosSharpen);
     assert(defaults.receiver.interpolation_mode ==
@@ -116,7 +116,7 @@ int main() {
     assert(!config.receiver.display);
     assert(config.receiver.minimum_output_width == 800);
     assert(config.receiver.minimum_output_height == 450);
-    assert(config.receiver.minimum_output_fps == 5);
+    assert(config.receiver.minimum_output_fps == 20);
     assert(!config.receiver.write_h264);
     assert(config.receiver.output_file == "/tmp/output.h264");
     assert(config.latency.metric == LatencyMetric::EncodeToAssemble);
@@ -149,7 +149,7 @@ int main() {
         "srt-runtime-config-bitrate-below-ladder.yaml",
         replace_once(complete_config(),
                      "max_video_kbps: 500",
-                     "max_video_kbps: 29"));
+                     "max_video_kbps: 59"));
     assert(load_fails(bitrate_below_ladder));
 
     const auto invalid_input = write_config(
@@ -202,7 +202,7 @@ int main() {
     const auto invalid_output_fps = write_config(
         "srt-runtime-config-invalid-output-fps.yaml",
         replace_once(complete_config(),
-                     "minimum_output_fps: 5",
+                     "minimum_output_fps: 20",
                      "minimum_output_fps: 0"));
     assert(load_fails(invalid_output_fps));
 
@@ -221,24 +221,6 @@ int main() {
     assert(alternate.receiver.interpolation_mode ==
            InterpolationMode::Repeat);
 
-    const auto partial = write_config(
-        "srt-runtime-config-partial.yaml",
-        "sender:\n"
-        "  input: file\n"
-        "  connect: 10.88.0.2:9000\n"
-        "receiver:\n"
-        "  listen: 10.88.0.2:9000\n"
-        "  display: false\n");
-    const auto partial_config = load_runtime_config(partial, false);
-    assert(partial_config.transport.mode == TransportMode::Udp);
-    assert(partial_config.sender.input == SenderInput::File);
-    assert(partial_config.sender.connect == "10.88.0.2:9000");
-    assert(partial_config.sender.max_video_kbps == 2000);
-    assert(partial_config.receiver.listen == "10.88.0.2:9000");
-    assert(!partial_config.receiver.display);
-    assert(partial_config.receiver.minimum_output_width == 640);
-    assert(partial_config.latency.metric == LatencyMetric::EncodeToDecode);
-
     const auto invalid_upscale = write_config(
         "srt-runtime-config-invalid-upscale.yaml",
         replace_once(complete_config(),
@@ -252,6 +234,12 @@ int main() {
                      "interpolation_mode: blend",
                      "interpolation_mode: optical_flow"));
     assert(load_fails(invalid_interpolation));
+
+    const auto missing_section = write_config(
+        "srt-runtime-config-missing-section.yaml",
+        "latency:\n"
+        "  metric: encode_to_decode\n");
+    assert(load_fails(missing_section));
 
     std::filesystem::remove(valid);
     std::filesystem::remove(display);
@@ -268,9 +256,9 @@ int main() {
     std::filesystem::remove(invalid_output_height);
     std::filesystem::remove(invalid_output_fps);
     std::filesystem::remove(bilinear_repeat);
-    std::filesystem::remove(partial);
     std::filesystem::remove(invalid_upscale);
     std::filesystem::remove(invalid_interpolation);
+    std::filesystem::remove(missing_section);
 
     std::cout << "runtime_config_tests=passed" << std::endl;
     return 0;

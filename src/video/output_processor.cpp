@@ -73,6 +73,44 @@ void sharpen_luma(AVFrame *frame) {
     }
 }
 
+void stretch_luma_contrast(AVFrame *frame) {
+    uint8_t minimum = 255;
+    uint8_t maximum = 0;
+    for (int y = 0; y < frame->height; ++y) {
+        for (int x = 0; x < frame->width; ++x) {
+            const uint8_t value =
+                frame->data[0][y * frame->linesize[0] + x];
+            minimum = std::min(minimum, value);
+            maximum = std::max(maximum, value);
+        }
+    }
+    if (maximum <= minimum) {
+        return;
+    }
+
+    const int input_range =
+        static_cast<int>(maximum) - static_cast<int>(minimum);
+    const int output_floor = 32;
+    const int output_range = std::max(input_range, output_floor);
+    const int midpoint =
+        (static_cast<int>(minimum) + static_cast<int>(maximum)) / 2;
+    const int target_min =
+        std::clamp(midpoint - output_range / 2, 0, 255 - output_range);
+
+    for (int y = 0; y < frame->height; ++y) {
+        for (int x = 0; x < frame->width; ++x) {
+            uint8_t &pixel =
+                frame->data[0][y * frame->linesize[0] + x];
+            const int stretched =
+                target_min +
+                (static_cast<int>(pixel) - static_cast<int>(minimum)) *
+                    output_range / input_range;
+            pixel = static_cast<uint8_t>(
+                std::clamp(stretched, 0, 255));
+        }
+    }
+}
+
 bool blend_compatible(const AVFrame *left, const AVFrame *right) {
     return left && right &&
            left->format == AV_PIX_FMT_YUV420P &&
@@ -162,6 +200,7 @@ AVFrame *OutputProcessor::process(const AVFrame *source) const {
 
     if (scaling &&
         upscale_mode_ == UpscaleMode::LanczosSharpen) {
+        stretch_luma_contrast(output);
         sharpen_luma(output);
     }
     return output;
@@ -209,7 +248,11 @@ OutputCadenceController::OutputCadenceController(
     int minimum_fps,
     InterpolationMode interpolation_mode)
     : interval_ms_(std::max<int64_t>(1, 1000 / minimum_fps)),
-      interpolation_mode_(interpolation_mode) {}
+      interpolation_mode_(interpolation_mode) {
+    if (minimum_fps >= 20 && interval_ms_ > 1) {
+        --interval_ms_;
+    }
+}
 
 OutputAction OutputCadenceController::on_real_frame(
     int64_t now_ms,

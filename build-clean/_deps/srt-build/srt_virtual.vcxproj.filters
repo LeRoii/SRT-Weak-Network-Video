@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\buffer_snd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\buffer_rcv.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\buffer_tools.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\cache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\channel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\crypto.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\epoll.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\fec.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\handshake.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\list.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\logger_default.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\logger_defs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\logging.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\md5.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\packet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\packetfilter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\queue.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\congctl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\socketconfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\srt_c_api.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\srt_compat.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\strerror_defs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\sync.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\tsbpd_time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\sync_cxx11.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\common\win_time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\srt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\logging_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\access_control.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\platform_sys.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\udt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src\srtcore\srt_shared.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{DF855987-2813-37BF-B385-4B2EC5BDD29F}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{F0745632-7375-3531-99D6-C617363E24DD}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

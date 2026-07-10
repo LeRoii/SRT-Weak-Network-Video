@@ -1,0 +1,24 @@
+# CMake generation dependency list for this directory.
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/CMakeLists.txt
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/common/filelist_win32.maf
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts/CheckCXXAtomic.cmake
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts/CheckCXXStdPutTime.cmake
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts/CheckGCCAtomicIntrinsics.cmake
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts/FindPThreadGetSetName.cmake
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts/haiUtil.cmake
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts/srt.pc.in
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts/test_vista.c
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/srtcore/filelist.maf
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/srtcore/version.h.in
+D:/cmake/share/cmake-3.29/Modules/CheckCSourceCompiles.cmake
+D:/cmake/share/cmake-3.29/Modules/CheckCXXSourceCompiles.cmake
+D:/cmake/share/cmake-3.29/Modules/CheckFunctionExists.cmake
+D:/cmake/share/cmake-3.29/Modules/CheckIncludeFile.cmake
+D:/cmake/share/cmake-3.29/Modules/CheckLibraryExists.cmake
+D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake
+D:/cmake/share/cmake-3.29/Modules/FindPackageHandleStandardArgs.cmake
+D:/cmake/share/cmake-3.29/Modules/FindPackageMessage.cmake
+D:/cmake/share/cmake-3.29/Modules/FindPkgConfig.cmake
+D:/cmake/share/cmake-3.29/Modules/FindThreads.cmake
+D:/cmake/share/cmake-3.29/Modules/GNUInstallDirs.cmake
+D:/cmake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake

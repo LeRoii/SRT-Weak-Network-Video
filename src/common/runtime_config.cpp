@@ -223,7 +223,10 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
 
     RuntimeConfig config;
     Section section = Section::None;
-    std::set<Section> seen_sections;
+    bool saw_transport = false;
+    bool saw_sender = false;
+    bool saw_receiver = false;
+    bool saw_latency = false;
     std::set<std::string> seen_keys;
     std::string line;
     int line_number = 0;
@@ -249,11 +252,22 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
         const std::string content = trim(line);
         if (indent == 0) {
             section = parse_section(content);
-            if (!seen_sections.insert(section).second) {
+            bool *seen = nullptr;
+            if (section == Section::Transport) {
+                seen = &saw_transport;
+            } else if (section == Section::Sender) {
+                seen = &saw_sender;
+            } else if (section == Section::Receiver) {
+                seen = &saw_receiver;
+            } else {
+                seen = &saw_latency;
+            }
+            if (*seen) {
                 throw std::runtime_error(
                     "runtime config line " + std::to_string(line_number) +
                     " repeats a section");
             }
+            *seen = true;
             continue;
         }
         if (section == Section::None || indent != 2) {
@@ -317,7 +331,7 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
                     value, "sender.camera_fps", 1, 240);
             } else if (key == "max_video_kbps") {
                 config.sender.max_video_kbps = parse_integer(
-                    value, "sender.max_video_kbps", 30, 2000);
+                    value, "sender.max_video_kbps", 60, 2000);
             } else {
                 throw std::runtime_error(
                     "unknown sender config key '" + key + "'");
@@ -366,7 +380,11 @@ RuntimeConfig load_runtime_config(const std::filesystem::path &path,
             }
         }
     }
-
+    if (!saw_transport || !saw_sender || !saw_receiver || !saw_latency) {
+        throw std::runtime_error(
+            "runtime config must contain transport, sender, receiver, and "
+            "latency sections");
+    }
     return config;
 }
 

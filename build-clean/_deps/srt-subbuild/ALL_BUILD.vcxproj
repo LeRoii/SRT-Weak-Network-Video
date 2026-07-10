@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ResolveNugetPackages>false</ResolveNugetPackages>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{14A4B152-DB97-3C83-9EC7-3D9D1B9827B6}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+D:\cmake\bin\cmake.exe -SD:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild -BD:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild --check-stamp-file D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\3.29.0-rc2\CMakeSystem.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\tmp\srt-populate-mkdirs.cmake;D:\cmake\share\cmake-3.29\Modules\CMakeDetermineSystem.cmake;D:\cmake\share\cmake-3.29\Modules\CMakeGenericSystem.cmake;D:\cmake\share\cmake-3.29\Modules\CMakeInitializeConfigs.cmake;D:\cmake\share\cmake-3.29\Modules\CMakeSystem.cmake.in;D:\cmake\share\cmake-3.29\Modules\CMakeSystemSpecificInformation.cmake;D:\cmake\share\cmake-3.29\Modules\CMakeSystemSpecificInitialize.cmake;D:\cmake\share\cmake-3.29\Modules\ExternalProject.cmake;D:\cmake\share\cmake-3.29\Modules\ExternalProject\PatchInfo.txt.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\RepositoryInfo.txt.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\UpdateInfo.txt.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\cfgcmd.txt.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\gitclone.cmake.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\gitupdate.cmake.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\mkdirs.cmake.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\shared_internal_commands.cmake;D:\cmake\share\cmake-3.29\Modules\Platform\Windows-Initialize.cmake;D:\cmake\share\cmake-3.29\Modules\Platform\Windows.cmake;D:\cmake\share\cmake-3.29\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\ZERO_CHECK.vcxproj">
+      <Project>{289E82F6-5208-3D60-A278-A9509C582BF3}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate.vcxproj">
+      <Project>{ECB98C9C-0224-36A9-A17C-0EC2EC063704}</Project>
+      <Name>srt-populate</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

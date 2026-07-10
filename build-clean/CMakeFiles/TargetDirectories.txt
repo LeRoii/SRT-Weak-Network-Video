@@ -1,0 +1,17 @@
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/srt_weak_video.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/protocol_tests.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/frame_pacer_tests.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/adaptation_tests.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/network_quality_tests.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/runtime_config_tests.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/latency_stats_tests.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/output_processing_tests.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/RUN_TESTS.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/INSTALL.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/ALL_BUILD.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/ZERO_CHECK.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-build/CMakeFiles/srt_virtual.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-build/CMakeFiles/srt_shared.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-build/CMakeFiles/RUN_TESTS.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-build/CMakeFiles/INSTALL.dir
+D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-build/CMakeFiles/ALL_BUILD.dir

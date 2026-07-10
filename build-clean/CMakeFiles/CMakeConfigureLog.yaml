@@ -1,0 +1,1305 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      The system is: Windows - 10.0.26200 - AMD64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+      生成启动时间为 2026/7/10 10:15:48。
+      
+      节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\3.29.0-rc2\\CompilerIdC\\CompilerIdC.vcxproj”(默认目标)。
+      PrepareForBuild:
+        正在创建目录“Debug\\”。
+        已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+        正在创建目录“Debug\\CompilerIdC.tlog\\”。
+      InitializeBuildStatus:
+        正在创建“Debug\\CompilerIdC.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+        正在对“Debug\\CompilerIdC.tlog\\unsuccessfulbuild”执行 Touch 任务。
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TC /FC /errorReport:queue CMakeCCompilerId.c
+        CMakeCCompilerId.c
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdC.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdC.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdC.lib" /MACHINE:X64 Debug\\CMakeCCompilerId.obj
+        CompilerIdC.vcxproj -> D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\3.29.0-rc2\\CompilerIdC\\CompilerIdC.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_C_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_C_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        正在删除文件“Debug\\CompilerIdC.tlog\\unsuccessfulbuild”。
+        正在对“Debug\\CompilerIdC.tlog\\CompilerIdC.lastbuildstate”执行 Touch 任务。
+      已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\3.29.0-rc2\\CompilerIdC\\CompilerIdC.vcxproj”(默认目标)的操作。
+      
+      已成功生成。
+          0 个警告
+          0 个错误
+      
+      已用时间 00:00:02.01
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.exe"
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "CompilerIdC.vcxproj"
+      
+      The C compiler identification is MSVC, found in:
+        D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/3.29.0-rc2/CompilerIdC/CompilerIdC.exe
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler:  
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+      生成启动时间为 2026/7/10 10:15:52。
+      
+      节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\3.29.0-rc2\\CompilerIdCXX\\CompilerIdCXX.vcxproj”(默认目标)。
+      PrepareForBuild:
+        正在创建目录“Debug\\”。
+        已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+        正在创建目录“Debug\\CompilerIdCXX.tlog\\”。
+      InitializeBuildStatus:
+        正在创建“Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+        正在对“Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild”执行 Touch 任务。
+      ClCompile:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /nologo /W0 /WX- /diagnostics:column /Od /D _MBCS /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\\\" /Fd"Debug\\vc143.pdb" /external:W0 /Gd /TP /FC /errorReport:queue CMakeCXXCompilerId.cpp
+        CMakeCXXCompilerId.cpp
+      Link:
+        C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:".\\CompilerIdCXX.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /PDB:".\\CompilerIdCXX.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:".\\CompilerIdCXX.lib" /MACHINE:X64 Debug\\CMakeCXXCompilerId.obj
+        CompilerIdCXX.vcxproj -> D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\3.29.0-rc2\\CompilerIdCXX\\CompilerIdCXX.exe
+      PostBuildEvent:
+        for %%i in (cl.exe) do @echo CMAKE_CXX_COMPILER=%%~$PATH:i
+        :VCEnd
+        CMAKE_CXX_COMPILER=C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\Hostx64\\x64\\cl.exe
+      FinalizeBuildStatus:
+        正在删除文件“Debug\\CompilerIdCXX.tlog\\unsuccessfulbuild”。
+        正在对“Debug\\CompilerIdCXX.tlog\\CompilerIdCXX.lastbuildstate”执行 Touch 任务。
+      已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\3.29.0-rc2\\CompilerIdCXX\\CompilerIdCXX.vcxproj”(默认目标)的操作。
+      
+      已成功生成。
+          0 个警告
+          0 个错误
+      
+      已用时间 00:00:02.50
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.exe"
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "CompilerIdCXX.vcxproj"
+      
+      The CXX compiler identification is MSVC, found in:
+        D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/3.29.0-rc2/CompilerIdCXX/CompilerIdCXX.exe
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:64 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-tcq1m6"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-tcq1m6"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_C_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-tcq1m6'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_f7f8e.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:15:56。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-tcq1m6\\cmTC_f7f8e.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_f7f8e.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-tcq1m6\\Debug\\”。
+          正在创建目录“cmTC_f7f8e.dir\\Debug\\cmTC_f7f8e.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_f7f8e.dir\\Debug\\cmTC_f7f8e.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_f7f8e.dir\\Debug\\cmTC_f7f8e.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_f7f8e.dir\\Debug\\\\" /Fd"cmTC_f7f8e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\cmake\\share\\cmake-3.29\\Modules\\CMakeCCompilerABI.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_f7f8e.dir\\Debug\\\\" /Fd"cmTC_f7f8e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\cmake\\share\\cmake-3.29\\Modules\\CMakeCCompilerABI.c"
+          CMakeCCompilerABI.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-tcq1m6\\Debug\\cmTC_f7f8e.exe" /INCREMENTAL /ILK:"cmTC_f7f8e.dir\\Debug\\cmTC_f7f8e.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-tcq1m6/Debug/cmTC_f7f8e.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-tcq1m6/Debug/cmTC_f7f8e.lib" /MACHINE:X64  /machine:x64 cmTC_f7f8e.dir\\Debug\\CMakeCCompilerABI.obj
+          cmTC_f7f8e.vcxproj -> D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-tcq1m6\\Debug\\cmTC_f7f8e.exe
+        FinalizeBuildStatus:
+          正在删除文件“cmTC_f7f8e.dir\\Debug\\cmTC_f7f8e.tlog\\unsuccessfulbuild”。
+          正在对“cmTC_f7f8e.dir\\Debug\\cmTC_f7f8e.tlog\\cmTC_f7f8e.lastbuildstate”执行 Touch 任务。
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-tcq1m6\\cmTC_f7f8e.vcxproj”(默认目标)的操作。
+        
+        已成功生成。
+            0 个警告
+            0 个错误
+        
+        已用时间 00:00:02.09
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:170 (message)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'C': C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.43.34808/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:207 (cmake_determine_linker_id)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Running the C compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.43.34808/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.43.34808.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:64 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-ssd48p"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-ssd48p"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_CXX_FLAGS_DEBUG: "/Zi /Ob0 /Od /RTC1"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-ssd48p'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_81944.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:15:59。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-ssd48p\\cmTC_81944.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_81944.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-ssd48p\\Debug\\”。
+          正在创建目录“cmTC_81944.dir\\Debug\\cmTC_81944.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_81944.dir\\Debug\\cmTC_81944.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_81944.dir\\Debug\\cmTC_81944.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_81944.dir\\Debug\\\\" /Fd"cmTC_81944.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "D:\\cmake\\share\\cmake-3.29\\Modules\\CMakeCXXCompilerABI.cpp"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_81944.dir\\Debug\\\\" /Fd"cmTC_81944.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue "D:\\cmake\\share\\cmake-3.29\\Modules\\CMakeCXXCompilerABI.cpp"
+          CMakeCXXCompilerABI.cpp
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-ssd48p\\Debug\\cmTC_81944.exe" /INCREMENTAL /ILK:"cmTC_81944.dir\\Debug\\cmTC_81944.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-ssd48p/Debug/cmTC_81944.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-ssd48p/Debug/cmTC_81944.lib" /MACHINE:X64  /machine:x64 cmTC_81944.dir\\Debug\\CMakeCXXCompilerABI.obj
+          cmTC_81944.vcxproj -> D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-ssd48p\\Debug\\cmTC_81944.exe
+        FinalizeBuildStatus:
+          正在删除文件“cmTC_81944.dir\\Debug\\cmTC_81944.tlog\\unsuccessfulbuild”。
+          正在对“cmTC_81944.dir\\Debug\\cmTC_81944.tlog\\cmTC_81944.lastbuildstate”执行 Touch 任务。
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-ssd48p\\cmTC_81944.vcxproj”(默认目标)的操作。
+        
+        已成功生成。
+            0 个警告
+            0 个错误
+        
+        已用时间 00:00:02.85
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:170 (message)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?|link\\.exe|lld-link(\\.exe)?))("|,| |$)]
+        linker tool for 'CXX': C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.43.34808/bin/HostX64/x64/link.exe
+        implicit libs: []
+        implicit objs: []
+        implicit dirs: []
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake:207 (cmake_determine_linker_id)"
+      - "D:/cmake/share/cmake-3.29/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Running the CXX compiler's linker: "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.43.34808/bin/HostX64/x64/link.exe" "-v"
+      Microsoft (R) Incremental Linker Version 14.43.34808.0
+      Copyright (C) Microsoft Corporation.  All rights reserved.
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "D:/cmake/share/cmake-3.29/Modules/FindThreads.cmake:97 (CHECK_C_SOURCE_COMPILES)"
+      - "D:/cmake/share/cmake-3.29/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:34 (include)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-k0u7jy"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-k0u7jy"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-k0u7jy'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_8662e.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:27。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-k0u7jy\\cmTC_8662e.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_8662e.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-k0u7jy\\Debug\\”。
+          正在创建目录“cmTC_8662e.dir\\Debug\\cmTC_8662e.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_8662e.dir\\Debug\\cmTC_8662e.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_8662e.dir\\Debug\\cmTC_8662e.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_8662e.dir\\Debug\\\\" /Fd"cmTC_8662e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-k0u7jy\\src.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CMAKE_HAVE_LIBC_PTHREAD /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_8662e.dir\\Debug\\\\" /Fd"cmTC_8662e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-k0u7jy\\src.c"
+          src.c
+        D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-k0u7jy\\src.c(1,10): error C1083: 无法打开包括文件: “pthread.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-k0u7jy\\cmTC_8662e.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-k0u7jy\\cmTC_8662e.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-k0u7jy\\cmTC_8662e.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-k0u7jy\\src.c(1,10): error C1083: 无法打开包括文件: “pthread.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-k0u7jy\\cmTC_8662e.vcxproj]
+        
+            0 个警告
+            1 个错误
+        
+        已用时间 00:00:00.86
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/FindThreads.cmake:112 (CHECK_LIBRARY_EXISTS)"
+      - "D:/cmake/share/cmake-3.29/Modules/FindThreads.cmake:175 (_threads_check_lib)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:34 (include)"
+    checks:
+      - "Looking for pthread_create in pthreads"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-vo8t4d"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-vo8t4d"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREADS_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-vo8t4d'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_ff2c4.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:28。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-vo8t4d\\cmTC_ff2c4.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_ff2c4.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-vo8t4d\\Debug\\”。
+          正在创建目录“cmTC_ff2c4.dir\\Debug\\cmTC_ff2c4.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_ff2c4.dir\\Debug\\cmTC_ff2c4.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_ff2c4.dir\\Debug\\cmTC_ff2c4.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_ff2c4.dir\\Debug\\\\" /Fd"cmTC_ff2c4.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-vo8t4d\\CheckFunctionExists.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_ff2c4.dir\\Debug\\\\" /Fd"cmTC_ff2c4.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-vo8t4d\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-vo8t4d\\Debug\\cmTC_ff2c4.exe" /INCREMENTAL /ILK:"cmTC_ff2c4.dir\\Debug\\cmTC_ff2c4.ilk" /NOLOGO pthreads.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-vo8t4d/Debug/cmTC_ff2c4.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-vo8t4d/Debug/cmTC_ff2c4.lib" /MACHINE:X64  /machine:x64 cmTC_ff2c4.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: 无法打开文件“pthreads.lib” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-vo8t4d\\cmTC_ff2c4.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-vo8t4d\\cmTC_ff2c4.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-vo8t4d\\cmTC_ff2c4.vcxproj”(默认目标) (1) ->
+        (Link 目标) -> 
+          LINK : fatal error LNK1104: 无法打开文件“pthreads.lib” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-vo8t4d\\cmTC_ff2c4.vcxproj]
+        
+            0 个警告
+            1 个错误
+        
+        已用时间 00:00:01.27
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/FindThreads.cmake:112 (CHECK_LIBRARY_EXISTS)"
+      - "D:/cmake/share/cmake-3.29/Modules/FindThreads.cmake:176 (_threads_check_lib)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:34 (include)"
+    checks:
+      - "Looking for pthread_create in pthread"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-kbfz4v"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-kbfz4v"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREAD_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-kbfz4v'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_6dc0f.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:30。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-kbfz4v\\cmTC_6dc0f.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_6dc0f.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-kbfz4v\\Debug\\”。
+          正在创建目录“cmTC_6dc0f.dir\\Debug\\cmTC_6dc0f.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_6dc0f.dir\\Debug\\cmTC_6dc0f.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_6dc0f.dir\\Debug\\cmTC_6dc0f.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_6dc0f.dir\\Debug\\\\" /Fd"cmTC_6dc0f.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-kbfz4v\\CheckFunctionExists.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=pthread_create /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_6dc0f.dir\\Debug\\\\" /Fd"cmTC_6dc0f.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-kbfz4v\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-kbfz4v\\Debug\\cmTC_6dc0f.exe" /INCREMENTAL /ILK:"cmTC_6dc0f.dir\\Debug\\cmTC_6dc0f.ilk" /NOLOGO pthread.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-kbfz4v/Debug/cmTC_6dc0f.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-kbfz4v/Debug/cmTC_6dc0f.lib" /MACHINE:X64  /machine:x64 cmTC_6dc0f.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: 无法打开文件“pthread.lib” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-kbfz4v\\cmTC_6dc0f.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-kbfz4v\\cmTC_6dc0f.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-kbfz4v\\cmTC_6dc0f.vcxproj”(默认目标) (1) ->
+        (Link 目标) -> 
+          LINK : fatal error LNK1104: 无法打开文件“pthread.lib” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-kbfz4v\\cmTC_6dc0f.vcxproj]
+        
+            0 个警告
+            1 个错误
+        
+        已用时间 00:00:01.17
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:341 (check_function_exists)"
+    checks:
+      - "Looking for inet_pton"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-6kc3mu"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-6kc3mu"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_INET_PTON"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-6kc3mu'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_c29ce.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:32。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-6kc3mu\\cmTC_c29ce.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_c29ce.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-6kc3mu\\Debug\\”。
+          正在创建目录“cmTC_c29ce.dir\\Debug\\cmTC_c29ce.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_c29ce.dir\\Debug\\cmTC_c29ce.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_c29ce.dir\\Debug\\cmTC_c29ce.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=inet_pton /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_c29ce.dir\\Debug\\\\" /Fd"cmTC_c29ce.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-6kc3mu\\CheckFunctionExists.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=inet_pton /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_c29ce.dir\\Debug\\\\" /Fd"cmTC_c29ce.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-6kc3mu\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-6kc3mu\\Debug\\cmTC_c29ce.exe" /INCREMENTAL /ILK:"cmTC_c29ce.dir\\Debug\\cmTC_c29ce.ilk" /NOLOGO ws2_32.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-6kc3mu/Debug/cmTC_c29ce.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-6kc3mu/Debug/cmTC_c29ce.lib" /MACHINE:X64  /machine:x64 cmTC_c29ce.dir\\Debug\\CheckFunctionExists.obj
+          cmTC_c29ce.vcxproj -> D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-6kc3mu\\Debug\\cmTC_c29ce.exe
+        FinalizeBuildStatus:
+          正在删除文件“cmTC_c29ce.dir\\Debug\\cmTC_c29ce.tlog\\unsuccessfulbuild”。
+          正在对“cmTC_c29ce.dir\\Debug\\cmTC_c29ce.tlog\\cmTC_c29ce.lastbuildstate”执行 Touch 任务。
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-6kc3mu\\cmTC_c29ce.vcxproj”(默认目标)的操作。
+        
+        已成功生成。
+            0 个警告
+            0 个错误
+        
+        已用时间 00:00:01.77
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "build-clean/_deps/srt-src/CMakeLists.txt:342 (try_compile)"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeTmp"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeTmp"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "AT_LEAST_VISTA"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeTmp'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_cdd07.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:34。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeTmp\\cmTC_cdd07.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_cdd07.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeTmp\\Debug\\”。
+          正在创建目录“cmTC_cdd07.dir\\Debug\\cmTC_cdd07.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_cdd07.dir\\Debug\\cmTC_cdd07.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_cdd07.dir\\Debug\\cmTC_cdd07.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_cdd07.dir\\Debug\\\\" /Fd"cmTC_cdd07.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\_deps\\srt-src\\scripts\\test_vista.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_cdd07.dir\\Debug\\\\" /Fd"cmTC_cdd07.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\_deps\\srt-src\\scripts\\test_vista.c"
+          test_vista.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeTmp\\Debug\\cmTC_cdd07.exe" /INCREMENTAL /ILK:"cmTC_cdd07.dir\\Debug\\cmTC_cdd07.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeTmp/Debug/cmTC_cdd07.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeTmp/Debug/cmTC_cdd07.lib" /MACHINE:X64  /machine:x64 cmTC_cdd07.dir\\Debug\\test_vista.obj
+          cmTC_cdd07.vcxproj -> D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeTmp\\Debug\\cmTC_cdd07.exe
+        FinalizeBuildStatus:
+          正在删除文件“cmTC_cdd07.dir\\Debug\\cmTC_cdd07.tlog\\unsuccessfulbuild”。
+          正在对“cmTC_cdd07.dir\\Debug\\cmTC_cdd07.tlog\\cmTC_cdd07.lastbuildstate”执行 Touch 任务。
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeTmp\\cmTC_cdd07.vcxproj”(默认目标)的操作。
+        
+        已成功生成。
+            0 个警告
+            0 个错误
+        
+        已用时间 00:00:01.95
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake:140 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake:66 (__CHECK_SYMBOL_EXISTS_IMPL)"
+      - "build-clean/_deps/srt-src/scripts/FindPThreadGetSetName.cmake:43 (check_symbol_exists)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:361 (FindPThreadGetSetName)"
+    checks:
+      - "Looking for pthread_getname_np"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-yjmj4j"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-yjmj4j"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_PTHREAD_GETNAME_NP_IN_PTHREAD_NP_H"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-yjmj4j'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_88af3.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:36。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\cmTC_88af3.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_88af3.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\Debug\\”。
+          正在创建目录“cmTC_88af3.dir\\Debug\\cmTC_88af3.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_88af3.dir\\Debug\\cmTC_88af3.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_88af3.dir\\Debug\\cmTC_88af3.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _GNU_SOURCE /D _DARWIN_C_SOURCE /D _POSIX_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_88af3.dir\\Debug\\\\" /Fd"cmTC_88af3.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue  -pthread "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\CheckSymbolExists.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _GNU_SOURCE /D _DARWIN_C_SOURCE /D _POSIX_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_88af3.dir\\Debug\\\\" /Fd"cmTC_88af3.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue  -pthread "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\CheckSymbolExists.c"
+        cl : 命令行  warning D9002: 忽略未知选项“-pthread” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\cmTC_88af3.vcxproj]
+          CheckSymbolExists.c
+        D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\CheckSymbolExists.c(2,10): error C1083: 无法打开包括文件: “pthread_np.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\cmTC_88af3.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\cmTC_88af3.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\cmTC_88af3.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          cl : 命令行  warning D9002: 忽略未知选项“-pthread” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\cmTC_88af3.vcxproj]
+        
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\cmTC_88af3.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\CheckSymbolExists.c(2,10): error C1083: 无法打开包括文件: “pthread_np.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-yjmj4j\\cmTC_88af3.vcxproj]
+        
+            1 个警告
+            1 个错误
+        
+        已用时间 00:00:00.65
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake:140 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake:66 (__CHECK_SYMBOL_EXISTS_IMPL)"
+      - "build-clean/_deps/srt-src/scripts/FindPThreadGetSetName.cmake:48 (check_symbol_exists)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:361 (FindPThreadGetSetName)"
+    checks:
+      - "Looking for pthread_setname_np"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-4wl7rm"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-4wl7rm"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_PTHREAD_SETNAME_NP_IN_PTHREAD_NP_H"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-4wl7rm'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_6a62e.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:38。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\cmTC_6a62e.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_6a62e.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\Debug\\”。
+          正在创建目录“cmTC_6a62e.dir\\Debug\\cmTC_6a62e.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_6a62e.dir\\Debug\\cmTC_6a62e.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_6a62e.dir\\Debug\\cmTC_6a62e.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _GNU_SOURCE /D _DARWIN_C_SOURCE /D _POSIX_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_6a62e.dir\\Debug\\\\" /Fd"cmTC_6a62e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue  -pthread "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\CheckSymbolExists.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _GNU_SOURCE /D _DARWIN_C_SOURCE /D _POSIX_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_6a62e.dir\\Debug\\\\" /Fd"cmTC_6a62e.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue  -pthread "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\CheckSymbolExists.c"
+        cl : 命令行  warning D9002: 忽略未知选项“-pthread” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\cmTC_6a62e.vcxproj]
+          CheckSymbolExists.c
+        D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\CheckSymbolExists.c(2,10): error C1083: 无法打开包括文件: “pthread_np.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\cmTC_6a62e.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\cmTC_6a62e.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\cmTC_6a62e.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          cl : 命令行  warning D9002: 忽略未知选项“-pthread” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\cmTC_6a62e.vcxproj]
+        
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\cmTC_6a62e.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\CheckSymbolExists.c(2,10): error C1083: 无法打开包括文件: “pthread_np.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4wl7rm\\cmTC_6a62e.vcxproj]
+        
+            1 个警告
+            1 个错误
+        
+        已用时间 00:00:00.92
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake:140 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake:66 (__CHECK_SYMBOL_EXISTS_IMPL)"
+      - "build-clean/_deps/srt-src/scripts/FindPThreadGetSetName.cmake:55 (check_symbol_exists)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:361 (FindPThreadGetSetName)"
+    checks:
+      - "Looking for pthread_getname_np"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-d17q8e"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-d17q8e"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_PTHREAD_GETNAME_NP"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-d17q8e'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_2f4ce.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:39。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\cmTC_2f4ce.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_2f4ce.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\Debug\\”。
+          正在创建目录“cmTC_2f4ce.dir\\Debug\\cmTC_2f4ce.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_2f4ce.dir\\Debug\\cmTC_2f4ce.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_2f4ce.dir\\Debug\\cmTC_2f4ce.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _GNU_SOURCE /D _DARWIN_C_SOURCE /D _POSIX_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_2f4ce.dir\\Debug\\\\" /Fd"cmTC_2f4ce.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue  -pthread "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\CheckSymbolExists.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _GNU_SOURCE /D _DARWIN_C_SOURCE /D _POSIX_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_2f4ce.dir\\Debug\\\\" /Fd"cmTC_2f4ce.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue  -pthread "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\CheckSymbolExists.c"
+        cl : 命令行  warning D9002: 忽略未知选项“-pthread” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\cmTC_2f4ce.vcxproj]
+          CheckSymbolExists.c
+        D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\CheckSymbolExists.c(2,10): error C1083: 无法打开包括文件: “pthread.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\cmTC_2f4ce.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\cmTC_2f4ce.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\cmTC_2f4ce.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          cl : 命令行  warning D9002: 忽略未知选项“-pthread” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\cmTC_2f4ce.vcxproj]
+        
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\cmTC_2f4ce.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\CheckSymbolExists.c(2,10): error C1083: 无法打开包括文件: “pthread.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-d17q8e\\cmTC_2f4ce.vcxproj]
+        
+            1 个警告
+            1 个错误
+        
+        已用时间 00:00:00.81
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake:140 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake:66 (__CHECK_SYMBOL_EXISTS_IMPL)"
+      - "build-clean/_deps/srt-src/scripts/FindPThreadGetSetName.cmake:59 (check_symbol_exists)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:361 (FindPThreadGetSetName)"
+    checks:
+      - "Looking for pthread_setname_np"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-dhzwr6"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-dhzwr6"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_PTHREAD_SETNAME_NP"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-dhzwr6'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_a1d89.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:40。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\cmTC_a1d89.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_a1d89.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\Debug\\”。
+          正在创建目录“cmTC_a1d89.dir\\Debug\\cmTC_a1d89.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_a1d89.dir\\Debug\\cmTC_a1d89.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_a1d89.dir\\Debug\\cmTC_a1d89.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _GNU_SOURCE /D _DARWIN_C_SOURCE /D _POSIX_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a1d89.dir\\Debug\\\\" /Fd"cmTC_a1d89.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue  -pthread "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\CheckSymbolExists.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D _GNU_SOURCE /D _DARWIN_C_SOURCE /D _POSIX_SOURCE=1 /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a1d89.dir\\Debug\\\\" /Fd"cmTC_a1d89.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue  -pthread "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\CheckSymbolExists.c"
+        cl : 命令行  warning D9002: 忽略未知选项“-pthread” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\cmTC_a1d89.vcxproj]
+          CheckSymbolExists.c
+        D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\CheckSymbolExists.c(2,10): error C1083: 无法打开包括文件: “pthread.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\cmTC_a1d89.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\cmTC_a1d89.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\cmTC_a1d89.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          cl : 命令行  warning D9002: 忽略未知选项“-pthread” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\cmTC_a1d89.vcxproj]
+        
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\cmTC_a1d89.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\CheckSymbolExists.c(2,10): error C1083: 无法打开包括文件: “pthread.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-dhzwr6\\cmTC_a1d89.vcxproj]
+        
+            1 个警告
+            1 个错误
+        
+        已用时间 00:00:00.84
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "build-clean/_deps/srt-src/scripts/CheckGCCAtomicIntrinsics.cmake:40 (check_library_exists)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:612 (CheckGCCAtomicIntrinsics)"
+    checks:
+      - "Looking for __atomic_fetch_add_8 in atomic"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-uxx6i9"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-uxx6i9"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_LIBATOMIC"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-uxx6i9'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_f2f12.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:42。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-uxx6i9\\cmTC_f2f12.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_f2f12.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-uxx6i9\\Debug\\”。
+          正在创建目录“cmTC_f2f12.dir\\Debug\\cmTC_f2f12.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_f2f12.dir\\Debug\\cmTC_f2f12.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_f2f12.dir\\Debug\\cmTC_f2f12.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=__atomic_fetch_add_8 /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_f2f12.dir\\Debug\\\\" /Fd"cmTC_f2f12.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-uxx6i9\\CheckFunctionExists.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D CHECK_FUNCTION_EXISTS=__atomic_fetch_add_8 /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_f2f12.dir\\Debug\\\\" /Fd"cmTC_f2f12.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-uxx6i9\\CheckFunctionExists.c"
+          CheckFunctionExists.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-uxx6i9\\Debug\\cmTC_f2f12.exe" /INCREMENTAL /ILK:"cmTC_f2f12.dir\\Debug\\cmTC_f2f12.ilk" /NOLOGO atomic.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-uxx6i9/Debug/cmTC_f2f12.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-uxx6i9/Debug/cmTC_f2f12.lib" /MACHINE:X64  /machine:x64 cmTC_f2f12.dir\\Debug\\CheckFunctionExists.obj
+        LINK : fatal error LNK1104: 无法打开文件“atomic.lib” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-uxx6i9\\cmTC_f2f12.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-uxx6i9\\cmTC_f2f12.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-uxx6i9\\cmTC_f2f12.vcxproj”(默认目标) (1) ->
+        (Link 目标) -> 
+          LINK : fatal error LNK1104: 无法打开文件“atomic.lib” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-uxx6i9\\cmTC_f2f12.vcxproj]
+        
+            0 个警告
+            1 个错误
+        
+        已用时间 00:00:01.12
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "build-clean/_deps/srt-src/scripts/CheckGCCAtomicIntrinsics.cmake:55 (check_c_source_compiles)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:612 (CheckGCCAtomicIntrinsics)"
+    checks:
+      - "Performing Test HAVE_LIBATOMIC_COMPILES"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-if7up6"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-if7up6"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_LIBATOMIC_COMPILES"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-if7up6'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_a2353.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:43。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-if7up6\\cmTC_a2353.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_a2353.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-if7up6\\Debug\\”。
+          正在创建目录“cmTC_a2353.dir\\Debug\\cmTC_a2353.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_a2353.dir\\Debug\\cmTC_a2353.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_a2353.dir\\Debug\\cmTC_a2353.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_LIBATOMIC_COMPILES /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a2353.dir\\Debug\\\\" /Fd"cmTC_a2353.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-if7up6\\src.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_LIBATOMIC_COMPILES /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_a2353.dir\\Debug\\\\" /Fd"cmTC_a2353.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-if7up6\\src.c"
+          src.c
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-if7up6\\Debug\\cmTC_a2353.exe" /INCREMENTAL /ILK:"cmTC_a2353.dir\\Debug\\cmTC_a2353.ilk" /NOLOGO atomic.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-if7up6/Debug/cmTC_a2353.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-if7up6/Debug/cmTC_a2353.lib" /MACHINE:X64  /machine:x64 cmTC_a2353.dir\\Debug\\src.obj
+        LINK : fatal error LNK1104: 无法打开文件“atomic.lib” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-if7up6\\cmTC_a2353.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-if7up6\\cmTC_a2353.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-if7up6\\cmTC_a2353.vcxproj”(默认目标) (1) ->
+        (Link 目标) -> 
+          LINK : fatal error LNK1104: 无法打开文件“atomic.lib” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-if7up6\\cmTC_a2353.vcxproj]
+        
+            0 个警告
+            1 个错误
+        
+        已用时间 00:00:01.18
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "build-clean/_deps/srt-src/scripts/CheckGCCAtomicIntrinsics.cmake:99 (check_c_source_compiles)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:612 (CheckGCCAtomicIntrinsics)"
+    checks:
+      - "Performing Test HAVE_GCCATOMIC_INTRINSICS"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-mef8d9"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-mef8d9"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_GCCATOMIC_INTRINSICS"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-mef8d9'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_3de39.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:45。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_3de39.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\Debug\\”。
+          正在创建目录“cmTC_3de39.dir\\Debug\\cmTC_3de39.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_3de39.dir\\Debug\\cmTC_3de39.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_3de39.dir\\Debug\\cmTC_3de39.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_GCCATOMIC_INTRINSICS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_3de39.dir\\Debug\\\\" /Fd"cmTC_3de39.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\src.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_GCCATOMIC_INTRINSICS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_3de39.dir\\Debug\\\\" /Fd"cmTC_3de39.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\src.c"
+          src.c
+        D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\src.c(8,30): error C2065: “__ATOMIC_SEQ_CST”: 未声明的标识符 [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj]
+        D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\src.c(9,30): error C2065: “__ATOMIC_SEQ_CST”: 未声明的标识符 [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj]
+        D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\src.c(10,37): error C2065: “__ATOMIC_SEQ_CST”: 未声明的标识符 [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj]
+        D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\src.c(11,33): error C2065: “__ATOMIC_SEQ_CST”: 未声明的标识符 [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\src.c(8,30): error C2065: “__ATOMIC_SEQ_CST”: 未声明的标识符 [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj]
+          D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\src.c(9,30): error C2065: “__ATOMIC_SEQ_CST”: 未声明的标识符 [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj]
+          D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\src.c(10,37): error C2065: “__ATOMIC_SEQ_CST”: 未声明的标识符 [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj]
+          D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\src.c(11,33): error C2065: “__ATOMIC_SEQ_CST”: 未声明的标识符 [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-mef8d9\\cmTC_3de39.vcxproj]
+        
+            0 个警告
+            4 个错误
+        
+        已用时间 00:00:00.76
+        
+      exitCode: 1
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "build-clean/_deps/srt-src/scripts/CheckCXXAtomic.cmake:42 (check_cxx_source_compiles)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:616 (CheckCXXAtomic)"
+    checks:
+      - "Performing Test HAVE_CXX_ATOMIC"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-516q1j"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-516q1j"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_CXX_ATOMIC"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-516q1j'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_139e0.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:47。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-516q1j\\cmTC_139e0.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_139e0.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-516q1j\\Debug\\”。
+          正在创建目录“cmTC_139e0.dir\\Debug\\cmTC_139e0.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_139e0.dir\\Debug\\cmTC_139e0.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_139e0.dir\\Debug\\cmTC_139e0.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_CXX_ATOMIC /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_139e0.dir\\Debug\\\\" /Fd"cmTC_139e0.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue  -std=c++11 "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-516q1j\\src.cxx"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_CXX_ATOMIC /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_139e0.dir\\Debug\\\\" /Fd"cmTC_139e0.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue  -std=c++11 "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-516q1j\\src.cxx"
+        cl : 命令行  warning D9002: 忽略未知选项“-std=c++11” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-516q1j\\cmTC_139e0.vcxproj]
+          src.cxx
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-516q1j\\Debug\\cmTC_139e0.exe" /INCREMENTAL /ILK:"cmTC_139e0.dir\\Debug\\cmTC_139e0.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-516q1j/Debug/cmTC_139e0.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-516q1j/Debug/cmTC_139e0.lib" /MACHINE:X64  /machine:x64 cmTC_139e0.dir\\Debug\\src.obj
+          cmTC_139e0.vcxproj -> D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-516q1j\\Debug\\cmTC_139e0.exe
+        FinalizeBuildStatus:
+          正在删除文件“cmTC_139e0.dir\\Debug\\cmTC_139e0.tlog\\unsuccessfulbuild”。
+          正在对“cmTC_139e0.dir\\Debug\\cmTC_139e0.tlog\\cmTC_139e0.lastbuildstate”执行 Touch 任务。
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-516q1j\\cmTC_139e0.vcxproj”(默认目标)的操作。
+        
+        已成功生成。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-516q1j\\cmTC_139e0.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          cl : 命令行  warning D9002: 忽略未知选项“-std=c++11” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-516q1j\\cmTC_139e0.vcxproj]
+        
+            1 个警告
+            0 个错误
+        
+        已用时间 00:00:01.52
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "build-clean/_deps/srt-src/scripts/CheckCXXAtomic.cmake:53 (check_cxx_source_compiles)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:616 (CheckCXXAtomic)"
+    checks:
+      - "Performing Test HAVE_CXX_ATOMIC_STATIC"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-8a16n6"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-8a16n6"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_CXX_ATOMIC_STATIC"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-8a16n6'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_c73c3.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:49。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\cmTC_c73c3.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_c73c3.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\Debug\\”。
+          正在创建目录“cmTC_c73c3.dir\\Debug\\cmTC_c73c3.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_c73c3.dir\\Debug\\cmTC_c73c3.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_c73c3.dir\\Debug\\cmTC_c73c3.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_CXX_ATOMIC_STATIC /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_c73c3.dir\\Debug\\\\" /Fd"cmTC_c73c3.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue  -std=c++11 -static "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\src.cxx"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_CXX_ATOMIC_STATIC /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_c73c3.dir\\Debug\\\\" /Fd"cmTC_c73c3.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue  -std=c++11 -static "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\src.cxx"
+        cl : 命令行  warning D9002: 忽略未知选项“-std=c++11” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\cmTC_c73c3.vcxproj]
+        cl : 命令行  warning D9002: 忽略未知选项“-static” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\cmTC_c73c3.vcxproj]
+          src.cxx
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\Debug\\cmTC_c73c3.exe" /INCREMENTAL /ILK:"cmTC_c73c3.dir\\Debug\\cmTC_c73c3.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-8a16n6/Debug/cmTC_c73c3.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-8a16n6/Debug/cmTC_c73c3.lib" /MACHINE:X64  /machine:x64 cmTC_c73c3.dir\\Debug\\src.obj
+          cmTC_c73c3.vcxproj -> D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\Debug\\cmTC_c73c3.exe
+        FinalizeBuildStatus:
+          正在删除文件“cmTC_c73c3.dir\\Debug\\cmTC_c73c3.tlog\\unsuccessfulbuild”。
+          正在对“cmTC_c73c3.dir\\Debug\\cmTC_c73c3.tlog\\cmTC_c73c3.lastbuildstate”执行 Touch 任务。
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\cmTC_c73c3.vcxproj”(默认目标)的操作。
+        
+        已成功生成。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\cmTC_c73c3.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          cl : 命令行  warning D9002: 忽略未知选项“-std=c++11” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\cmTC_c73c3.vcxproj]
+          cl : 命令行  warning D9002: 忽略未知选项“-static” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-8a16n6\\cmTC_c73c3.vcxproj]
+        
+            2 个警告
+            0 个错误
+        
+        已用时间 00:00:01.54
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckCXXSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "build-clean/_deps/srt-src/scripts/CheckCXXStdPutTime.cmake:53 (check_cxx_source_compiles)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:622 (CheckCXXStdPutTime)"
+    checks:
+      - "Performing Test HAVE_CXX_STD_PUT_TIME"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-4ipq0m"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-4ipq0m"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "/DWIN32 /D_WINDOWS /EHsc"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_CXX_STD_PUT_TIME"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-4ipq0m'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_43e8c.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:51。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4ipq0m\\cmTC_43e8c.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_43e8c.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4ipq0m\\Debug\\”。
+          正在创建目录“cmTC_43e8c.dir\\Debug\\cmTC_43e8c.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_43e8c.dir\\Debug\\cmTC_43e8c.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_43e8c.dir\\Debug\\cmTC_43e8c.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_CXX_STD_PUT_TIME /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_43e8c.dir\\Debug\\\\" /Fd"cmTC_43e8c.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue  -std=c++11 "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4ipq0m\\src.cxx"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D HAVE_CXX_STD_PUT_TIME /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_43e8c.dir\\Debug\\\\" /Fd"cmTC_43e8c.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TP /errorReport:queue  -std=c++11 "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4ipq0m\\src.cxx"
+        cl : 命令行  warning D9002: 忽略未知选项“-std=c++11” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4ipq0m\\cmTC_43e8c.vcxproj]
+          src.cxx
+        Link:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\link.exe /ERRORREPORT:QUEUE /OUT:"D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4ipq0m\\Debug\\cmTC_43e8c.exe" /INCREMENTAL /ILK:"cmTC_43e8c.dir\\Debug\\cmTC_43e8c.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-4ipq0m/Debug/cmTC_43e8c.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-4ipq0m/Debug/cmTC_43e8c.lib" /MACHINE:X64  /machine:x64 cmTC_43e8c.dir\\Debug\\src.obj
+          cmTC_43e8c.vcxproj -> D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4ipq0m\\Debug\\cmTC_43e8c.exe
+        FinalizeBuildStatus:
+          正在删除文件“cmTC_43e8c.dir\\Debug\\cmTC_43e8c.tlog\\unsuccessfulbuild”。
+          正在对“cmTC_43e8c.dir\\Debug\\cmTC_43e8c.tlog\\cmTC_43e8c.lastbuildstate”执行 Touch 任务。
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4ipq0m\\cmTC_43e8c.vcxproj”(默认目标)的操作。
+        
+        已成功生成。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4ipq0m\\cmTC_43e8c.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          cl : 命令行  warning D9002: 忽略未知选项“-std=c++11” [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-4ipq0m\\cmTC_43e8c.vcxproj]
+        
+            1 个警告
+            0 个错误
+        
+        已用时间 00:00:02.31
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake:140 (try_compile)"
+      - "D:/cmake/share/cmake-3.29/Modules/CheckSymbolExists.cmake:66 (__CHECK_SYMBOL_EXISTS_IMPL)"
+      - "build-clean/_deps/srt-src/CMakeLists.txt:991 (check_symbol_exists)"
+    checks:
+      - "Looking for pthread_atfork"
+    directories:
+      source: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-hhdfpg"
+      binary: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-hhdfpg"
+    cmakeVariables:
+      CMAKE_C_FLAGS: "/DWIN32 /D_WINDOWS"
+      CMAKE_EXE_LINKER_FLAGS: "/machine:x64"
+      CMAKE_MODULE_PATH: "D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src/scripts"
+      VCPKG_INSTALLED_DIR: "D:/SoftWare/vcpkg/installed"
+      VCPKG_PREFER_SYSTEM_LIBS: "OFF"
+      VCPKG_TARGET_TRIPLET: "x64-windows"
+      Z_VCPKG_ROOT_DIR: "D:/SoftWare/vcpkg"
+    buildResult:
+      variable: "HAVE_PTHREAD_ATFORK"
+      cached: true
+      stdout: |
+        Change Dir: 'D:/Code/C++/SRT-Weak-Network-Video/build-clean/CMakeFiles/CMakeScratch/TryCompile-hhdfpg'
+        
+        Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_fef56.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+        适用于 .NET Framework MSBuild 版本 17.13.9+e0f243f1e
+        生成启动时间为 2026/7/10 10:16:54。
+        
+        节点 1 上的项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-hhdfpg\\cmTC_fef56.vcxproj”(默认目标)。
+        PrepareForBuild:
+          正在创建目录“cmTC_fef56.dir\\Debug\\”。
+          已启用结构化输出。编译器诊断的格式设置将反映错误层次结构。有关详细信息，请参阅 https://aka.ms/cpp/structured-output。
+          正在创建目录“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-hhdfpg\\Debug\\”。
+          正在创建目录“cmTC_fef56.dir\\Debug\\cmTC_fef56.tlog\\”。
+        InitializeBuildStatus:
+          正在创建“cmTC_fef56.dir\\Debug\\cmTC_fef56.tlog\\unsuccessfulbuild”，因为已指定“AlwaysCreate”。
+          正在对“cmTC_fef56.dir\\Debug\\cmTC_fef56.tlog\\unsuccessfulbuild”执行 Touch 任务。
+        ClCompile:
+          C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.43.34808\\bin\\HostX64\\x64\\CL.exe /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_fef56.dir\\Debug\\\\" /Fd"cmTC_fef56.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-hhdfpg\\CheckSymbolExists.c"
+          用于 x64 的 Microsoft (R) C/C++ 优化编译器 19.43.34808 版
+          版权所有(C) Microsoft Corporation。保留所有权利。
+          cl /c /Zi /W1 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\\"Debug\\"" /Gm- /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_fef56.dir\\Debug\\\\" /Fd"cmTC_fef56.dir\\Debug\\vc143.pdb" /external:W1 /Gd /TC /errorReport:queue "D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-hhdfpg\\CheckSymbolExists.c"
+          CheckSymbolExists.c
+        D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-hhdfpg\\CheckSymbolExists.c(2,10): error C1083: 无法打开包括文件: “pthread.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-hhdfpg\\cmTC_fef56.vcxproj]
+        已完成生成项目“D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-hhdfpg\\cmTC_fef56.vcxproj”(默认目标)的操作 - 失败。
+        
+        生成失败。
+        
+        “D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-hhdfpg\\cmTC_fef56.vcxproj”(默认目标) (1) ->
+        (ClCompile 目标) -> 
+          D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-hhdfpg\\CheckSymbolExists.c(2,10): error C1083: 无法打开包括文件: “pthread.h”: No such file or directory [D:\\Code\\C++\\SRT-Weak-Network-Video\\build-clean\\CMakeFiles\\CMakeScratch\\TryCompile-hhdfpg\\cmTC_fef56.vcxproj]
+        
+            0 个警告
+            1 个错误
+        
+        已用时间 00:00:00.61
+        
+      exitCode: 1
+...

@@ -1,0 +1,1 @@
+D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build\srt_virtual.dir\Release\srt_virtual.lib

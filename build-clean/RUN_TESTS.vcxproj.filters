@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\CMakeFiles\5fabf3314d85f1f2a92a8b0f857512cb\RUN_TESTS_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{3FB5A5F8-CF3F-37F5-8F64-6C6650F7720B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

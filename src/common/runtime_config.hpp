@@ -57,7 +57,7 @@ struct ReceiverConfig {
     bool display = true;
     int minimum_output_width = 640;
     int minimum_output_height = 360;
-    int minimum_output_fps = 5;
+    int minimum_output_fps = 20;
     UpscaleMode upscale_mode = UpscaleMode::LanczosSharpen;
     InterpolationMode interpolation_mode = InterpolationMode::Blend;
     bool write_h264 = true;

@@ -1,7 +1,7 @@
 metadata:
   purpose: "Record parameters tuned during weak-network video development."
   runtime_loaded: false
-  updated_at: "2026-06-24"
+  updated_at: "2026-07-08"
   units_note: "Bitrates are kbps unless a different unit is stated."
 
 current:
@@ -36,7 +36,7 @@ current:
       display: true
       minimum_output_width: 640
       minimum_output_height: 360
-      minimum_output_fps: 5
+      minimum_output_fps: 20
       upscale_mode: lanczos_sharpen
       selectable_upscale_modes: [bilinear, lanczos_sharpen]
       interpolation_mode: blend
@@ -81,6 +81,12 @@ current:
       synthetic_loss_percent: 100
       synthetic_rtt_ms: 500
       retry_delay_ms: 100
+    file_input_pacing:
+      mode: absolute_deadline
+      processing_time_subtracted_from_sleep: true
+      late_frame_policy: reset_deadline_no_burst
+      applies_to: [udp, srt]
+    camera_input_pacing: "V4L2 capture cadence; no sender-side post-send frame sleep."
     udp:
       socket_send_buffer_bytes: 4194304
       socket_receive_buffer_bytes: 4194304
@@ -88,9 +94,9 @@ current:
       feedback_loss_ewma_previous_weight: 0.8
       recovery_feedback_timeout_ms: 1000
       recovery_receiver_frame_age_ms: 1500
-      recovery_profile: {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, p_frame_fec_ratio: 8.0, keyframe_fec_ratio: 12.0, all_intra: false}
+      recovery_profile: {level: 8, bitrate_kbps: 60, fps: 10, width: 160, height: 90, gop_frames: 1, min_data_shards: 1, p_frame_fec_ratio: 12.0, keyframe_fec_ratio: 12.0, all_intra: true}
       missing_feedback_starts_recovery: false
-      missing_feedback_probe_profile: {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, p_frame_fec_ratio: 8.0, keyframe_fec_ratio: 12.0, all_intra: false}
+      missing_feedback_probe_profile: {level: 8, bitrate_kbps: 60, fps: 10, width: 160, height: 90, gop_frames: 1, min_data_shards: 1, p_frame_fec_ratio: 12.0, keyframe_fec_ratio: 12.0, all_intra: true}
       adaptation_feedback_sequence_deduplication: true
 
   receiver:
@@ -117,7 +123,7 @@ current:
 
   adaptation:
     max_video_kbps:
-      minimum: 30
+      minimum: 60
       maximum: 2000
       default: 2000
     healthy_window:
@@ -152,21 +158,25 @@ current:
       - {greater_than_ms: 300, minimum_level: 6}
       - {greater_than_ms: 400, minimum_level: 7}
     profiles:
-      - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, gop_frames: 30, p_frame_fec_ratio: 0.10, keyframe_fec_ratio: 0.30, all_intra: false}
-      - {level: 1, bitrate_kbps: 900, fps: 20, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75, all_intra: false}
-      - {level: 2, bitrate_kbps: 700, fps: 15, width: 640, height: 360, gop_frames: 8, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75, all_intra: false}
-      - {level: 3, bitrate_kbps: 400, fps: 10, width: 640, height: 360, gop_frames: 10, p_frame_fec_ratio: 0.75, keyframe_fec_ratio: 1.50, all_intra: false}
-      - {level: 4, bitrate_kbps: 220, fps: 5, width: 426, height: 240, gop_frames: 5, p_frame_fec_ratio: 2.50, keyframe_fec_ratio: 5.00, all_intra: false}
-      - {level: 5, bitrate_kbps: 140, fps: 3, width: 426, height: 240, gop_frames: 3, p_frame_fec_ratio: 3.00, keyframe_fec_ratio: 6.00, all_intra: false}
-      - {level: 6, bitrate_kbps: 80, fps: 3, width: 320, height: 180, gop_frames: 3, p_frame_fec_ratio: 2.50, keyframe_fec_ratio: 5.00, all_intra: false}
-      - {level: 7, bitrate_kbps: 50, fps: 2, width: 320, height: 180, gop_frames: 2, p_frame_fec_ratio: 4.00, keyframe_fec_ratio: 7.00, all_intra: false}
-      - {level: 8, bitrate_kbps: 30, fps: 2, width: 256, height: 144, gop_frames: 2, p_frame_fec_ratio: 8.00, keyframe_fec_ratio: 12.00, all_intra: false}
-    gop_policy: "Levels 1 and 2 use about 0.5 seconds; other levels use about 1 second."
+      - {level: 0, bitrate_kbps: 2000, fps: 30, width: 1280, height: 720, gop_frames: 30, min_data_shards: 4, p_frame_fec_ratio: 0.10, keyframe_fec_ratio: 0.30, all_intra: false}
+      - {level: 1, bitrate_kbps: 900, fps: 24, width: 640, height: 360, gop_frames: 12, min_data_shards: 4, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75, all_intra: false}
+      - {level: 2, bitrate_kbps: 700, fps: 24, width: 640, height: 360, gop_frames: 12, min_data_shards: 4, p_frame_fec_ratio: 0.50, keyframe_fec_ratio: 0.75, all_intra: false}
+      - {level: 3, bitrate_kbps: 500, fps: 20, width: 640, height: 360, gop_frames: 10, min_data_shards: 4, p_frame_fec_ratio: 1.00, keyframe_fec_ratio: 2.00, all_intra: false}
+      - {level: 4, bitrate_kbps: 350, fps: 20, width: 426, height: 240, gop_frames: 10, min_data_shards: 2, p_frame_fec_ratio: 2.00, keyframe_fec_ratio: 4.00, all_intra: false}
+      - {level: 5, bitrate_kbps: 220, fps: 15, width: 320, height: 180, gop_frames: 3, min_data_shards: 2, p_frame_fec_ratio: 3.00, keyframe_fec_ratio: 6.00, all_intra: false}
+      - {level: 6, bitrate_kbps: 150, fps: 12, width: 320, height: 180, gop_frames: 2, min_data_shards: 2, p_frame_fec_ratio: 5.00, keyframe_fec_ratio: 8.00, all_intra: false}
+      - {level: 7, bitrate_kbps: 90, fps: 12, width: 256, height: 144, gop_frames: 1, min_data_shards: 1, p_frame_fec_ratio: 8.00, keyframe_fec_ratio: 10.00, all_intra: true}
+      - {level: 8, bitrate_kbps: 60, fps: 10, width: 160, height: 90, gop_frames: 1, min_data_shards: 1, p_frame_fec_ratio: 12.00, keyframe_fec_ratio: 12.00, all_intra: true}
+    gop_policy: "Levels 1 through 4 use about 0.5 seconds; Levels 5 and 6 use very short GOPs; Levels 7 and 8 are all-intra."
 
   fec:
     target_shard_bytes: 1000
     maximum_total_shards: 255
-    minimum_data_shards_per_block: 4
+    minimum_data_shards_per_block:
+      profile_controlled: true
+      default_profiles_0_to_3: 4
+      severe_profiles_4_to_6: 2
+      emergency_profiles_7_to_8: 1
     multiple_blocks_per_frame: true
 
   protocol:
@@ -222,17 +232,17 @@ current:
     preserve_decoded_fps_at_or_above_minimum: true
     minimum_output_width: 640
     minimum_output_height: 360
-    minimum_output_fps: 5
+    minimum_output_fps: 20
     aspect_ratio_preserved: true
     default_upscale_mode: lanczos_sharpen
     selectable_upscale_modes: [bilinear, lanczos_sharpen]
-    lanczos_sharpen_scope: luma_after_upscale
+    lanczos_sharpen_scope: luma_contrast_stretch_then_luma_after_upscale
     default_interpolation_mode: blend
     selectable_interpolation_modes: [repeat, blend]
     blend_weights: [0.5, 0.5]
     prolonged_gap_fallback: repeat_last_complete_frame
     processed_h264_output: false
-    log_fields: [decoded_fps]
+    log_fields: [decoded_fps, output_fps, synthetic_fps, output_resolution]
 
   netem_script:
     left_namespace: webrtc_tx
@@ -259,12 +269,17 @@ current:
     tc08_hard_metric: "latency_avg <= 500ms"
     tc08_below_180ms: "reported as better-than-target latency, not a failure"
     tc08_report_only_metrics: [latency_p95, latency_max]
+    tc07_downgrade_window_seconds: 3.0
+    tc07_upgrade_window_seconds: 15.0
+    tc09_hard_metric: "At 80 percent steady loss, post-warmup average decoded_fps >= 8, post-warmup average output_fps >= 20, and output_resolution == 640x360."
+    receiver_display_for_headless_acceptance: {display: true, sdl_video_driver: dummy}
+    reported_output_metrics: [decoded_fps, output_fps, synthetic_fps, decoded_fps_min, output_fps_min, fps_warmup_start_elapsed, output_resolution]
     ffmpeg_strict_command: "ffmpeg -v error -err_detect explode -i received.h264 -f null -"
     suites:
       quick:
-        steady_losses_percent: [0, 20, 45, 80, 85]
+        steady_losses_percent: [0, 20, 45, 70, 80]
         steady_duration_seconds: 60
-        staircase_losses_percent: [0, 10, 50, 85, 50, 10, 0]
+        staircase_losses_percent: [0, 10, 50, 70, 80, 50, 10, 0]
         staircase_step_seconds: 30
       full:
         steady_losses_percent: [0, 5, 15, 20, 35, 45, 60, 70, 80, 85]
@@ -276,6 +291,25 @@ current:
         optimization_required: false
 
 development_history:
+  - parameter: file_input_absolute_pacing
+    previous: "File mode slept one full source frame interval after decode, scale, x264 encode, FEC sharding, and UDP/SRT send, so a 30fps file produced frame intervals larger than 33ms."
+    current: "File mode uses an absolute source-frame deadline pacer on both UDP and SRT paths. Processing and send time are subtracted from the following sleep; if a frame is already late, the pacer resets to the current time instead of burst-sending catch-up frames."
+    reason: "Make no-loss file playback match the configured/source fps closely enough for receiver decoded_fps and output_fps to reflect the 30fps profile instead of processing_time + frame_interval pacing."
+
+  - parameter: lowres_transport_20fps_display
+    previous:
+      transport_constraint: "High-loss profiles still assumed very low true fps, with Level 8 at 30kbps/2fps/256x144 and display minimum_output_fps at 5."
+      fec_blocking: "FEC encoder used a fixed minimum of 4 data shards per block, even for tiny emergency frames."
+      acceptance_metrics: "Automated acceptance tracked decoded_fps but did not require 20fps display cadence or report synthetic_fps/output_resolution in every scenario summary."
+    current:
+      final_display_minimum: "640x360 at 20fps."
+      transport_policy: "High-loss profiles may transmit below 640x360; Level 8 is 60kbps/10fps/160x90 all-intra, targeting 8-12 true decoded fps at 80 percent bidirectional loss."
+      max_video_kbps_minimum: 60
+      fec_blocking: "min_data_shards is profile-controlled: 4 for Levels 0-3, 2 for Levels 4-6, and 1 for Levels 7-8."
+      display_processing: "Receiver upscales lower-res decoded frames, applies luma contrast stretch plus sharpen after upscale, and fills display cadence with repeat/blend synthetic frames; 20fps and higher cadences use 1ms interval headroom to avoid short-window scheduler dips below the minimum."
+      acceptance_metrics: "Reports post-warmup decoded_fps, output_fps, synthetic_fps, minimum decoded/output fps, and output_resolution; TC-09 checks the 80 percent steady-loss decoded/output/display targets."
+    reason: "Forcing every transport profile to 640x360/20fps at 80 percent bidirectional loss was unrealistic. The revised target preserves complete CRC-valid H.264 frames while using lower transport resolution and receiver-side display post-processing to keep the operator view stable."
+
   - parameter: mid_loss_fec_ratios
     previous:
       level_3: {p_frame_fec_ratio: 0.40, keyframe_fec_ratio: 1.00}
@@ -595,6 +629,15 @@ development_history:
     reason: "Allow mid-loss H.264 resynchronization without unnecessary emergency-profile drops."
 
 validation_scenarios:
+  - {transport: udp, suite: quick_smoke, loss_percent: 0, delay_ms: 50, direction: both, duration_seconds: 20, decoded_fps_avg_after_warmup: 30.0625, decoded_fps_min_after_warmup: 29.0, output_fps_avg_after_warmup: 30.0, output_fps_min_after_warmup: 29.0, synthetic_fps_avg_after_warmup: 1.25, output_resolution: "1280x720", max_frame_gap_ms: 73, decoder_errors: 0, ffmpeg_strict: passed, report_dir: "/tmp/weaknet-acceptance-file-pacer-20260708", implementation: file_input_absolute_pacing_v1}
+  - {transport: udp, suite: quick_smoke, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 20, decoded_fps_avg_after_warmup: 9.5, decoded_fps_min_after_warmup: 9.0, output_fps_avg_after_warmup: 20.3125, output_fps_min_after_warmup: 20.0, synthetic_fps_avg_after_warmup: 11.3125, output_resolution: "640x360", max_frame_gap_ms: 815, decoder_errors: 0, ffmpeg_strict: passed, tc09: passed, report_dir: "/tmp/weaknet-acceptance-file-pacer-20260708", implementation: file_input_absolute_pacing_v1}
+  - {transport: udp, suite: quick_smoke, scenario: staircase, losses_percent: [0, 10, 50, 70, 80, 50, 10, 0], delay_ms: 50, direction: both, step_duration_seconds: 8, decoded_fps_avg: 18.36764705882353, output_fps_avg: 23.514705882352942, output_resolution_final: "1280x720", max_frame_gap_ms: 475, decoder_errors: 0, ffmpeg_strict: passed, tc07: passed, report_dir: "/tmp/weaknet-acceptance-file-pacer-20260708", implementation: file_input_absolute_pacing_v1}
+  - {transport: udp, suite: quick_smoke, loss_percent: 0, delay_ms: 50, direction: both, duration_seconds: 20, decoded_fps_avg_after_warmup: 19.13, decoded_fps_min_after_warmup: 17.0, output_fps_avg_after_warmup: 22.13, output_fps_min_after_warmup: 20.0, synthetic_fps_avg_after_warmup: 13.67, output_resolution: "1280x720", max_frame_gap_ms: 91, decoder_errors: 0, ffmpeg_strict: passed, report_dir: "/tmp/weaknet-acceptance-20260708-164100", implementation: lowres_transport_20fps_display_v1}
+  - {transport: udp, suite: quick_smoke, loss_percent: 20, delay_ms: 50, direction: both, duration_seconds: 20, decoded_fps_avg_after_warmup: 12.69, decoded_fps_min_after_warmup: 9.0, output_fps_avg_after_warmup: 20.81, output_fps_min_after_warmup: 20.0, synthetic_fps_avg_after_warmup: 15.81, output_resolution: "640x360", max_frame_gap_ms: 424, decoder_errors: 0, ffmpeg_strict: passed, report_dir: "/tmp/weaknet-acceptance-20260708-164100", implementation: lowres_transport_20fps_display_v1}
+  - {transport: udp, suite: quick_smoke, loss_percent: 45, delay_ms: 50, direction: both, duration_seconds: 20, decoded_fps_avg_after_warmup: 13.25, decoded_fps_min_after_warmup: 6.0, output_fps_avg_after_warmup: 20.38, output_fps_min_after_warmup: 20.0, synthetic_fps_avg_after_warmup: 16.62, output_resolution: "640x362", max_frame_gap_ms: 556, decoder_errors: 0, ffmpeg_strict: passed, report_dir: "/tmp/weaknet-acceptance-20260708-164100", implementation: lowres_transport_20fps_display_v1}
+  - {transport: udp, suite: quick_smoke, loss_percent: 70, delay_ms: 50, direction: both, duration_seconds: 20, decoded_fps_avg_after_warmup: 9.69, decoded_fps_min_after_warmup: 8.0, output_fps_avg_after_warmup: 20.38, output_fps_min_after_warmup: 20.0, synthetic_fps_avg_after_warmup: 10.94, output_resolution: "640x360", max_frame_gap_ms: 580, decoder_errors: 0, ffmpeg_strict: passed, report_dir: "/tmp/weaknet-acceptance-20260708-164100", implementation: lowres_transport_20fps_display_v1}
+  - {transport: udp, suite: quick_smoke, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 20, decoded_fps_avg_after_warmup: 8.19, decoded_fps_min_after_warmup: 7.0, output_fps_avg_after_warmup: 20.38, output_fps_min_after_warmup: 20.0, synthetic_fps_avg_after_warmup: 12.25, output_resolution: "640x360", max_frame_gap_ms: 823, decoder_errors: 0, ffmpeg_strict: passed, tc09: passed, report_dir: "/tmp/weaknet-acceptance-20260708-164100", implementation: lowres_transport_20fps_display_v1}
+  - {transport: udp, suite: quick_smoke, scenario: staircase, losses_percent: [0, 10, 50, 70, 80, 50, 10, 0], delay_ms: 50, direction: both, step_duration_seconds: 8, decoded_fps_avg: 13.84, output_fps_avg: 20.84, output_resolution_final: "1280x720", max_frame_gap_ms: 547, decoder_errors: 0, ffmpeg_strict: passed, tc07: passed, report_dir: "/tmp/weaknet-acceptance-20260708-164100", implementation: lowres_transport_20fps_display_v1}
   - {transport: udp, loss_percent: 10, delay_ms: 50, direction: both, duration_seconds: 31, profile: "Level 1 900kbps/20fps/640x360", decoded_fps_stable_range: "14-17 after recovery, short resync dips observed", max_frame_gap_ms: 1105, decoder_errors: 0, ffmpeg_strict: passed, implementation: low_loss_fps_v1}
   - {transport: udp, loss_percent: 20, delay_ms: 50, direction: both, duration_seconds: 31, profile: "Level 2/3 boundary, mostly 400kbps/10fps/640x360 at sampled loss above 20 percent", level8_recovery_events_after_fix: 0, max_frame_gap_ms: 721, decoder_errors: 0, ffmpeg_strict: passed, implementation: low_loss_fps_v1}
   - {transport: udp, loss_percent: 80, delay_ms: 50, direction: both, duration_seconds: 51, profile: "Level 8 30kbps/2fps/256x144", frames: 91, dropped_frames: 17, max_frame_gap_ms: 1336, decoder_errors: 0, ffmpeg_strict: passed, implementation: low_loss_fps_v1}

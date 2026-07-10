@@ -1,0 +1,305 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{ECB98C9C-0224-36A9-A17C-0EC2EC063704}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>srt-populate</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\ee6ac24bc89bfdbf02f0acd8dd66235f\srt-populate-mkdir.rule">
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildInParallel>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Creating directories for 'srt-populate'</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+D:\cmake\bin\cmake.exe -Dcfgdir=/Debug -P D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/tmp/srt-populate-mkdirs.cmake
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-mkdir
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-mkdir</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\ee6ac24bc89bfdbf02f0acd8dd66235f\srt-populate-download.rule">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing download step (git clone) for 'srt-populate'</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -P D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/tmp/srt-populate-gitclone.cmake
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-download
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\srt-populate-gitinfo.txt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-mkdir;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-download</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\ee6ac24bc89bfdbf02f0acd8dd66235f\srt-populate-update.rule">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing update step for 'srt-populate'</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -Dcan_fetch=YES -P D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/tmp/srt-populate-gitupdate.cmake
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\tmp\srt-populate-gitupdate.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\srt-populate-update-info.txt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-download;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-update</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <VerifyInputsAndOutputsExist Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</VerifyInputsAndOutputsExist>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\ee6ac24bc89bfdbf02f0acd8dd66235f\srt-populate-patch.rule">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Performing patch step for 'srt-populate'</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-src
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -DSRT_SOURCE_DIR=D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-src -P D:/Code/C++/SRT-Weak-Network-Video/cmake/patch_srt.cmake
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-patch
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\srt-populate-patch-info.txt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-update;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-patch</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <VerifyInputsAndOutputsExist Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</VerifyInputsAndOutputsExist>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\ee6ac24bc89bfdbf02f0acd8dd66235f\srt-populate-configure.rule">
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildInParallel>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">No configure step for 'srt-populate'</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-configure
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\tmp\srt-populate-cfgcmd.txt;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-patch;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-configure</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\ee6ac24bc89bfdbf02f0acd8dd66235f\srt-populate-build.rule">
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildInParallel>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">No build step for 'srt-populate'</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-build
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-configure;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-build</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\ee6ac24bc89bfdbf02f0acd8dd66235f\srt-populate-install.rule">
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildInParallel>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">No install step for 'srt-populate'</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-install
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-build;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-install</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\ee6ac24bc89bfdbf02f0acd8dd66235f\srt-populate-test.rule">
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildInParallel>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">No test step for 'srt-populate'</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+cd D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-build
+if %errorlevel% neq 0 goto :cmEnd
+D:
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E echo_append
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-test
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-install;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-test</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\3d8423d9c83cea0b6902435c1a9e2770\srt-populate-complete.rule">
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildInParallel>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Completed 'srt-populate'</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+D:\cmake\bin\cmake.exe -E make_directory D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/Debug
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/Debug/srt-populate-complete
+if %errorlevel% neq 0 goto :cmEnd
+D:\cmake\bin\cmake.exe -E touch D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/srt-populate-prefix/src/srt-populate-stamp/Debug/srt-populate-done
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-install;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-mkdir;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-download;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-update;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-patch;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-configure;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-build;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\src\srt-populate-stamp\Debug\srt-populate-test;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\Debug\srt-populate-complete</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <VerifyInputsAndOutputsExist Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</VerifyInputsAndOutputsExist>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\dc09bfe24206cf1a9574bd7d682bac59\srt-populate.rule">
+      <BuildInParallel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</BuildInParallel>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"></Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\Debug\srt-populate-complete;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\srt-populate</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <VerifyInputsAndOutputsExist Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</VerifyInputsAndOutputsExist>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+D:\cmake\bin\cmake.exe -SD:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild -BD:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild --check-stamp-file D:/Code/C++/SRT-Weak-Network-Video/build-clean/_deps/srt-subbuild/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\3.29.0-rc2\CMakeSystem.cmake;D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\srt-populate-prefix\tmp\srt-populate-mkdirs.cmake;D:\cmake\share\cmake-3.29\Modules\CMakeDetermineSystem.cmake;D:\cmake\share\cmake-3.29\Modules\CMakeGenericSystem.cmake;D:\cmake\share\cmake-3.29\Modules\CMakeInitializeConfigs.cmake;D:\cmake\share\cmake-3.29\Modules\CMakeSystem.cmake.in;D:\cmake\share\cmake-3.29\Modules\CMakeSystemSpecificInformation.cmake;D:\cmake\share\cmake-3.29\Modules\CMakeSystemSpecificInitialize.cmake;D:\cmake\share\cmake-3.29\Modules\ExternalProject.cmake;D:\cmake\share\cmake-3.29\Modules\ExternalProject\PatchInfo.txt.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\RepositoryInfo.txt.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\UpdateInfo.txt.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\cfgcmd.txt.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\gitclone.cmake.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\gitupdate.cmake.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\mkdirs.cmake.in;D:\cmake\share\cmake-3.29\Modules\ExternalProject\shared_internal_commands.cmake;D:\cmake\share\cmake-3.29\Modules\Platform\Windows-Initialize.cmake;D:\cmake\share\cmake-3.29\Modules\Platform\Windows.cmake;D:\cmake\share\cmake-3.29\Modules\Platform\WindowsPaths.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\CMakeFiles\srt-populate">
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="D:\Code\C++\SRT-Weak-Network-Video\build-clean\_deps\srt-subbuild\ZERO_CHECK.vcxproj">
+      <Project>{289E82F6-5208-3D60-A278-A9509C582BF3}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

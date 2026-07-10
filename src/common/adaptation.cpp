@@ -6,15 +6,15 @@
 namespace {
 
 constexpr std::array<VideoProfile, 9> kProfiles{{
-    {0, 2000, 30, 1280, 720, 30, 0.10, 0.30, false},
-    {1, 900, 20, 640, 360, 10, 0.50, 0.75, false},
-    {2, 700, 15, 640, 360, 8, 0.50, 0.75, false},
-    {3, 400, 10, 640, 360, 10, 0.75, 1.50, false},
-    {4, 220, 5, 426, 240, 5, 2.50, 5.00, false},
-    {5, 140, 3, 426, 240, 3, 3.00, 6.00, false},
-    {6, 80, 3, 320, 180, 3, 2.50, 5.00, false},
-    {7, 50, 2, 320, 180, 2, 4.00, 7.00, false},
-    {8, 30, 2, 256, 144, 2, 8.00, 12.00, false},
+    {0, 2000, 30, 1280, 720, 30, 4, 0.10, 0.30, false},
+    {1, 900, 24, 640, 360, 12, 4, 0.50, 0.75, false},
+    {2, 700, 24, 640, 360, 12, 4, 0.50, 0.75, false},
+    {3, 500, 20, 640, 360, 10, 4, 1.00, 2.00, false},
+    {4, 350, 20, 426, 240, 10, 2, 2.00, 4.00, false},
+    {5, 220, 15, 320, 180, 3, 2, 3.00, 6.00, false},
+    {6, 150, 12, 320, 180, 2, 2, 5.00, 8.00, false},
+    {7, 90, 12, 256, 144, 1, 1, 8.00, 10.00, true},
+    {8, 60, 10, 160, 90, 1, 1, 12.00, 12.00, true},
 }};
 
 constexpr int kLossL2ConfirmationWindows = 3;
@@ -74,7 +74,7 @@ int rtt_required_level(double rtt_ms) {
 } // namespace
 
 AdaptationController::AdaptationController(int max_video_kbps)
-    : max_video_kbps_(std::clamp(max_video_kbps, 30, 2000)) {
+    : max_video_kbps_(std::clamp(max_video_kbps, 60, 2000)) {
     while (level_ + 1 < static_cast<int>(kProfiles.size()) &&
            kProfiles[static_cast<std::size_t>(level_)].bitrate_kbps >
                max_video_kbps_) {
@@ -321,7 +321,7 @@ VideoProfile AdaptationController::profile_for_level(int level) const {
 VideoProfile udp_recovery_profile(int max_video_kbps) {
     VideoProfile profile = kProfiles.back();
     profile.bitrate_kbps =
-        std::min(profile.bitrate_kbps, std::max(30, max_video_kbps));
+        std::min(profile.bitrate_kbps, std::max(60, max_video_kbps));
     return profile;
 }
 
