@@ -82,14 +82,15 @@ int main() {
     assert(defaults.transport.feedback_interval_ms == 200);
     assert(defaults.transport.feedback_redundancy == 10);
     assert(defaults.transport.feedback_timeout_ms == 1000);
-    assert(defaults.sender.connect == "127.0.0.1:9000");
-    assert(defaults.sender.input == SenderInput::Camera);
+    assert(defaults.sender.connect == "10.88.0.2:9000");
+    assert(defaults.sender.input == SenderInput::File);
+    assert(defaults.sender.video_file == "/home/u20/code/jetson-2k.mp4");
     assert(defaults.sender.camera_device == "/dev/video0");
     assert(defaults.sender.camera_width == 640);
     assert(defaults.sender.camera_height == 480);
     assert(defaults.sender.camera_fps == 30);
     assert(defaults.sender.max_video_kbps == 2000);
-    assert(defaults.receiver.listen == "0.0.0.0:9000");
+    assert(defaults.receiver.listen == "10.88.0.2:9000");
     assert(defaults.receiver.display);
     assert(defaults.receiver.minimum_output_width == 640);
     assert(defaults.receiver.minimum_output_height == 360);
@@ -103,6 +104,29 @@ int main() {
     assert(defaults.latency.metric == LatencyMetric::EncodeToDecode);
     assert(defaults.latency.window_seconds == 10);
     assert(load_fails(missing));
+
+    const auto empty = write_config(
+        "srt-runtime-config-empty.yaml",
+        "");
+    const auto empty_defaults = load_runtime_config(empty, false);
+    assert(empty_defaults.sender.input == SenderInput::File);
+    assert(empty_defaults.sender.connect == "10.88.0.2:9000");
+    assert(empty_defaults.receiver.listen == "10.88.0.2:9000");
+    assert(empty_defaults.receiver.minimum_output_fps == 30);
+
+    const auto partial = write_config(
+        "srt-runtime-config-partial.yaml",
+        "sender:\n"
+        "  connect: 127.0.0.1:9100\n"
+        "receiver:\n"
+        "  display: false\n");
+    const auto partial_config = load_runtime_config(partial, false);
+    assert(partial_config.transport.mode == TransportMode::Udp);
+    assert(partial_config.sender.input == SenderInput::File);
+    assert(partial_config.sender.connect == "127.0.0.1:9100");
+    assert(partial_config.receiver.listen == "10.88.0.2:9000");
+    assert(!partial_config.receiver.display);
+    assert(partial_config.latency.metric == LatencyMetric::EncodeToDecode);
 
     const auto valid = write_config(
         "srt-runtime-config-valid.yaml",
@@ -235,12 +259,18 @@ int main() {
                      "interpolation_mode: optical_flow"));
     assert(load_fails(invalid_interpolation));
 
-    const auto missing_section = write_config(
-        "srt-runtime-config-missing-section.yaml",
+    const auto latency_only = write_config(
+        "srt-runtime-config-latency-only.yaml",
         "latency:\n"
-        "  metric: encode_to_decode\n");
-    assert(load_fails(missing_section));
+        "  metric: encode_to_assemble\n");
+    const auto latency_only_config =
+        load_runtime_config(latency_only, false);
+    assert(latency_only_config.sender.input == SenderInput::File);
+    assert(latency_only_config.latency.metric ==
+           LatencyMetric::EncodeToAssemble);
 
+    std::filesystem::remove(empty);
+    std::filesystem::remove(partial);
     std::filesystem::remove(valid);
     std::filesystem::remove(display);
     std::filesystem::remove(invalid_metric);
@@ -258,7 +288,7 @@ int main() {
     std::filesystem::remove(bilinear_repeat);
     std::filesystem::remove(invalid_upscale);
     std::filesystem::remove(invalid_interpolation);
-    std::filesystem::remove(missing_section);
+    std::filesystem::remove(latency_only);
 
     std::cout << "runtime_config_tests=passed" << std::endl;
     return 0;

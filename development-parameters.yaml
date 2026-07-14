@@ -9,11 +9,12 @@ current:
     config_file: runtime-config.yaml
     config_location: "Directory containing the executable."
     command_line_parameters: [role]
-    missing_config_behavior: "Use compiled defaults."
+    missing_config_behavior: "Use compiled defaults. Empty and partial YAML files are allowed; present keys override defaults and omitted keys keep defaults."
     compiled_fallback:
-      sender_input: camera
-      sender_connect: "127.0.0.1:9000"
-      receiver_listen: "0.0.0.0:9000"
+      sender_input: file
+      sender_connect: "10.88.0.2:9000"
+      sender_video_file: "/home/u20/code/jetson-2k.mp4"
+      receiver_listen: "10.88.0.2:9000"
     transport:
       mode: udp
       selectable_modes: [udp, srt]
@@ -292,6 +293,20 @@ current:
         optimization_required: false
 
 development_history:
+  - parameter: runtime_config_compiled_defaults
+    previous:
+      fallback_sender_input: camera
+      fallback_sender_connect: "127.0.0.1:9000"
+      fallback_receiver_listen: "0.0.0.0:9000"
+      parser_requirement: "When a config file existed, it had to contain transport, sender, receiver, and latency sections."
+    current:
+      fallback_source: "Every runtime-config.yaml field is hardcoded in RuntimeConfig defaults using the checked-in YAML values."
+      fallback_sender_input: file
+      fallback_sender_connect: "10.88.0.2:9000"
+      fallback_receiver_listen: "10.88.0.2:9000"
+      parser_requirement: "Missing files use defaults when allowed by the caller; empty and partial YAML files load successfully, and present keys override the defaults."
+    reason: "Allow the program to run even when runtime-config.yaml is empty or only contains overrides, while keeping the checked-in YAML as the visible default template."
+
   - parameter: loss80_quality_fps_rebalance
     previous:
       level_5: "220kbps/30fps/256x144, all-intra, FEC ratios 5/6"
@@ -452,7 +467,7 @@ development_history:
     previous: "Only a looping local video file was supported."
     current:
       selectable_inputs: [camera, file]
-      default_input: camera
+      default_input: file
       camera:
         api: V4L2
         device: /dev/video0
@@ -465,7 +480,7 @@ development_history:
 
   - parameter: runtime_configuration_source
     previous: "Endpoint, media path, bitrate limit, output path, and display mode were command-line parameters."
-    current: "All startup settings are loaded from runtime-config.yaml; command line accepts only role."
+    current: "All startup settings have compiled defaults matching runtime-config.yaml; command line accepts only role, and runtime-config.yaml can partially override those defaults."
     reason: "Keep startup behavior reproducible and centralize runtime parameters."
 
   - parameter: receiver_h264_output

@@ -89,6 +89,10 @@ Start the receiver and sender:
 The command line accepts only `--role`. Set `receiver.display: false` for
 headless operation. Set `receiver.write_h264: false` to disable creation and
 writing of the H.264 output file; writing is enabled by default.
+Every field in the checked-in configuration also has the same compiled default
+in code. A missing or empty runtime config therefore starts with the values
+shown above. A partial YAML file only overrides the keys it contains; omitted
+sections and fields keep their compiled defaults.
 The display uses a minimum output specification rather than a fixed size.
 Frames already at or above the configured minimum width and height keep their
 decoded resolution. Smaller frames are scaled up without changing aspect
@@ -165,11 +169,10 @@ with 30fps as the source-limited ceiling when the picture can be very blurry.
 
 `sender.input` selects the video source:
 
-- `camera` uses a Linux V4L2 camera and is the compiled fallback when the
-  configuration file is absent.
+- `camera` uses a Linux V4L2 camera.
 - `file` loops the local file configured by `sender.video_file`.
 
-The checked-in namespace-test configuration above currently selects `file`.
+The checked-in configuration and compiled defaults currently select `file`.
 File input is paced against the source frame deadline: decode, scale, x264,
 FEC, and socket-send time are subtracted from the following sleep. If a frame
 is already late, the sender does not burst-send catch-up frames; it restarts the
@@ -181,11 +184,11 @@ requested camera mode; the negotiated values are printed as
 `video_input=camera ...` when the sender starts. Camera pacing comes from the
 V4L2 capture cadence; the sender does not add the file-mode post-send sleep.
 
-To use the local file instead:
+To use a local V4L2 camera instead:
 
 ```yaml
 sender:
-  input: file
+  input: camera
 ```
 
 The remaining sender fields stay unchanged. The sender process must have read
@@ -194,8 +197,8 @@ and write permission for the configured `/dev/video*` device.
 ## Latency Metrics
 
 The executable automatically loads `runtime-config.yaml` from the directory
-that contains the executable. If it is missing, the compiled defaults shown
-above are used.
+that contains the executable. If it is missing, empty, or only contains a few
+keys, the compiled defaults shown above are used for everything else.
 
 Only one latency metric is sampled and printed at a time:
 

@@ -42,8 +42,8 @@ struct TransportConfig {
 };
 
 struct SenderConfig {
-    SenderInput input = SenderInput::Camera;
-    std::string connect = "127.0.0.1:9000";
+    SenderInput input = SenderInput::File;
+    std::string connect = "10.88.0.2:9000";
     std::string video_file = "/home/u20/code/jetson-2k.mp4";
     std::string camera_device = "/dev/video0";
     int camera_width = 640;
@@ -53,7 +53,7 @@ struct SenderConfig {
 };
 
 struct ReceiverConfig {
-    std::string listen = "0.0.0.0:9000";
+    std::string listen = "10.88.0.2:9000";
     bool display = true;
     int minimum_output_width = 640;
     int minimum_output_height = 360;
