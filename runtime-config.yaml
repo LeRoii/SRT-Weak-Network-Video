@@ -19,7 +19,7 @@ receiver:
   display: true
   minimum_output_width: 640
   minimum_output_height: 360
-  minimum_output_fps: 20
+  minimum_output_fps: 30
   upscale_mode: lanczos_sharpen
   interpolation_mode: blend
   write_h264: true

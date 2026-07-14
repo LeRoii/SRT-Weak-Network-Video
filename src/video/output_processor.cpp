@@ -14,6 +14,8 @@ extern "C" {
 
 namespace {
 
+constexpr int64_t kCadenceToleranceMs = 2;
+
 int even_ceiling(double value) {
     int result = static_cast<int>(std::ceil(value - 1e-9));
     if (result % 2 != 0) {
@@ -249,8 +251,10 @@ OutputCadenceController::OutputCadenceController(
     InterpolationMode interpolation_mode)
     : interval_ms_(std::max<int64_t>(1, 1000 / minimum_fps)),
       interpolation_mode_(interpolation_mode) {
-    if (minimum_fps >= 20 && interval_ms_ > 1) {
+    if (minimum_fps == 20 && interval_ms_ > 1) {
         --interval_ms_;
+    } else if (minimum_fps == 30) {
+        ++interval_ms_;
     }
 }
 
@@ -260,9 +264,35 @@ OutputAction OutputCadenceController::on_real_frame(
     const bool have_previous = last_real_at_ms_ >= 0;
     const int64_t gap_ms =
         have_previous ? now_ms - last_real_at_ms_ : 0;
+    const int64_t tolerance_ms =
+        interval_ms_ <= 50 ? kCadenceToleranceMs : 0;
     last_real_at_ms_ = now_ms;
 
-    if (!have_previous || gap_ms <= interval_ms_) {
+    if (!have_previous) {
+        low_rate_mode_ = false;
+        blend_pending_ = false;
+        real_pending_ = false;
+        synthetic_credit_ms_ = 0;
+        next_output_at_ms_ = now_ms + interval_ms_;
+        return OutputAction::CurrentReal;
+    }
+
+    if (gap_ms > interval_ms_ + tolerance_ms) {
+        synthetic_credit_ms_ += gap_ms - interval_ms_;
+        synthetic_credit_ms_ =
+            std::min(synthetic_credit_ms_, interval_ms_ * 4);
+    }
+
+    if (interval_ms_ <= 50 &&
+        next_output_at_ms_ > now_ms + tolerance_ms) {
+        low_rate_mode_ = true;
+        blend_pending_ = false;
+        real_pending_ = true;
+        return OutputAction::None;
+    }
+
+    if (gap_ms <= interval_ms_ + tolerance_ms ||
+        synthetic_credit_ms_ < interval_ms_) {
         low_rate_mode_ = false;
         blend_pending_ = false;
         real_pending_ = false;
@@ -271,6 +301,7 @@ OutputAction OutputCadenceController::on_real_frame(
     }
 
     low_rate_mode_ = true;
+    synthetic_credit_ms_ -= interval_ms_;
     blend_pending_ =
         interpolation_mode_ == InterpolationMode::Blend &&
         can_blend;
@@ -287,15 +318,22 @@ OutputAction OutputCadenceController::on_tick(int64_t now_ms) {
         now_ms < next_output_at_ms_) {
         return OutputAction::None;
     }
-    next_output_at_ms_ += interval_ms_;
-    if (next_output_at_ms_ <= now_ms) {
-        next_output_at_ms_ = now_ms + interval_ms_;
-    }
-    if (!low_rate_mode_) {
-        if (now_ms - last_real_at_ms_ < interval_ms_) {
+    if (!low_rate_mode_ && synthetic_credit_ms_ < interval_ms_) {
+        const int64_t tolerance_ms =
+            interval_ms_ <= 50 ? kCadenceToleranceMs : 0;
+        if (now_ms - last_real_at_ms_ <
+            interval_ms_ + tolerance_ms) {
             return OutputAction::None;
         }
         low_rate_mode_ = true;
+    }
+    if (!blend_pending_ && !real_pending_ &&
+        synthetic_credit_ms_ >= interval_ms_) {
+        synthetic_credit_ms_ -= interval_ms_;
+    }
+    next_output_at_ms_ += interval_ms_;
+    if (next_output_at_ms_ <= now_ms) {
+        next_output_at_ms_ = now_ms + interval_ms_;
     }
     if (blend_pending_) {
         blend_pending_ = false;

@@ -25,7 +25,7 @@ def test_summary_reports_display_metrics() -> None:
         sender_log = root / "sender.log"
         receiver_log = root / "receiver.log"
         sender_log.write_text(
-            "[elapsed=1.000] profile=60kbps/10fps/160x90\n",
+            "[elapsed=1.000] profile=220kbps/24fps/320x180\n",
             encoding="utf-8",
         )
         receiver_log.write_text(
@@ -64,7 +64,7 @@ def test_tc09_uses_post_warmup_average() -> None:
         sender_log = root / "sender.log"
         receiver_log = root / "receiver.log"
         sender_log.write_text(
-            "[elapsed=1.000] profile=60kbps/10fps/160x90\n",
+            "[elapsed=1.000] profile=220kbps/24fps/320x180\n",
             encoding="utf-8",
         )
         receiver_log.write_text(
@@ -74,18 +74,18 @@ def test_tc09_uses_post_warmup_average() -> None:
                     "decoded_fps=1 output_fps=5 synthetic_fps=4 "
                     "output_resolution=640x360 max_frame_gap_ms=500 "
                     "latency_avg=100.0ms latency_samples=1",
-                    "[elapsed=6.000] frames=8 decoder_errors=0 "
-                    "decoded_fps=8 output_fps=20 synthetic_fps=12 "
+                    "[elapsed=6.000] frames=21 decoder_errors=0 "
+                    "decoded_fps=21 output_fps=29 synthetic_fps=8 "
                     "output_resolution=640x360 max_frame_gap_ms=500 "
-                    "latency_avg=100.0ms latency_samples=8",
-                    "[elapsed=7.000] frames=18 decoder_errors=0 "
-                    "decoded_fps=10 output_fps=20 synthetic_fps=10 "
+                    "latency_avg=100.0ms latency_samples=21",
+                    "[elapsed=7.000] frames=43 decoder_errors=0 "
+                    "decoded_fps=22 output_fps=30 synthetic_fps=8 "
                     "output_resolution=640x360 max_frame_gap_ms=500 "
-                    "latency_avg=100.0ms latency_samples=18",
-                    "[elapsed=8.000] frames=25 decoder_errors=0 "
-                    "decoded_fps=7 output_fps=20 synthetic_fps=13 "
+                    "latency_avg=100.0ms latency_samples=43",
+                    "[elapsed=8.000] frames=64 decoder_errors=0 "
+                    "decoded_fps=21 output_fps=29 synthetic_fps=8 "
                     "output_resolution=640x360 max_frame_gap_ms=500 "
-                    "latency_avg=100.0ms latency_samples=25",
+                    "latency_avg=100.0ms latency_samples=64",
                 ]
             )
             + "\n",
@@ -102,12 +102,14 @@ def test_tc09_uses_post_warmup_average() -> None:
             receiver_log,
             root / "received.h264",
             {"passed": True, "returncode": 0, "bytes": 100},
-            {"available": True, "nb_read_frames": "25"},
+            {"available": True, "nb_read_frames": "64"},
             [{"elapsed": 0.0, "loss_percent": 80}],
         )
 
         assert summary["checks"]["TC-09"]["passed"]
-        assert summary["metrics"]["decoded_fps"] > 8
+        assert summary["metrics"]["decoded_fps"] >= 20
+        assert summary["metrics"]["output_fps"] >= 28
+        assert summary["metrics"]["synthetic_fps"] <= 10
 
 
 def test_runtime_config_enables_dummy_display_metrics() -> None:
@@ -117,7 +119,7 @@ def test_runtime_config_enables_dummy_display_metrics() -> None:
         config_path = weaknet.write_runtime_config(root, output_file)
         text = config_path.read_text(encoding="utf-8")
         assert "  display: true\n" in text
-        assert "  minimum_output_fps: 20\n" in text
+        assert "  minimum_output_fps: 30\n" in text
 
 
 def test_quick_suite_covers_revised_acceptance_losses() -> None:
@@ -127,7 +129,7 @@ def test_quick_suite_covers_revised_acceptance_losses() -> None:
         for scenario in scenarios
         if scenario.kind == "steady"
     ]
-    assert steady_losses == [0, 20, 45, 70, 80]
+    assert steady_losses == [0, 20, 30, 45, 50, 65, 70, 80]
 
 
 def test_staircase_downgrade_allows_feedback_scheduling_margin() -> None:
@@ -139,11 +141,11 @@ def test_staircase_downgrade_allows_feedback_scheduling_margin() -> None:
             "\n".join(
                 [
                     "[elapsed=1.000] profile=2000kbps/30fps/1280x720",
-                    "[elapsed=12.900] profile_change=1 reason=test old=2000kbps/30fps/1280x720 new=900kbps/24fps/640x360",
-                    "[elapsed=23.900] profile_change=1 reason=test old=900kbps/24fps/640x360 new=350kbps/20fps/426x240",
-                    "[elapsed=36.800] profile_change=1 reason=test old=350kbps/20fps/426x240 new=60kbps/10fps/160x90",
-                    "[elapsed=50.000] profile_change=1 reason=test old=60kbps/10fps/160x90 new=350kbps/20fps/426x240",
-                    "[elapsed=61.000] profile_change=1 reason=test old=350kbps/20fps/426x240 new=900kbps/24fps/640x360",
+                    "[elapsed=12.900] profile_change=1 reason=test old=2000kbps/30fps/1280x720 new=900kbps/30fps/640x360",
+                    "[elapsed=23.900] profile_change=1 reason=test old=900kbps/30fps/640x360 new=350kbps/30fps/320x180",
+                    "[elapsed=36.800] profile_change=1 reason=test old=350kbps/30fps/320x180 new=220kbps/24fps/320x180",
+                    "[elapsed=50.000] profile_change=1 reason=test old=220kbps/24fps/320x180 new=350kbps/30fps/320x180",
+                    "[elapsed=61.000] profile_change=1 reason=test old=350kbps/30fps/320x180 new=900kbps/30fps/640x360",
                 ]
             )
             + "\n",
@@ -151,7 +153,7 @@ def test_staircase_downgrade_allows_feedback_scheduling_margin() -> None:
         )
         receiver_log.write_text(
             "[elapsed=70.000] frames=100 decoder_errors=0 "
-            "decoded_fps=10 output_fps=20 synthetic_fps=10 "
+            "decoded_fps=21 output_fps=29 synthetic_fps=8 "
             "output_resolution=640x360 max_frame_gap_ms=500 "
             "latency_avg=100.0ms latency_samples=100\n",
             encoding="utf-8",
@@ -188,12 +190,70 @@ def test_staircase_downgrade_allows_feedback_scheduling_margin() -> None:
         assert summary["checks"]["TC-07"]["passed"]
 
 
+def test_staircase_downgrade_passes_when_profile_already_matches_loss() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        sender_log = root / "sender.log"
+        receiver_log = root / "receiver.log"
+        sender_log.write_text(
+            "\n".join(
+                [
+                    "[elapsed=1.000] profile=2000kbps/30fps/1280x720",
+                    "[elapsed=12.900] profile_change=1 reason=test old=2000kbps/30fps/1280x720 new=500kbps/30fps/512x288",
+                    "[elapsed=14.900] profile_change=1 reason=test old=500kbps/30fps/512x288 new=350kbps/30fps/320x180",
+                    "[elapsed=22.000] profile=350kbps/30fps/320x180",
+                    "[elapsed=29.500] profile=350kbps/30fps/320x180",
+                    "[elapsed=37.000] profile_change=1 reason=test old=350kbps/30fps/320x180 new=220kbps/24fps/320x180",
+                    "[elapsed=45.000] profile_change=1 reason=test old=220kbps/24fps/320x180 new=350kbps/30fps/320x180",
+                ]
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        receiver_log.write_text(
+            "[elapsed=50.000] frames=100 decoder_errors=0 "
+            "decoded_fps=30 output_fps=30 synthetic_fps=0 "
+            "output_resolution=640x360 max_frame_gap_ms=200 "
+            "latency_avg=100.0ms latency_samples=100\n",
+            encoding="utf-8",
+        )
+
+        summary = weaknet.summarize_scenario(
+            weaknet.Scenario(
+                name="staircase",
+                kind="staircase",
+                steps=(
+                    weaknet.Step(0, 50, 8),
+                    weaknet.Step(30, 50, 8),
+                    weaknet.Step(50, 50, 8),
+                    weaknet.Step(80, 50, 8),
+                    weaknet.Step(50, 50, 8),
+                ),
+            ),
+            sender_log,
+            receiver_log,
+            root / "received.h264",
+            {"passed": True, "returncode": 0, "bytes": 100},
+            {"available": True, "nb_read_frames": "100"},
+            [
+                {"elapsed": 4.0, "loss_percent": 0},
+                {"elapsed": 12.0, "loss_percent": 30},
+                {"elapsed": 20.0, "loss_percent": 50},
+                {"elapsed": 36.0, "loss_percent": 80},
+                {"elapsed": 44.0, "loss_percent": 50},
+            ],
+        )
+
+        assert summary["checks"]["TC-07"]["passed"]
+
+
 def main() -> int:
     test_summary_reports_display_metrics()
     test_tc09_uses_post_warmup_average()
     test_runtime_config_enables_dummy_display_metrics()
     test_quick_suite_covers_revised_acceptance_losses()
     test_staircase_downgrade_allows_feedback_scheduling_margin()
+    test_staircase_downgrade_passes_when_profile_already_matches_loss()
     print("weaknet_acceptance_tests=passed")
     return 0
 

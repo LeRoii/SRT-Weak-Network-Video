@@ -68,7 +68,7 @@ receiver:
   display: true
   minimum_output_width: 640
   minimum_output_height: 360
-  minimum_output_fps: 20
+  minimum_output_fps: 30
   upscale_mode: lanczos_sharpen
   interpolation_mode: blend
   write_h264: true
@@ -100,12 +100,15 @@ decoded data and optional H.264 output file are not modified.
 default and applies luma contrast stretch plus light luma sharpening only after
 an upscale.
 `interpolation_mode` selects `repeat` or `blend`; the default `blend` emits one
-50/50 transition frame before displaying a newly received low-rate frame.
-Both modes retain the last complete frame during a prolonged gap.
+50/50 transition frame only when the cadence controller has accumulated enough
+low-rate display debt. Both modes retain the last complete frame during a
+prolonged gap. The 30 fps display default uses bounded supplementation so a
+24 fps decoded stream is smoothed with a small number of synthetic frames rather
+than replacing most real frames.
 
 Receiver statistics include `decoded_fps`, `output_fps`, `synthetic_fps`, and
 `output_resolution` so reports can separate true decoded throughput from the
-20 fps display cadence.
+30 fps display cadence.
 
 ### Transport Mode
 
@@ -118,25 +121,29 @@ Receiver statistics include `decoded_fps`, `output_fps`, `synthetic_fps`, and
   comparison. SRT still uses its 350 ms latency budget and ARQ.
 
 UDP starts with the normal Level 0 profile (`1280x720/30fps`) and switches to
-Level 8 at `160x90/10fps/60kbps` only after stale or missing feedback, send
+Level 8 at `320x180/24fps/220kbps` only after stale or missing feedback, send
 congestion, a receiver frame age above 1500 ms, or very high reported loss. A
 recovery frame keeps Level 8 until it is acknowledged, then the sender
 immediately selects the level implied by the fresh feedback. UDP and SRT use the
 same nine-level ladder after recovery. Low transport resolutions are allowed
 below the display minimum; the receiver upscales complete decoded frames to at
-least `640x360` and fills the display cadence to at least `20fps`.
+least `640x360` and fills the display cadence to `30fps` by default. The sender
+profiles are quality/fps balanced: low and mid levels stay at the current 30fps
+source ceiling, while 70-80% loss levels keep `320x180` transport detail and
+accept `24-28fps` true send cadence rather than dropping to very blurry
+`160x90` transport.
 
 | Level | H.264 profile | GOP frames | min data shards | P-frame FEC | keyframe FEC | all-intra |
 |---:|---|---:|---:|---:|---:|---|
 | 0 | 1280x720 / 30 fps / 2000 kbps | 30 | 4 | 0.10 | 0.30 | no |
-| 1 | 640x360 / 24 fps / 900 kbps | 12 | 4 | 0.50 | 0.75 | no |
-| 2 | 640x360 / 24 fps / 700 kbps | 12 | 4 | 0.50 | 0.75 | no |
-| 3 | 640x360 / 20 fps / 500 kbps | 10 | 4 | 1.00 | 2.00 | no |
-| 4 | 426x240 / 20 fps / 350 kbps | 10 | 2 | 2.00 | 4.00 | no |
-| 5 | 320x180 / 15 fps / 220 kbps | 3 | 2 | 3.00 | 6.00 | no |
-| 6 | 320x180 / 12 fps / 150 kbps | 2 | 2 | 5.00 | 8.00 | no |
-| 7 | 256x144 / 12 fps / 90 kbps | 1 | 1 | 8.00 | 10.00 | yes |
-| 8 | 160x90 / 10 fps / 60 kbps | 1 | 1 | 12.00 | 12.00 | yes |
+| 1 | 640x360 / 30 fps / 900 kbps | 10 | 4 | 0.50 | 0.75 | no |
+| 2 | 640x360 / 30 fps / 700 kbps | 8 | 4 | 0.75 | 1.00 | no |
+| 3 | 512x288 / 30 fps / 500 kbps | 6 | 3 | 1.00 | 2.00 | no |
+| 4 | 320x180 / 30 fps / 350 kbps | 1 | 1 | 3.00 | 4.00 | yes |
+| 5 | 320x180 / 30 fps / 300 kbps | 1 | 1 | 5.00 | 6.00 | yes |
+| 6 | 320x180 / 28 fps / 260 kbps | 1 | 1 | 7.00 | 8.00 | yes |
+| 7 | 320x180 / 26 fps / 240 kbps | 1 | 1 | 10.00 | 10.00 | yes |
+| 8 | 320x180 / 24 fps / 220 kbps | 1 | 1 | 12.00 | 12.00 | yes |
 
 Raw loss thresholds above 5, 15, 20, 30, 50, 65, 72, and 77 percent map to
 Levels 1 through 8. Effective selection adds hysteresis: Level 2 requires three
@@ -151,8 +158,8 @@ feedback windows.
 Levels 3 through 8 use stronger FEC, lower transport resolution, smaller
 per-block data shard counts, and short GOP or all-intra coding to improve true
 decoded-frame throughput under high loss. At 80% bidirectional loss the target
-is 8-12 true decoded fps plus 20 fps display output, not 20 distinct decoded
-frames.
+is no longer 8-12 true decoded fps; the acceptance floor is 20 true decoded fps,
+with 30fps as the source-limited ceiling when the picture can be very blurry.
 
 ### Sender Input
 
@@ -311,10 +318,10 @@ Run the quick regression suite:
 python3 scripts/weaknet_acceptance.py --suite quick
 ```
 
-The quick suite runs 0%, 20%, 45%, 70%, and 80% bidirectional loss with 50 ms
-delay for 60 seconds per steady scenario, followed by a short staircase from
-0% to 10%, 50%, 70%, 80%, then back down through 50%, 10%, and 0%. For a
-shorter smoke run, override the durations:
+The quick suite runs 0%, 20%, 30%, 45%, 50%, 65%, 70%, and 80% bidirectional
+loss with 50 ms delay for 60 seconds per steady scenario, followed by a short
+staircase from 0% to 10%, 30%, 50%, 65%, 70%, 80%, then back down through 50%,
+10%, and 0%. For a shorter smoke run, override the durations:
 
 ```bash
 python3 scripts/weaknet_acceptance.py \
@@ -329,10 +336,10 @@ The full suite is intended for formal acceptance:
 python3 scripts/weaknet_acceptance.py --suite full
 ```
 
-It runs 0%, 5%, 15%, 20%, 35%, 45%, 60%, 70%, 80%, and 85% bidirectional loss
-for 600 seconds per steady scenario, then runs the full staircase up to 85%
-and gradually back down to 0%. The 90% case is separated as an extreme
-observation and does not fail the main
+It runs 0%, 5%, 15%, 20%, 30%, 35%, 45%, 50%, 60%, 65%, 70%, 80%, and 85%
+bidirectional loss for 600 seconds per steady scenario, then runs the full
+staircase up to 85% and gradually back down to 0%. The 90% case is separated as
+an extreme observation and does not fail the main
 acceptance suite:
 
 ```bash
@@ -356,6 +363,7 @@ increasing loss and profile recovery on decreasing loss, using a 3 second
 downshift window and a 15 second recovery window. TC-08 uses
 `latency_avg <= 500 ms` as the hard criterion; values below 180 ms are reported
 as better-than-target latency rather than failures. TC-09 checks the 80% loss
-target after warmup: average `decoded_fps >= 8`, average `output_fps >= 20`,
-and `output_resolution == 640x360`. The report also includes `synthetic_fps`,
+target after warmup: average `decoded_fps >= 20`, average `output_fps >= 28`,
+average `synthetic_fps <= 10`, and `output_resolution == 640x360`.
+The report also includes `synthetic_fps`,
 post-warmup fps minimums, `latency_p95`, and `latency_max` for diagnosis.

@@ -49,9 +49,10 @@ int luma_range(const AVFrame *frame) {
     return static_cast<int>(maximum) - static_cast<int>(minimum);
 }
 
-int count_outputs_for_input_interval(int input_interval_ms) {
+int count_outputs_for_input_interval(int input_interval_ms,
+                                     int target_fps) {
     OutputCadenceController cadence(
-        20, InterpolationMode::Blend);
+        target_fps, InterpolationMode::Blend);
     int outputs = 0;
     int next_real_ms = 0;
     for (int now_ms = 0; now_ms < 1000; ++now_ms) {
@@ -63,6 +64,28 @@ int count_outputs_for_input_interval(int input_interval_ms) {
         outputs += cadence.on_tick(now_ms) != OutputAction::None;
     }
     return outputs;
+}
+
+int count_synthetic_for_input_interval(int input_interval_ms,
+                                       int target_fps) {
+    OutputCadenceController cadence(
+        target_fps, InterpolationMode::Blend);
+    int synthetic = 0;
+    int next_real_ms = 0;
+    auto count_synthetic = [&synthetic](OutputAction action) {
+        if (action == OutputAction::BlendSynthetic ||
+            action == OutputAction::RepeatSynthetic) {
+            ++synthetic;
+        }
+    };
+    for (int now_ms = 0; now_ms < 1000; ++now_ms) {
+        if (now_ms == next_real_ms) {
+            count_synthetic(cadence.on_real_frame(now_ms, true));
+            next_real_ms += input_interval_ms;
+        }
+        count_synthetic(cadence.on_tick(now_ms));
+    }
+    return synthetic;
 }
 
 void test_dimensions_and_scaling() {
@@ -215,22 +238,37 @@ void test_two_and_three_fps_reach_minimum_output() {
         three_fps.on_real_frame(0, false) != OutputAction::None;
     three_fps_outputs +=
         three_fps.on_tick(200) != OutputAction::None;
-    (void)three_fps.on_real_frame(333, true);
+    three_fps_outputs +=
+        three_fps.on_real_frame(333, true) != OutputAction::None;
     three_fps_outputs +=
         three_fps.on_tick(400) != OutputAction::None;
     three_fps_outputs +=
         three_fps.on_tick(600) != OutputAction::None;
-    (void)three_fps.on_real_frame(666, true);
+    three_fps_outputs +=
+        three_fps.on_real_frame(666, true) != OutputAction::None;
     three_fps_outputs +=
         three_fps.on_tick(800) != OutputAction::None;
-    (void)three_fps.on_real_frame(999, true);
+    three_fps_outputs +=
+        three_fps.on_real_frame(999, true) != OutputAction::None;
     assert(three_fps_outputs >= 5);
 }
 
 void test_eight_ten_and_twelve_fps_reach_twenty_output() {
-    assert(count_outputs_for_input_interval(125) >= 20);
-    assert(count_outputs_for_input_interval(100) >= 20);
-    assert(count_outputs_for_input_interval(83) >= 20);
+    assert(count_outputs_for_input_interval(125, 20) >= 20);
+    assert(count_outputs_for_input_interval(100, 20) >= 20);
+    assert(count_outputs_for_input_interval(83, 20) >= 20);
+}
+
+void test_twenty_to_twenty_four_fps_reach_near_thirty_output() {
+    assert(count_outputs_for_input_interval(50, 30) >= 28);
+    assert(count_outputs_for_input_interval(45, 30) >= 28);
+    assert(count_outputs_for_input_interval(42, 30) >= 28);
+    assert(count_outputs_for_input_interval(42, 30) <= 32);
+    assert(count_synthetic_for_input_interval(42, 30) <= 10);
+}
+
+void test_thirty_fps_input_does_not_trigger_synthetic_cadence() {
+    assert(count_synthetic_for_input_interval(33, 30) <= 1);
 }
 
 void test_twenty_fps_cadence_has_scheduler_headroom() {
@@ -255,6 +293,8 @@ int main() {
     test_high_rate_passthrough();
     test_two_and_three_fps_reach_minimum_output();
     test_eight_ten_and_twelve_fps_reach_twenty_output();
+    test_twenty_to_twenty_four_fps_reach_near_thirty_output();
+    test_thirty_fps_input_does_not_trigger_synthetic_cadence();
     test_twenty_fps_cadence_has_scheduler_headroom();
     std::cout << "output_processing_tests=passed" << std::endl;
     return 0;

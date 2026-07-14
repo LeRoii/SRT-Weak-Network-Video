@@ -24,14 +24,14 @@ from typing import Iterable
 
 PROFILES = [
     (0, 2000, 30, 1280, 720),
-    (1, 900, 24, 640, 360),
-    (2, 700, 24, 640, 360),
-    (3, 500, 20, 640, 360),
-    (4, 350, 20, 426, 240),
-    (5, 220, 15, 320, 180),
-    (6, 150, 12, 320, 180),
-    (7, 90, 12, 256, 144),
-    (8, 60, 10, 160, 90),
+    (1, 900, 30, 640, 360),
+    (2, 700, 30, 640, 360),
+    (3, 500, 30, 512, 288),
+    (4, 350, 30, 320, 180),
+    (5, 300, 30, 320, 180),
+    (6, 260, 28, 320, 180),
+    (7, 240, 26, 320, 180),
+    (8, 220, 24, 320, 180),
 ]
 
 PROFILE_RE = re.compile(
@@ -169,7 +169,7 @@ def write_runtime_config(root: Path, output_file: Path) -> Path:
                 "  display: true",
                 "  minimum_output_width: 640",
                 "  minimum_output_height: 360",
-                "  minimum_output_fps: 20",
+                "  minimum_output_fps: 30",
                 "  upscale_mode: lanczos_sharpen",
                 "  interpolation_mode: blend",
                 "  write_h264: true",
@@ -226,15 +226,15 @@ def scenarios_for_suite(suite: str, duration_seconds: int | None,
     if suite == "quick":
         steady_duration = duration_seconds or 60
         step_duration = step_duration_seconds or 30
-        losses = [0, 20, 45, 70, 80]
-        staircase = [0, 10, 50, 70, 80, 50, 10, 0]
+        losses = [0, 20, 30, 45, 50, 65, 70, 80]
+        staircase = [0, 10, 30, 50, 65, 70, 80, 50, 10, 0]
     elif suite == "full":
         steady_duration = duration_seconds or 600
         step_duration = step_duration_seconds or 60
-        losses = [0, 5, 15, 20, 35, 45, 60, 70, 80, 85]
+        losses = [0, 5, 15, 20, 30, 35, 45, 50, 60, 65, 70, 80, 85]
         staircase = [
-            0, 5, 10, 15, 20, 35, 45, 60, 70, 80, 85,
-            80, 70, 60, 45, 35, 20, 10, 5, 0,
+            0, 5, 10, 15, 20, 30, 35, 45, 50, 60, 65, 70, 80, 85,
+            80, 70, 65, 60, 50, 45, 35, 30, 20, 10, 5, 0,
         ]
     else:
         steady_duration = duration_seconds or 600
@@ -428,6 +428,20 @@ def downgrade_after(
     )
 
 
+def profile_at_or_below_bitrate_after(
+    profiles: list[dict[str, object]],
+    applied_at: float,
+    window_seconds: float,
+    required_bitrate_kbps: int,
+) -> bool:
+    return any(
+        profile["elapsed"] is not None and
+        0 <= float(profile["elapsed"]) - applied_at <= window_seconds and
+        int(profile["bitrate_kbps"]) <= required_bitrate_kbps
+        for profile in profiles
+    )
+
+
 def upgrade_after(
     profile_changes: list[dict[str, object]],
     applied_at: float,
@@ -565,8 +579,9 @@ def summarize_scenario(scenario: Scenario, sender_log: Path,
     tc09 = True
     if scenario.kind == "steady" and first_loss == 80 and not scenario.extreme:
         tc09 = (
-            decoded_fps >= 8 and
-            output_fps >= 20 and
+            decoded_fps >= 20 and
+            output_fps >= 28 and
+            synthetic_fps <= 10 and
             output_resolution == "640x360"
         )
 
@@ -590,10 +605,19 @@ def summarize_scenario(scenario: Scenario, sender_log: Path,
             frames > 0 and decoder_errors == 0 and
             bool(ffmpeg_result["passed"]) and
             all(
-                downgrade_after(
-                    profile_changes,
-                    float(step_events[index]["elapsed"]),
-                    DOWNGRADE_WINDOW_SECONDS,
+                (
+                    downgrade_after(
+                        profile_changes,
+                        float(step_events[index]["elapsed"]),
+                        DOWNGRADE_WINDOW_SECONDS,
+                    ) or
+                    profile_at_or_below_bitrate_after(
+                        profiles,
+                        float(step_events[index]["elapsed"]),
+                        DOWNGRADE_WINDOW_SECONDS,
+                        required_bitrate_for_loss(
+                            scenario.steps[index].loss_percent),
+                    )
                 )
                 for index in increasing_loss_step_indexes
             ) and

@@ -1,6 +1,8 @@
 #include "common/adaptation.hpp"
 
+#include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <optional>
 
@@ -55,24 +57,24 @@ void test_profile_ladder_and_loss_boundaries() {
     const Expected cases[] = {
         {0.0, 0, 2000, 30, 1280, 720, 30, 4, 0.10, 0.30, false},
         {5.0, 0, 2000, 30, 1280, 720, 30, 4, 0.10, 0.30, false},
-        {5.01, 1, 900, 24, 640, 360, 12, 4, 0.50, 0.75, false},
-        {15.0, 1, 900, 24, 640, 360, 12, 4, 0.50, 0.75, false},
-        {15.01, 1, 900, 24, 640, 360, 12, 4, 0.50, 0.75, false},
-        {20.0, 1, 900, 24, 640, 360, 12, 4, 0.50, 0.75, false},
-        {20.01, 3, 500, 20, 640, 360, 10, 4, 1.00, 2.00, false},
-        {30.0, 3, 500, 20, 640, 360, 10, 4, 1.00, 2.00, false},
-        {30.01, 4, 350, 20, 426, 240, 10, 2, 2.00, 4.00, false},
-        {50.0, 4, 350, 20, 426, 240, 10, 2, 2.00, 4.00, false},
-        {50.01, 4, 350, 20, 426, 240, 10, 2, 2.00, 4.00, false},
-        {55.0, 4, 350, 20, 426, 240, 10, 2, 2.00, 4.00, false},
-        {60.0, 4, 350, 20, 426, 240, 10, 2, 2.00, 4.00, false},
-        {60.01, 5, 220, 15, 320, 180, 3, 2, 3.00, 6.00, false},
-        {65.0, 5, 220, 15, 320, 180, 3, 2, 3.00, 6.00, false},
-        {65.01, 6, 150, 12, 320, 180, 2, 2, 5.00, 8.00, false},
-        {72.0, 6, 150, 12, 320, 180, 2, 2, 5.00, 8.00, false},
-        {72.01, 7, 90, 12, 256, 144, 1, 1, 8.00, 10.00, true},
-        {77.0, 7, 90, 12, 256, 144, 1, 1, 8.00, 10.00, true},
-        {77.01, 8, 60, 10, 160, 90, 1, 1, 12.00, 12.00, true},
+        {5.01, 1, 900, 30, 640, 360, 10, 4, 0.50, 0.75, false},
+        {15.0, 1, 900, 30, 640, 360, 10, 4, 0.50, 0.75, false},
+        {15.01, 1, 900, 30, 640, 360, 10, 4, 0.50, 0.75, false},
+        {20.0, 1, 900, 30, 640, 360, 10, 4, 0.50, 0.75, false},
+        {20.01, 3, 500, 30, 512, 288, 6, 3, 1.00, 2.00, false},
+        {30.0, 3, 500, 30, 512, 288, 6, 3, 1.00, 2.00, false},
+        {30.01, 4, 350, 30, 320, 180, 1, 1, 3.00, 4.00, true},
+        {50.0, 4, 350, 30, 320, 180, 1, 1, 3.00, 4.00, true},
+        {50.01, 4, 350, 30, 320, 180, 1, 1, 3.00, 4.00, true},
+        {55.0, 4, 350, 30, 320, 180, 1, 1, 3.00, 4.00, true},
+        {60.0, 4, 350, 30, 320, 180, 1, 1, 3.00, 4.00, true},
+        {60.01, 5, 300, 30, 320, 180, 1, 1, 5.00, 6.00, true},
+        {65.0, 5, 300, 30, 320, 180, 1, 1, 5.00, 6.00, true},
+        {65.01, 6, 260, 28, 320, 180, 1, 1, 7.00, 8.00, true},
+        {72.0, 6, 260, 28, 320, 180, 1, 1, 7.00, 8.00, true},
+        {72.01, 7, 240, 26, 320, 180, 1, 1, 10.00, 10.00, true},
+        {77.0, 7, 240, 26, 320, 180, 1, 1, 10.00, 10.00, true},
+        {77.01, 8, 220, 24, 320, 180, 1, 1, 12.00, 12.00, true},
     };
 
     for (const auto &expected : cases) {
@@ -161,8 +163,8 @@ void test_low_loss_l2_requires_confirmation() {
     assert(controller.update(network(15.01, 50.0)).level == 1);
     assert(controller.update(network(15.01, 50.0)).level == 1);
     expect_profile(controller.update(network(15.01, 50.0)),
-                   2, 700, 24, 640, 360, 12, 4,
-                   0.50, 0.75, false);
+                   2, 700, 30, 640, 360, 8, 4,
+                   0.75, 1.00, false);
 
     for (int sample = 0; sample < 10; ++sample) {
         assert(controller.update(network(14.5, 50.0)).level == 2);
@@ -177,13 +179,13 @@ void test_low_loss_l2_requires_confirmation() {
 void test_loss_degradation_is_immediate_for_high_loss() {
     AdaptationController emergency(2000);
     expect_profile(emergency.update(network(80.0, 50.0)),
-                   8, 60, 10, 160, 90, 1, 1,
+                   8, 220, 24, 320, 180, 1, 1,
                    12.00, 12.00, true);
 
     AdaptationController high_loss(2000);
     expect_profile(high_loss.update(network(70.0, 500.0)),
-                   6, 150, 12, 320, 180, 2, 2,
-                   5.00, 8.00, false);
+                   6, 260, 28, 320, 180, 1, 1,
+                   7.00, 8.00, true);
     for (int sample = 0; sample < 3; ++sample) {
         assert(high_loss.update(network(70.0, 500.0)).level == 6);
     }
@@ -304,12 +306,12 @@ void test_high_loss_recovers_toward_lower_required_level() {
 void test_max_video_bitrate_selects_supported_profile() {
     AdaptationController capped(1000);
     expect_profile(
-        capped.current(), 1, 900, 24, 640, 360, 12, 4,
+        capped.current(), 1, 900, 30, 640, 360, 10, 4,
         0.50, 0.75, false);
 
     AdaptationController minimum(1);
     expect_profile(
-        minimum.current(), 8, 60, 10, 160, 90, 1, 1,
+        minimum.current(), 8, 60, 24, 320, 180, 1, 1,
         12.00, 12.00, true);
 }
 
@@ -324,16 +326,16 @@ void test_invalid_snapshot_keeps_current_profile() {
 void test_udp_recovery_profile() {
     expect_profile(
         udp_recovery_profile(2000),
-        8, 60, 10, 160, 90, 1, 1, 12.0, 12.0, true);
+        8, 220, 24, 320, 180, 1, 1, 12.0, 12.0, true);
     expect_profile(
         udp_recovery_profile(1),
-        8, 60, 10, 160, 90, 1, 1, 12.0, 12.0, true);
+        8, 60, 24, 320, 180, 1, 1, 12.0, 12.0, true);
 
     AdaptationController controller(2000);
     controller.force_emergency();
     expect_profile(
         controller.current(),
-        8, 60, 10, 160, 90, 1, 1, 12.0, 12.0, true);
+        8, 220, 24, 320, 180, 1, 1, 12.0, 12.0, true);
 }
 
 void test_reset_to_network_after_udp_recovery() {
@@ -346,7 +348,60 @@ void test_reset_to_network_after_udp_recovery() {
     controller.force_emergency();
     expect_profile(
         controller.reset_to_network(network(70.0, 50.0)),
-        6, 150, 12, 320, 180, 2, 2, 5.00, 8.00, false);
+        6, 260, 28, 320, 180, 1, 1, 7.00, 8.00, true);
+}
+
+double frame_recovery_probability(double loss_percent,
+                                  int data_shards,
+                                  double parity_ratio) {
+    const int parity_shards =
+        std::max(1, static_cast<int>(std::ceil(
+                        static_cast<double>(data_shards) *
+                        parity_ratio)));
+    const int total_shards = data_shards + parity_shards;
+    const double loss = loss_percent / 100.0;
+    const double received = 1.0 - loss;
+    double probability = 0.0;
+    for (int shards_received = data_shards;
+         shards_received <= total_shards;
+         ++shards_received) {
+        double combinations = 1.0;
+        for (int i = 1; i <= shards_received; ++i) {
+            combinations *=
+                static_cast<double>(total_shards - shards_received + i) /
+                static_cast<double>(i);
+        }
+        probability += combinations *
+                       std::pow(received, shards_received) *
+                       std::pow(loss, total_shards - shards_received);
+    }
+    return probability;
+}
+
+void test_fps_first_fec_model_keeps_expected_decoded_fps_above_twenty() {
+    struct Case {
+        double loss_percent;
+        int fps;
+        int min_data_shards;
+        double parity_ratio;
+        double minimum_expected_decoded_fps;
+    };
+    const Case cases[] = {
+        {50.0, 30, 1, 3.00, 20.0},
+        {65.0, 30, 1, 5.00, 20.0},
+        {72.0, 28, 1, 7.00, 20.0},
+        {77.0, 26, 1, 10.00, 20.0},
+        {80.0, 24, 1, 12.00, 20.0},
+    };
+
+    for (const auto &test_case : cases) {
+        const double decoded_fps =
+            frame_recovery_probability(test_case.loss_percent,
+                                       test_case.min_data_shards,
+                                       test_case.parity_ratio) *
+            static_cast<double>(test_case.fps);
+        assert(decoded_fps >= test_case.minimum_expected_decoded_fps);
+    }
 }
 
 void test_udp_recovery_ignores_stale_feedback_before_receiver_seen() {
@@ -385,6 +440,7 @@ int main() {
     test_invalid_snapshot_keeps_current_profile();
     test_udp_recovery_profile();
     test_reset_to_network_after_udp_recovery();
+    test_fps_first_fec_model_keeps_expected_decoded_fps_above_twenty();
     test_udp_recovery_ignores_stale_feedback_before_receiver_seen();
     test_udp_send_failure_waits_for_receiver_before_recovery();
     std::cout << "adaptation_tests=passed" << std::endl;

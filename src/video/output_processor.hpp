@@ -58,4 +58,5 @@ private:
     bool low_rate_mode_ = false;
     bool blend_pending_ = false;
     bool real_pending_ = false;
+    int64_t synthetic_credit_ms_ = 0;
 };

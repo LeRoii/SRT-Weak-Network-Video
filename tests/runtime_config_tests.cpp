@@ -42,7 +42,7 @@ std::string complete_config(const std::string &metric = "encode_to_decode",
         "  display: false\n"
         "  minimum_output_width: 800\n"
         "  minimum_output_height: 450\n"
-        "  minimum_output_fps: 20\n"
+        "  minimum_output_fps: 30\n"
         "  upscale_mode: lanczos_sharpen\n"
         "  interpolation_mode: blend\n"
         "  write_h264: " + write_h264 + "\n"
@@ -93,7 +93,7 @@ int main() {
     assert(defaults.receiver.display);
     assert(defaults.receiver.minimum_output_width == 640);
     assert(defaults.receiver.minimum_output_height == 360);
-    assert(defaults.receiver.minimum_output_fps == 20);
+    assert(defaults.receiver.minimum_output_fps == 30);
     assert(defaults.receiver.upscale_mode ==
            UpscaleMode::LanczosSharpen);
     assert(defaults.receiver.interpolation_mode ==
@@ -116,7 +116,7 @@ int main() {
     assert(!config.receiver.display);
     assert(config.receiver.minimum_output_width == 800);
     assert(config.receiver.minimum_output_height == 450);
-    assert(config.receiver.minimum_output_fps == 20);
+    assert(config.receiver.minimum_output_fps == 30);
     assert(!config.receiver.write_h264);
     assert(config.receiver.output_file == "/tmp/output.h264");
     assert(config.latency.metric == LatencyMetric::EncodeToAssemble);
@@ -202,7 +202,7 @@ int main() {
     const auto invalid_output_fps = write_config(
         "srt-runtime-config-invalid-output-fps.yaml",
         replace_once(complete_config(),
-                     "minimum_output_fps: 20",
+                     "minimum_output_fps: 30",
                      "minimum_output_fps: 0"));
     assert(load_fails(invalid_output_fps));
 
